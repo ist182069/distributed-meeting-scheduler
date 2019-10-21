@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Remoting;
 
-namespace Library
-{
-    public class Class1
+
+namespace MSDAD
+{ 
+    class RemoteClient : MarshalByRefObject, ClientInterface
     {
+
     }
 }
