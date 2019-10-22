@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MSDAD
 {
-    class RemoteServer : MarshalByRefObject, ServerInterface
+    class RemoteServer : MarshalByRefObject, Library.ServerInterface
     {
         public void Close(string meeting_topic)
         {
@@ -26,6 +27,12 @@ namespace MSDAD
         public string List()
         {
             throw new NotImplementedException();
+        }
+
+        public string Ping()
+        {
+            string message = "Ping";
+            return message;
         }
 
         public void Wait(int milliseconds)

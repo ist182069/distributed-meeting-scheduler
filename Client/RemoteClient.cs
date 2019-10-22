@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,11 @@ using System.Runtime.Remoting;
 
 namespace MSDAD
 { 
-    class RemoteClient : MarshalByRefObject, ClientInterface
-    {
+    namespace Client {
+        class RemoteClient : MarshalByRefObject, ClientInterface
+        {
 
+        }
     }
+    
 }

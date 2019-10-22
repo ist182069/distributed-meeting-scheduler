@@ -6,17 +6,21 @@ using System.Threading.Tasks;
 
 namespace MSDAD
 {
-    public interface ClientInterface
+    namespace Library
     {
+        public interface ClientInterface
+        {
 
-    }
+        }
 
-    public interface ServerInterface
-    {
-        String List();
-        void Create(String meeting_topic);
-        void Join(String meeting_topic);
-        void Close(String meeting_topic);
-        void Wait(int milliseconds);
-    }
+        public interface ServerInterface
+        {
+            string Ping();
+            string List();
+            void Create(String meeting_topic);
+            void Join(String meeting_topic);
+            void Close(String meeting_topic);
+            void Wait(int milliseconds);
+        }
+    }    
 }
