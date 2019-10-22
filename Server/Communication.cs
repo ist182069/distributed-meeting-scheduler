@@ -17,8 +17,36 @@ namespace MSDAD
         class Communication
         {
             ArrayList portList = new ArrayList();
+            List<Meeting> eventList = new List<Meeting>();
             RemoteServer remoteServer;
             TcpChannel channel;
+            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees)
+            {
+                lock (this)
+                {
+                    eventList.Add(new Meeting(topic, minAttendees, rooms));
+                }
+
+                if (invitees != null)
+                {
+                    // Mandar invites
+                }
+
+                Console.WriteLine("New event: " + topic);
+            }
+            public string List()
+            {
+                string listData = "";
+                foreach(Meeting m in this.eventList)
+                {
+                    listData += m.getTopic();
+                    listData += "\n";
+                    listData += m.getSlotsData();
+                    listData += "\n";
+                }
+
+                return listData;
+            }
             public void Start(string port)
             {                           
                 channel = new TcpChannel(Int32.Parse(port));

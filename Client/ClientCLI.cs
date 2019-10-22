@@ -12,6 +12,8 @@ namespace MSDAD
         class ClientCLI
         {
             public const string PING_COMMAND = "ping";
+            public const string CREATE = "create";
+            public const string LIST = "list";
             public void Display()
             {
                 Communication clientCommunication;
@@ -40,6 +42,41 @@ namespace MSDAD
                     {
                         case PING_COMMAND:                            
                             clientCommunication.Ping();                            
+                            break;
+                        case CREATE:
+                            Console.WriteLine("Insert the folloing parameters");
+                            Console.WriteLine("Meeting topic: ");
+                            string topic = Console.ReadLine();
+
+                            Console.WriteLine("Minimum Attendees: ");
+                            int minAttendees = Int32.Parse(Console.ReadLine());
+
+                            Console.WriteLine("Write slots of the type Lisboa,2020-01-02, then type end:"); 
+                            string room;
+                            List<string> slots = new List<string>();
+                            while (!(room = Console.ReadLine()).Equals("end"))
+                            {
+                                slots.Add(room);
+                            }
+
+                            Console.WriteLine("Want invitees? y:n");
+                            if (Console.ReadLine().Equals("n"))
+                            {
+                                clientCommunication.Create(topic, minAttendees, slots, null);
+                                break;
+                            }
+                            Console.WriteLine("Write invitees port, then type end \n");
+                            List<int> invitees = new List<int>();
+                            string portInvitee;
+                            while (!(portInvitee = Console.ReadLine()).Equals("end"))
+                            {
+                                invitees.Add(Int32.Parse(portInvitee));
+                            }
+                            clientCommunication.Create(topic, minAttendees, slots, invitees);
+                            break;
+                        case LIST:
+                            string listData = clientCommunication.List();
+                            Console.WriteLine(listData);
                             break;
                         default:
                             Console.WriteLine("You must insert a valid command");

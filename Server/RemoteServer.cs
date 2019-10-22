@@ -1,5 +1,6 @@
 ﻿using MSDAD.Library;
 using System;
+using System.Collections.Generic;
 
 namespace MSDAD
 {
@@ -19,9 +20,9 @@ namespace MSDAD
                 throw new NotImplementedException();
             }
 
-            public void Create(string meeting_topic)
+            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees)
             {
-                throw new NotImplementedException();
+                this.communication.Create(topic, minAttendees, rooms, invitees);
             }
 
             public void Join(string meeting_topic)
@@ -31,7 +32,7 @@ namespace MSDAD
 
             public string List()
             {
-                throw new NotImplementedException();
+                return communication.List();
             }
 
             public void Ping(int port, string message)

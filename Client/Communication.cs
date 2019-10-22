@@ -51,6 +51,14 @@ namespace MSDAD
                 
                 this.server.Ping(port, send_message);
             }
+            public void Create(string topic, int minAttendees, List<string> rooms,List<int> invitees)
+            {
+                this.server.Create(topic, minAttendees, rooms, invitees);
+            }
+            public string List()
+            {
+                return this.server.List();
+            }
         }
     }
     
