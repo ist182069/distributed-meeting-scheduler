@@ -16,25 +16,30 @@ namespace MSDAD
             {
                 Communication clientCommunication;
                 ServerInterface server;
-                string command, message, port;
+                int port_int;
+                string command, message, port_string;
 
                 Console.Write("Pick a client port: ");
-                port = Console.ReadLine();
+                port_string = Console.ReadLine();
+
+                // TODO adicionar excepcao aqui
+                port_int = Int32.Parse(port_string);
 
                 clientCommunication = new Communication();
-                clientCommunication.Start(port);
+                clientCommunication.Start(port_int);
 
                 while (true)
                 {
                     Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
                     command = Console.ReadLine();
 
+                    clientCommunication.GetRemoteServer();
+                    clientCommunication.Hello(port_int);
+
                     switch (command)
                     {
-                        case PING_COMMAND:
-                            clientCommunication.GetRemoteServer();
-                            message = clientCommunication.Ping();
-                            Console.WriteLine(message);
+                        case PING_COMMAND:                            
+                            clientCommunication.Ping();                            
                             break;
                         default:
                             Console.WriteLine("You must insert a valid command");

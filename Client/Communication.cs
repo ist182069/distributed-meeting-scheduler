@@ -1,7 +1,15 @@
 ﻿using MSDAD.Library;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Text;
@@ -13,26 +21,33 @@ namespace MSDAD
     {
         class Communication
         {
+            RemoteClient client;
             TcpChannel channel;
             ServerInterface server;
-            public void Start(string port)
-            {
-                channel = new TcpChannel(Int32.Parse(port));
+            
+            public void Start(int port)
+            {   
+                channel = new TcpChannel(port);
                 ChannelServices.RegisterChannel(channel, true);
+
+                this.client = new RemoteClient(this);
+                RemotingServices.Marshal(this.client, "RemoteClient", typeof(RemoteClient));
             }
             public void GetRemoteServer()
             {                
                 this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://localhost:11000/RemoteServer");
             }
-            public string Ping()
+            public void Hello(int port)
             {
-                string recv_message, send_message;
-
+                this.server.Hello(port);
+            }
+            public void Ping()
+            {
+                string send_message;
+                
                 send_message = "ping";
-
-                recv_message = this.server.Ping(send_message);
-
-                return recv_message; 
+                
+                this.server.Ping(send_message);
             }
         }
     }

@@ -10,12 +10,13 @@ namespace MSDAD
     {
         public interface ClientInterface
         {
-
+            void Ping(string message);
         }
 
         public interface ServerInterface
         {
-            string Ping(string recv_message);
+            void Hello(int port);
+            void Ping(string message);
             string List();
             void Create(String meeting_topic);
             void Join(String meeting_topic);

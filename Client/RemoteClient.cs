@@ -12,7 +12,16 @@ namespace MSDAD
     namespace Client {
         class RemoteClient : MarshalByRefObject, ClientInterface
         {
+            Communication communication;
 
+            public RemoteClient(Communication communication)
+            {
+                this.communication = communication;
+            }
+            public void Ping(string message)
+            {
+                Console.WriteLine(message);
+            }
         }
     }
     

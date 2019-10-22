@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MSDAD.Library;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -14,6 +16,7 @@ namespace MSDAD
     {
         class Communication
         {
+            ArrayList portList = new ArrayList();
             RemoteServer remoteServer;
             TcpChannel channel;
             public void Start(string port)
@@ -23,6 +26,27 @@ namespace MSDAD
                 this.remoteServer = new RemoteServer(this);
                 RemotingServices.Marshal(this.remoteServer, "RemoteServer", typeof(RemoteServer));
             }
+            public void AddPortArray(int port)
+            {
+                lock(this)
+                {
+                    portList.Add(port);
+                }
+                
+            }
+            public void BroadcastPing(string message)
+            {
+                
+                foreach (int port in this.portList)
+                {
+                    ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + port + "/RemoteClient");
+
+                    client.Ping(message);
+                }
+             
+            }
+
+           
         }
     }
 }

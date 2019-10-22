@@ -34,20 +34,22 @@ namespace MSDAD
                 throw new NotImplementedException();
             }
 
-            public string Ping(string recv_message)
+            public void Ping(string message)
             {
-                string send_message;
-
-                Console.WriteLine(recv_message);
-
-                send_message = "pong";
-
-                return send_message;
+                Console.WriteLine("Received message: " + message);
+                Console.WriteLine("Will broadcast it to all available clients... ");
+                communication.BroadcastPing(message);
+                Console.Write("Success!");
             }
 
             public void Wait(int milliseconds)
             {
                 throw new NotImplementedException();
+            }
+
+            public void Hello(int port)
+            {
+                communication.AddPortArray(port);
             }
         }
     }
