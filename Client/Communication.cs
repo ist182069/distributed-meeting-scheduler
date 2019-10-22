@@ -22,7 +22,7 @@ namespace MSDAD
             }
             public void GetRemoteServer()
             {                
-                this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://localhost:11000/ServerInterface");
+                this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://localhost:11000/RemoteServer");
             }
             public string Ping()
             {

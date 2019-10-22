@@ -44,8 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientCLI.cs" />
+    <Compile Include="Communication.cs" />
     <Compile Include="RemoteClient.cs" />
-    <Compile Include="Client.cs" />
+    <Compile Include="ClientMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

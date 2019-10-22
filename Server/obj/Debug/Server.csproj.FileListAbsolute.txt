@@ -1,0 +1,10 @@
+C:\tmp\Projecto-DAD-2018-2019\Server\bin\Debug\Server.exe.config
+C:\tmp\Projecto-DAD-2018-2019\Server\bin\Debug\Server.exe
+C:\tmp\Projecto-DAD-2018-2019\Server\bin\Debug\Server.pdb
+C:\tmp\Projecto-DAD-2018-2019\Server\bin\Debug\Library.dll
+C:\tmp\Projecto-DAD-2018-2019\Server\bin\Debug\Library.pdb
+C:\tmp\Projecto-DAD-2018-2019\Server\obj\Debug\Server.csprojAssemblyReference.cache
+C:\tmp\Projecto-DAD-2018-2019\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\tmp\Projecto-DAD-2018-2019\Server\obj\Debug\Server.csproj.CopyComplete
+C:\tmp\Projecto-DAD-2018-2019\Server\obj\Debug\Server.exe
+C:\tmp\Projecto-DAD-2018-2019\Server\obj\Debug\Server.pdb

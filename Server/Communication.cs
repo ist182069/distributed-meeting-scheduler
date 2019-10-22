@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
@@ -11,20 +12,14 @@ namespace MSDAD
 {
     namespace Server
     {
-        class Server
+        class Communication
         {
-            static void Main(string[] args)
-            {
-                string port;
-
-                port = Console.ReadLine();
+            public void Start(string port)
+            {           
                 TcpChannel channel = new TcpChannel(Int32.Parse(port));
                 ChannelServices.RegisterChannel(channel, true);
-                RemotingConfiguration.RegisterWellKnownServiceType(typeof(RemoteServer), "RemoteServer", WellKnownObjectMode.Singleton);
-
-                System.Console.ReadLine();
+                RemotingConfiguration.RegisterWellKnownServiceType(typeof(RemoteServer), "RemoteServer", WellKnownObjectMode.Singleton);                
             }
         }
     }
-    
 }
