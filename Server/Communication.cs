@@ -34,14 +34,17 @@ namespace MSDAD
                 }
                 
             }
-            public void BroadcastPing(string message)
+            public void BroadcastPing(int port, string message)
             {
                 
-                foreach (int port in this.portList)
+                foreach (int p in this.portList)
                 {
-                    ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + port + "/RemoteClient");
-
-                    client.Ping(message);
+                    if (p != port)
+                    {
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + p + "/RemoteClient");
+                        client.Ping(message);
+                    }
+                    
                 }
              
             }

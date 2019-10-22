@@ -24,9 +24,11 @@ namespace MSDAD
             RemoteClient client;
             TcpChannel channel;
             ServerInterface server;
+            int port;
             
             public void Start(int port)
-            {   
+            {
+                this.port = port;
                 channel = new TcpChannel(port);
                 ChannelServices.RegisterChannel(channel, true);
 
@@ -47,7 +49,7 @@ namespace MSDAD
                 
                 send_message = "ping";
                 
-                this.server.Ping(send_message);
+                this.server.Ping(port, send_message);
             }
         }
     }

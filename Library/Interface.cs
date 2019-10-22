@@ -16,7 +16,7 @@ namespace MSDAD
         public interface ServerInterface
         {
             void Hello(int port);
-            void Ping(string message);
+            void Ping(int port, string message);
             string List();
             void Create(String meeting_topic);
             void Join(String meeting_topic);

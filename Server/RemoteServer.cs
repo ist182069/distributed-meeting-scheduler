@@ -34,11 +34,11 @@ namespace MSDAD
                 throw new NotImplementedException();
             }
 
-            public void Ping(string message)
+            public void Ping(int port, string message)
             {
                 Console.WriteLine("Received message: " + message);
                 Console.WriteLine("Will broadcast it to all available clients... ");
-                communication.BroadcastPing(message);
+                communication.BroadcastPing(port, message);
                 Console.Write("Success!");
             }
 
