@@ -26,11 +26,13 @@ namespace MSDAD
             }
             public string Ping()
             {
-                string message;
+                string recv_message, send_message;
 
-                message = this.server.Ping();
+                send_message = "ping";
 
-                return message; 
+                recv_message = this.server.Ping(send_message);
+
+                return recv_message; 
             }
         }
     }

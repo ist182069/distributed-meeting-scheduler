@@ -13,7 +13,7 @@ namespace MSDAD
                 Communication serverCommunication;
                 serverCommunication = new Communication();
                 serverCommunication.Start("11000");
-                Console.Write("the server has been successfully started!");
+                Console.WriteLine("the server has been successfully started!");
 
                 Console.ReadLine();
             }

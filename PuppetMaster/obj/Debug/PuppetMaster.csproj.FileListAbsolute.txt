@@ -1,0 +1,9 @@
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\bin\Debug\PuppetMaster.exe.config
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\bin\Debug\PuppetMaster.exe
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\bin\Debug\PuppetMaster.pdb
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\obj\Debug\PuppetMaster.csprojAssemblyReference.cache
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\obj\Debug\MSDAD.Properties.Resources.resources
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\obj\Debug\PuppetMaster.csproj.GenerateResource.cache
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\obj\Debug\PuppetMaster.csproj.CoreCompileInputs.cache
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\obj\Debug\PuppetMaster.exe
+C:\tmp\Projecto-DAD-2018-2019\PuppetMaster\obj\Debug\PuppetMaster.pdb

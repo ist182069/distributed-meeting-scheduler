@@ -14,11 +14,14 @@ namespace MSDAD
     {
         class Communication
         {
+            RemoteServer remoteServer;
+            TcpChannel channel;
             public void Start(string port)
-            {           
-                TcpChannel channel = new TcpChannel(Int32.Parse(port));
+            {                           
+                channel = new TcpChannel(Int32.Parse(port));
                 ChannelServices.RegisterChannel(channel, true);
-                RemotingConfiguration.RegisterWellKnownServiceType(typeof(RemoteServer), "RemoteServer", WellKnownObjectMode.Singleton);                
+                this.remoteServer = new RemoteServer(this);
+                RemotingServices.Marshal(this.remoteServer, "RemoteServer", typeof(RemoteServer));
             }
         }
     }

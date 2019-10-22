@@ -7,6 +7,13 @@ namespace MSDAD
     {
         class RemoteServer : MarshalByRefObject, ServerInterface
         {
+            delegate void InvokeDelegate(string message);
+
+            Communication communication;
+            public RemoteServer(Communication communication)
+            {
+                this.communication = communication;
+            }
             public void Close(string meeting_topic)
             {
                 throw new NotImplementedException();
@@ -27,10 +34,15 @@ namespace MSDAD
                 throw new NotImplementedException();
             }
 
-            public string Ping()
+            public string Ping(string recv_message)
             {
-                string message = "Ping";
-                return message;
+                string send_message;
+
+                Console.WriteLine(recv_message);
+
+                send_message = "pong";
+
+                return send_message;
             }
 
             public void Wait(int milliseconds)
