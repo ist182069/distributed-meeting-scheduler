@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,20 @@ namespace MSDAD
 {
     namespace Client
     {
-        public const string PING_COMMAND = "ping";
-
-        class ClientUI
+        class ClientCLI
         {
+            public const string PING_COMMAND = "ping";
             public void Display()
             {
-                string command; 
+                Communication clientCommunication;
+                ServerInterface server;
+                string command, message, port;
+
+                Console.Write("Pick a client port: ");
+                port = Console.ReadLine();
+
+                clientCommunication = new Communication();
+                clientCommunication.Start(port);
 
                 while (true)
                 {
@@ -24,13 +32,16 @@ namespace MSDAD
                     switch (command)
                     {
                         case PING_COMMAND:
-                            this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://localhost:11000/RemoteServer");
+                            clientCommunication.GetRemoteServer();
+                            message = clientCommunication.Ping();
+                            Console.WriteLine(message);
                             break;
                         default:
                             Console.WriteLine("You must insert a valid command");
                             break;
                     }
-                }                
+                }
+            }
         }
     }
 }
