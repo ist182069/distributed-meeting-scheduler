@@ -30,11 +30,11 @@ namespace MSDAD
 
                 while (true)
                 {
-                    Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
-                    command = Console.ReadLine();
-
                     clientCommunication.GetRemoteServer();
                     clientCommunication.Hello(port_int);
+
+                    Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
+                    command = Console.ReadLine();                    
 
                     switch (command)
                     {
