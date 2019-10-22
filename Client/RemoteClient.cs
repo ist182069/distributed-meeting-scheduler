@@ -20,7 +20,7 @@ namespace MSDAD
             }
             public void Ping(string message)
             {
-                Console.WriteLine(message);
+                Console.WriteLine("Received message: " + message);
             }
         }
     }
