@@ -10,8 +10,6 @@
 
                 serverCLI = new ServerCLI();
                 serverCLI.Display();
-
-                System.Console.ReadLine();
             }
         }
     }

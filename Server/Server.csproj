@@ -44,6 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
+=======
+    <Compile Include="ServerLibrary.cs" />
+    <Compile Include="Exceptions\NoMeetingException.cs" />
+>>>>>>> refs/remotes/origin/master
     <Compile Include="Meeting.cs" />
     <Compile Include="ServerCLI.cs" />
     <Compile Include="ServerCommunication.cs" />

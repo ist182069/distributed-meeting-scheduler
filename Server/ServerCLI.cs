@@ -6,16 +6,37 @@ namespace MSDAD
     {
         class ServerCLI
         {
+            public const string EXIT = "exit";
             public void Display()
             {
-                Console.Write("Starting up server...");
-
+                string command;
+                ServerLibrary serverLibrary;
                 ServerCommunication serverCommunication;
+                
+                Console.Write("Starting up server...");
+                
                 serverCommunication = new ServerCommunication();
                 serverCommunication.Start("11000");
+                serverLibrary = new ServerLibrary(serverCommunication);
+
                 Console.WriteLine("the server has been successfully started!");
 
-                Console.ReadLine();
+                while (true)
+                {
+
+                    Console.Write("Please run a command to be run on the server: ");
+                    command = Console.ReadLine();
+
+                    switch (command)
+                    {
+                        case EXIT:
+                            Console.Write("Bye!");
+                            return;
+                        default:
+                            Console.WriteLine("That command does not exist. You must insert another one");
+                            break;
+                    }
+                }
             }
         }
     }
