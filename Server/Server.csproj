@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ServerLibrary.cs" />
     <Compile Include="Exceptions\NoMeetingException.cs" />
     <Compile Include="Meeting.cs" />
     <Compile Include="ServerCLI.cs" />

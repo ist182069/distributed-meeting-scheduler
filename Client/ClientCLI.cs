@@ -14,6 +14,7 @@ namespace MSDAD
         {
             public const string PING_COMMAND = "ping";
             public const string CREATE = "create";
+            public const string EXIT = "exit";
             public const string LIST = "list";
             public const string JOIN = "join";
             public void Display()
@@ -66,6 +67,9 @@ namespace MSDAD
                             }
                             clientCommunication.Join(topicJoin, slotsJoin, port_int);
                             break;
+                        case EXIT:
+                            Console.WriteLine("Bye!");
+                            return;
                         default:
                             Console.WriteLine("You must insert a valid command");
                             break;
