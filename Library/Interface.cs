@@ -17,7 +17,7 @@ namespace MSDAD
         {
             void Hello(int port);
             void Ping(int port, string message);
-            string List();
+            string List(int port);
             void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port);
             void Join(String meeting_topic);
             void Close(String meeting_topic);

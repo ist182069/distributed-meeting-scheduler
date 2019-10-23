@@ -75,7 +75,7 @@ namespace MSDAD
                             clientCommunication.Create(topic, minAttendees, slots, invitees, port_int);
                             break;
                         case LIST:
-                            string listData = clientCommunication.List();
+                            string listData = clientCommunication.List(port_int);
                             Console.WriteLine(listData);
                             break;
                         default:

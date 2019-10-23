@@ -55,9 +55,9 @@ namespace MSDAD
             {
                 this.server.Create(topic, minAttendees, rooms, invitees,port);
             }
-            public string List()
+            public string List(int port)
             {
-                return this.server.List();
+                return this.server.List(port);
             }
         }
     }

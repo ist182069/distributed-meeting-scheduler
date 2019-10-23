@@ -30,9 +30,9 @@ namespace MSDAD
                 throw new NotImplementedException();
             }
 
-            public string List()
+            public string List(int port)
             {
-                return communication.List();
+                return communication.List(port);
             }
 
             public void Ping(int port, string message)

@@ -24,25 +24,23 @@ namespace MSDAD
             {
                 lock (this)
                 {
-                    eventList.Add(new Meeting(topic, minAttendees, rooms, port));
-                }
-
-                if (invitees != null)
-                {
-                    // Mandar invites
+                    eventList.Add(new Meeting(topic, minAttendees, rooms,invitees, port));
                 }
 
                 Console.WriteLine("New event: " + topic);
             }
-            public string List()
+            public string List(int port)
             {
                 string listData = "";
                 foreach(Meeting m in this.eventList)
                 {
-                    listData += m.getTopic();
-                    listData += "\n";
-                    listData += m.getSlotsData();
-                    listData += "\n";
+                    if (m.isInvited(port))
+                    {
+                        listData += m.getTopic();
+                        listData += "\n";
+                        listData += m.getSlotsData();
+                        listData += "\n";
+                    }
                 }
 
                 return listData;

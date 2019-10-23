@@ -12,14 +12,16 @@ namespace MSDAD
         private int minAttendees;
         private List<string> slots;
         private int coordinator;
-        //private List<Object> candidatos;  A tratar no join!!!
+        private List<int> invitees;
+        //private List<Object> candidatos;  A tratar no join!!! e talvez por o coordenador por defeito
         
-        public Meeting(string topic, int minAttendees, List<string> slots, int port)
+        public Meeting(string topic, int minAttendees, List<string> slots,List<int> invitees, int port)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;
             this.slots = slots;
             this.coordinator = port;
+            this.invitees = invitees;
         }
         public string getTopic()
         {
@@ -36,6 +38,16 @@ namespace MSDAD
             }
 
             return slotsData;
+        }
+
+        public Boolean isInvited(int port)
+        {
+            if(this.invitees == null)
+            {
+                return true;
+            }
+
+            return this.invitees.Contains(port);
         }
 
     }
