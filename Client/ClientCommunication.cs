@@ -21,10 +21,12 @@ namespace MSDAD
     {        
         class ClientCommunication
         {
+            int port;
+
             RemoteClient client;
             TcpChannel channel;
             ServerInterface server;
-            int port;
+
             List<MeetingView> meetingViews = new List<MeetingView>();
 
             public void Start(int port)
@@ -58,10 +60,7 @@ namespace MSDAD
             }
             public void List(int port)
             {
-                foreach(MeetingView meetingView in this.meetingViews)
-                {
-                    Console.WriteLine(meetingView.GetTopic());
-                }
+                this.server.List(port);
             }
             public void Join(string topic, List<string> slots, int port)
             {
@@ -78,7 +77,21 @@ namespace MSDAD
                 MeetingView meetingView;
 
                 meetingView = new MeetingView(topic, rooms, coord_port);
-                this.meetingViews.Add(meetingView);
+
+                this.AddView(meetingView);
+            }
+
+            public void AddView(MeetingView meetingView)
+            {
+                lock(this)
+                {
+                    meetingViews.Add(meetingView);
+                }
+            }
+            
+            public List<MeetingView> GetMeetingViews()
+            {
+                return this.meetingViews;
             }
         }
     }

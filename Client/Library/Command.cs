@@ -8,7 +8,8 @@ namespace MSDAD
 {
     namespace Client
     {
-        namespace Commands {
+        namespace Library {
+            
             abstract class Command
             {
                 public abstract void Execute(ClientCommunication clientCommunication, int port_int);

@@ -30,9 +30,9 @@ namespace MSDAD
                 this.communication.Join(topic, slots, port);
             }
 
-            public string List(int port)
+            public void List(int port)
             {
-                return communication.List(port);
+                // TODO de momento nao retorna nada. Eventualmente devolve os estados do sistema                
             }
 
             public void Ping(int port, string message)

@@ -8,7 +8,7 @@ namespace MSDAD
 {
     namespace Client
     {
-        namespace Commands
+        namespace Library
         {
             class Create : Command
             {
@@ -45,6 +45,7 @@ namespace MSDAD
                             invitees.Add(Int32.Parse(portInvitee));
                         }
                         clientCommunication.Create(topic, minAttendees, slots, invitees, port_int);
+                        clientCommunication.AddView(new MeetingView(topic, slots, port_int));
                     }
                 }
             }

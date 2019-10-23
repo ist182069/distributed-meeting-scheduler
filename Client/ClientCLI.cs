@@ -1,4 +1,4 @@
-﻿using MSDAD.Client.Commands;
+﻿using MSDAD.Client.Library;
 using MSDAD.Library;
 using System;
 using System.Collections.Generic;
@@ -17,6 +17,7 @@ namespace MSDAD
             public const string EXIT = "exit";
             public const string LIST = "list";
             public const string JOIN = "join";
+
             public void Display()
             {
                 Command commandClass;
@@ -52,7 +53,8 @@ namespace MSDAD
                             commandClass.Execute(clientCommunication, port_int);
                             break;
                         case LIST:
-                            clientCommunication.List(port_int);
+                            commandClass = new List();
+                            commandClass.Execute(clientCommunication, port_int);
                             break;
                         case JOIN:
                             Console.WriteLine("Write meeting topic:");
