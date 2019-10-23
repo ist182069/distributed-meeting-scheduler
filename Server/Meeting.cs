@@ -13,15 +13,16 @@ namespace MSDAD
         private List<string> slots;
         private int coordinator;
         private List<int> invitees;
-        //private List<Object> candidatos;  A tratar no join!!! e talvez por o coordenador por defeito
-        
-        public Meeting(string topic, int minAttendees, List<string> slots,List<int> invitees, int port)
+        private Dictionary<int, List<string>> candidates;  
+
+        public Meeting(string topic, int minAttendees, List<string> slots, List<int> invitees, int port)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;
             this.slots = slots;
             this.coordinator = port;
             this.invitees = invitees;
+            this.candidates = new Dictionary<int, List<string>>();
         }
         public string getTopic()
         {
@@ -50,5 +51,12 @@ namespace MSDAD
             return this.invitees.Contains(port);
         }
 
+        public void Join(List<string> slots, int port)
+        {
+            lock (this)
+            {
+                this.candidates.Add(port, slots);
+            }
+        }
     }
 }

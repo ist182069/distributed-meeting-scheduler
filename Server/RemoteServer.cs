@@ -25,9 +25,9 @@ namespace MSDAD
                 this.communication.Create(topic, minAttendees, rooms, invitees, port);
             }
 
-            public void Join(string meeting_topic)
+            public void Join(string topic, List<string> slots, int port)
             {
-                throw new NotImplementedException();
+                this.communication.Join(topic, slots, port);
             }
 
             public string List(int port)

@@ -59,6 +59,11 @@ namespace MSDAD
             {
                 return this.server.List(port);
             }
+            public void Join(string topic, List<string> slots, int port)
+            {
+                this.server.Join(topic, slots, port);
+            }
+
         }
     }
     

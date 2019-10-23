@@ -1,4 +1,5 @@
-﻿using MSDAD.Library;
+﻿using MSDAD.Exceptions;
+using MSDAD.Library;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,6 +45,32 @@ namespace MSDAD
                 }
 
                 return listData;
+            }
+
+            public void Join(String topic, List<string> slots, int port)
+            {
+                Meeting meeting = null;
+                try
+                {
+                    meeting = GetMeeting(topic);
+                    meeting.Join(slots, port);
+                } catch (NoMeetingException e)
+                {
+                    ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + port + "/RemoteClient");
+                    client.Ping("That meeting doesn't exist.");
+                }
+            }
+
+            private Meeting GetMeeting(string topic)
+            {
+                foreach(Meeting m in this.eventList)
+                {
+                    if (m.getTopic() == topic)
+                    {
+                        return m;
+                    }
+                }
+                throw new NoMeetingException();
             }
             public void Start(string port)
             {                           

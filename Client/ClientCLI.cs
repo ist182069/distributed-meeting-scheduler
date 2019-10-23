@@ -14,6 +14,7 @@ namespace MSDAD
             public const string PING_COMMAND = "ping";
             public const string CREATE = "create";
             public const string LIST = "list";
+            public const string JOIN = "join";
             public void Display()
             {
                 ClientCommunication clientCommunication;
@@ -77,6 +78,18 @@ namespace MSDAD
                         case LIST:
                             string listData = clientCommunication.List(port_int);
                             Console.WriteLine(listData);
+                            break;
+                        case JOIN:
+                            Console.WriteLine("Write meeting topic:");
+                            string topicJoin = Console.ReadLine();
+                            Console.WriteLine("Write slots of the type Lisboa,2020-01-02 you can attend, then type end:");
+                            string roomJoin;
+                            List<string> slotsJoin = new List<string>();
+                            while (!(roomJoin = Console.ReadLine()).Equals("end"))
+                            {
+                                slotsJoin.Add(roomJoin);
+                            }
+                            clientCommunication.Join(topicJoin, slotsJoin, port_int);
                             break;
                         default:
                             Console.WriteLine("You must insert a valid command");
