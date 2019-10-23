@@ -10,8 +10,8 @@ namespace MSDAD
             {
                 Console.Write("Starting up server...");
 
-                Communication serverCommunication;
-                serverCommunication = new Communication();
+                ServerCommunication serverCommunication;
+                serverCommunication = new ServerCommunication();
                 serverCommunication.Start("11000");
                 Console.WriteLine("the server has been successfully started!");
 

@@ -14,17 +14,17 @@ namespace MSDAD
 {
     namespace Server
     {
-        class Communication
+        class ServerCommunication
         {
             ArrayList portList = new ArrayList();
             List<Meeting> eventList = new List<Meeting>();
             RemoteServer remoteServer;
             TcpChannel channel;
-            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees)
+            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port)
             {
                 lock (this)
                 {
-                    eventList.Add(new Meeting(topic, minAttendees, rooms));
+                    eventList.Add(new Meeting(topic, minAttendees, rooms, port));
                 }
 
                 if (invitees != null)

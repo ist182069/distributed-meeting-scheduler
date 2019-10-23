@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientCLI.cs" />
-    <Compile Include="Communication.cs" />
+    <Compile Include="ClientCommunication.cs" />
     <Compile Include="RemoteClient.cs" />
     <Compile Include="ClientMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

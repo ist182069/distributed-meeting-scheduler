@@ -16,7 +16,7 @@ namespace MSDAD
             public const string LIST = "list";
             public void Display()
             {
-                Communication clientCommunication;
+                ClientCommunication clientCommunication;
                 ServerInterface server;
                 int port_int;
                 string command, message, port_string;
@@ -27,7 +27,7 @@ namespace MSDAD
                 // TODO adicionar excepcao aqui
                 port_int = Int32.Parse(port_string);
 
-                clientCommunication = new Communication();
+                clientCommunication = new ClientCommunication();
                 clientCommunication.Start(port_int);
 
                 while (true)
@@ -62,7 +62,7 @@ namespace MSDAD
                             Console.WriteLine("Want invitees? y:n");
                             if (Console.ReadLine().Equals("n"))
                             {
-                                clientCommunication.Create(topic, minAttendees, slots, null);
+                                clientCommunication.Create(topic, minAttendees, slots, null, port_int);
                                 break;
                             }
                             Console.WriteLine("Write invitees port, then type end \n");
@@ -72,7 +72,7 @@ namespace MSDAD
                             {
                                 invitees.Add(Int32.Parse(portInvitee));
                             }
-                            clientCommunication.Create(topic, minAttendees, slots, invitees);
+                            clientCommunication.Create(topic, minAttendees, slots, invitees, port_int);
                             break;
                         case LIST:
                             string listData = clientCommunication.List();

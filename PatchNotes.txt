@@ -1,0 +1,20 @@
+> Commit anterior
+- criação do metodo remoto create
+-- criação da recolha de dados da consola para a execução
+   do metodo
+-- criação no lado do servidor de uma proto-meeting.class
+   (a completar e melhorar) quando forem adicionadas as novas
+   funcionalidades
+-- unico parametro incompleto desta funcionalidade é que não 
+   estão a ser enviados os invitees, pois isto ja mexe com a 
+   funcao join
+- criada a funcao list
+> Commit atual
+- Alteracao do metodo create
+-- agora cada meeting tem um coordenador
+   (que é o porto por agora)
+- Refatorizacao
+-- agora as classes comunication passam a ser 
+   ClientComunication e ServerComunication
+
+    

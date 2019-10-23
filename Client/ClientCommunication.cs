@@ -19,7 +19,7 @@ namespace MSDAD
 {
     namespace Client
     {
-        class Communication
+        class ClientCommunication
         {
             RemoteClient client;
             TcpChannel channel;
@@ -51,9 +51,9 @@ namespace MSDAD
                 
                 this.server.Ping(port, send_message);
             }
-            public void Create(string topic, int minAttendees, List<string> rooms,List<int> invitees)
+            public void Create(string topic, int minAttendees, List<string> rooms,List<int> invitees,int port)
             {
-                this.server.Create(topic, minAttendees, rooms, invitees);
+                this.server.Create(topic, minAttendees, rooms, invitees,port);
             }
             public string List()
             {

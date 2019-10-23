@@ -11,13 +11,15 @@ namespace MSDAD
         private string topic;
         private int minAttendees;
         private List<string> slots;
+        private int coordinator;
         //private List<Object> candidatos;  A tratar no join!!!
         
-        public Meeting(string topic, int minAttendees, List<string> slots)
+        public Meeting(string topic, int minAttendees, List<string> slots, int port)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;
             this.slots = slots;
+            this.coordinator = port;
         }
         public string getTopic()
         {

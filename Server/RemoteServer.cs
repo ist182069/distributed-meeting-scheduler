@@ -10,8 +10,8 @@ namespace MSDAD
         {
             delegate void InvokeDelegate(string message);
 
-            Communication communication;
-            public RemoteServer(Communication communication)
+            ServerCommunication communication;
+            public RemoteServer(ServerCommunication communication)
             {
                 this.communication = communication;
             }
@@ -20,9 +20,9 @@ namespace MSDAD
                 throw new NotImplementedException();
             }
 
-            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees)
+            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port)
             {
-                this.communication.Create(topic, minAttendees, rooms, invitees);
+                this.communication.Create(topic, minAttendees, rooms, invitees, port);
             }
 
             public void Join(string meeting_topic)
