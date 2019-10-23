@@ -59,6 +59,7 @@ namespace MSDAD
                 }
                 catch (ServerCommunicationException e)
                 {
+                    Console.WriteLine("merda");
                     Console.WriteLine(e.Message);
                 }
             }

@@ -24,6 +24,7 @@ namespace MSDAD.Client.Commands
                 slotsJoin.Add(roomJoin);
             }
 
+            comm.Join(topicJoin, slotsJoin, port_int);
             return topicJoin;
         }
     }

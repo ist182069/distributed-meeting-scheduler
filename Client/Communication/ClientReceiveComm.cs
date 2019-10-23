@@ -54,6 +54,11 @@ namespace MSDAD
 
                 // TODO passes the status to the ClientLibrary
             }
+
+            public void Join()
+            {
+
+            }
         }
     }
     
