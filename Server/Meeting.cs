@@ -51,6 +51,11 @@ namespace MSDAD
             return this.invitees.Contains(port);
         }
 
+        public Boolean isCandidate(int port)
+        {
+            return candidates.ContainsKey(port);
+        }
+
         public void Join(List<string> slots, int port)
         {
             lock (this)

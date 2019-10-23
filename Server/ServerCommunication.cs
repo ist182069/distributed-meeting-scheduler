@@ -52,10 +52,13 @@ namespace MSDAD
                 try
                 {
                     meeting = GetMeeting(topic);
-                    meeting.Join(slots, port);
+                    meeting.Join(slots, port);                    
                 } catch (ServerCommunicationException e)
                 {
                     throw e;
+                } catch (ArgumentException a)
+                {
+                    throw new ServerCommunicationException("You are already a candidate to that meeting.");
                 }
             }
 
