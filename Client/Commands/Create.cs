@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MSDAD.Client.Commands;
+using MSDAD.Client.Comunication;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,17 +14,23 @@ namespace MSDAD
         {
             class Create : Command
             {
-                public override void Execute(ClientCommunication clientCommunication, int port_int)
+                public override object Execute(ClientSendComm comm, int port_int)
                 {
+                    
+                    int minAttendees;
+                    string portInvitee, room, topic;
+                    MeetingView meetingView;
+
+                    List<int> invitees = new List<int>();
+
                     Console.WriteLine("Insert the following parameters");
                     Console.WriteLine("Meeting topic: ");
-                    string topic = Console.ReadLine();
+                    topic = Console.ReadLine();
 
                     Console.WriteLine("Minimum Attendees: ");
-                    int minAttendees = Int32.Parse(Console.ReadLine());
+                    minAttendees = Int32.Parse(Console.ReadLine());
 
                     Console.WriteLine("Write slots of the type Lisboa,2020-01-02, then type end:");
-                    string room;
                     List<string> slots = new List<string>();
                     while (!(room = Console.ReadLine()).Equals("end"))
                     {
@@ -32,21 +40,22 @@ namespace MSDAD
                     Console.WriteLine("Want invitees? y:n");
                     if (Console.ReadLine().Equals("n"))
                     {
-                        clientCommunication.Create(topic, minAttendees, slots, null, port_int);
+                        comm.Create(topic, minAttendees, slots, null, port_int);
 
                     }
                     else
                     {
                         Console.WriteLine("Write invitees port, then type end \n");
-                        List<int> invitees = new List<int>();
-                        string portInvitee;
+                        
                         while (!(portInvitee = Console.ReadLine()).Equals("end"))
                         {
                             invitees.Add(Int32.Parse(portInvitee));
                         }
-                        clientCommunication.Create(topic, minAttendees, slots, invitees, port_int);
-                        clientCommunication.AddView(new MeetingView(topic, slots, port_int));
+                        comm.Create(topic, minAttendees, slots, invitees, port_int);                        
                     }
+                    meetingView = new MeetingView(topic, slots, port_int);
+
+                    return meetingView;
                 }
             }
         }

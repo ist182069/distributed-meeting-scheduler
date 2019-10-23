@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Client.Comunication;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,11 @@ namespace MSDAD
 {
     namespace Client
     {
-        namespace Library {
+        namespace Commands {
             
             abstract class Command
             {
-                public abstract void Execute(ClientCommunication clientCommunication, int port_int);
+                public abstract object Execute(ClientSendComm comm, int port_int);
             }
         }        
     }    

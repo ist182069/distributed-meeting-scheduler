@@ -9,12 +9,12 @@ using System.Runtime.Remoting;
 
 namespace MSDAD
 { 
-    namespace Client {
+    namespace Client.Comunication {
         class RemoteClient : MarshalByRefObject, ClientInterface
         {
-            ClientCommunication communication; 
+            ClientReceiveComm communication; 
 
-            public RemoteClient(ClientCommunication communication)
+            public RemoteClient(ClientReceiveComm communication)
             {
                 this.communication = communication;
             }
@@ -25,7 +25,7 @@ namespace MSDAD
 
             public void SendMeeting(string topic, List<string> rooms, int coord_port)
             {
-                this.communication.CreateMeeting(topic, rooms, coord_port);
+                this.communication.Create(topic, rooms, coord_port);
             }
         }
     }

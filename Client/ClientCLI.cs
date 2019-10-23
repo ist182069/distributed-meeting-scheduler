@@ -1,4 +1,4 @@
-﻿using MSDAD.Client.Library;
+﻿using MSDAD.Client.Commands;
 using MSDAD.Library;
 using System;
 using System.Collections.Generic;
@@ -20,11 +20,10 @@ namespace MSDAD
 
             public void Display()
             {
-                Command commandClass;
-                ClientCommunication clientCommunication;
-                ServerInterface server;
+                
+                ClientLibrary clientLibrary;               
                 int port_int;
-                string command, message, port_string;
+                string command, port_string;
 
                 Console.Write("Pick a client port: ");
                 port_string = Console.ReadLine();
@@ -32,41 +31,26 @@ namespace MSDAD
                 // TODO adicionar excepcao aqui
                 port_int = Int32.Parse(port_string);
 
-                clientCommunication = new ClientCommunication();
-                clientCommunication.Start(port_int);
+                clientLibrary = new ClientLibrary(port_int);
 
                 while (true)
-                {
-                    clientCommunication.GetRemoteServer();
-                    clientCommunication.Hello(port_int);
-
+                {                    
                     Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
                     command = Console.ReadLine();                    
 
                     switch (command)
                     {
                         case PING_COMMAND:                            
-                            clientCommunication.Ping();                            
+                            clientLibrary.Ping();                            
                             break;
                         case CREATE:
-                            commandClass = new Create();
-                            commandClass.Execute(clientCommunication, port_int);
+                            clientLibrary.Create();
                             break;
                         case LIST:
-                            commandClass = new List();
-                            commandClass.Execute(clientCommunication, port_int);
+                            clientLibrary.List();
                             break;
                         case JOIN:
-                            Console.WriteLine("Write meeting topic:");
-                            string topicJoin = Console.ReadLine();
-                            Console.WriteLine("Write slots of the type Lisboa,2020-01-02 you can attend, then type end:");
-                            string roomJoin;
-                            List<string> slotsJoin = new List<string>();
-                            while (!(roomJoin = Console.ReadLine()).Equals("end"))
-                            {
-                                slotsJoin.Add(roomJoin);
-                            }
-                            clientCommunication.Join(topicJoin, slotsJoin, port_int);
+                            clientLibrary.Join();
                             break;
                         case EXIT:
                             Console.WriteLine("Bye!");

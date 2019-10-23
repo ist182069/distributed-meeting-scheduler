@@ -44,13 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Library\List.cs" />
+    <Compile Include="ClientLibrary.cs" />
+    <Compile Include="Commands\Join.cs" />
+    <Compile Include="Commands\List.cs" />
+    <Compile Include="Communication\ClientSendComm.cs" />
     <Compile Include="MeetingView.cs" />
-    <Compile Include="Library\Create.cs" />
-    <Compile Include="Library\Command.cs" />
+    <Compile Include="Commands\Create.cs" />
+    <Compile Include="Commands\Command.cs" />
     <Compile Include="ClientCLI.cs" />
-    <Compile Include="ClientCommunication.cs" />
-    <Compile Include="RemoteClient.cs" />
+    <Compile Include="Communication\ClientReceiveComm.cs" />
+    <Compile Include="Communication\RemoteClient.cs" />
     <Compile Include="ClientMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

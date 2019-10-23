@@ -109,11 +109,9 @@ namespace MSDAD
                         client.Ping(message);
                     }
                     
-                }
-             
+                }             
             }
 
-           
         }
     }
 }
