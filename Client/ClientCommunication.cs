@@ -61,7 +61,13 @@ namespace MSDAD
             }
             public void Join(string topic, List<string> slots, int port)
             {
-                this.server.Join(topic, slots, port);
+                try
+                {
+                    this.server.Join(topic, slots, port);
+                } catch (ServerCommunicationException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
 
         }
