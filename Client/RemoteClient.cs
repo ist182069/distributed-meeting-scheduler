@@ -22,6 +22,11 @@ namespace MSDAD
             {
                 Console.WriteLine("Received message: " + message);
             }
+
+            public void SendMeeting(string topic, List<string> rooms, int coord_port)
+            {
+                this.communication.CreateMeeting(topic, rooms, coord_port);
+            }
         }
     }
     

@@ -10,14 +10,12 @@ namespace MSDAD
             public void Display()
             {
                 string command;
-                ServerLibrary serverLibrary;
                 ServerCommunication serverCommunication;
                 
                 Console.Write("Starting up server...");
                 
                 serverCommunication = new ServerCommunication();
                 serverCommunication.Start("11000");
-                serverLibrary = new ServerLibrary(serverCommunication);
 
                 Console.WriteLine("the server has been successfully started!");
 

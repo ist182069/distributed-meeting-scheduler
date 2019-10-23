@@ -18,14 +18,15 @@ using System.Threading.Tasks;
 namespace MSDAD
 {
     namespace Client
-    {
+    {        
         class ClientCommunication
         {
             RemoteClient client;
             TcpChannel channel;
             ServerInterface server;
             int port;
-            
+            List<MeetingView> meetingViews = new List<MeetingView>();
+
             public void Start(int port)
             {
                 this.port = port;
@@ -55,9 +56,12 @@ namespace MSDAD
             {
                 this.server.Create(topic, minAttendees, rooms, invitees,port);
             }
-            public string List(int port)
+            public void List(int port)
             {
-                return this.server.List(port);
+                foreach(MeetingView meetingView in this.meetingViews)
+                {
+                    Console.WriteLine(meetingView.GetTopic());
+                }
             }
             public void Join(string topic, List<string> slots, int port)
             {
@@ -69,7 +73,13 @@ namespace MSDAD
                     Console.WriteLine(e.Message);
                 }
             }
+            public void CreateMeeting(string topic, List<string> rooms, int coord_port)
+            {
+                MeetingView meetingView;
 
+                meetingView = new MeetingView(topic, rooms, coord_port);
+                this.meetingViews.Add(meetingView);
+            }
         }
     }
     

@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MeetingView.cs" />
     <Compile Include="Commands\Create.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="ClientCLI.cs" />

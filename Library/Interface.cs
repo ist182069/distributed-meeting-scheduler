@@ -11,6 +11,8 @@ namespace MSDAD
         public interface ClientInterface
         {
             void Ping(string message);
+
+            void SendMeeting(string topic, List<string> rooms, int coord_port);
         }
 
         public interface ServerInterface

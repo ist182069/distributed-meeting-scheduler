@@ -27,6 +27,16 @@ namespace MSDAD
                     eventList.Add(new Meeting(topic, minAttendees, rooms,invitees, port));
                 }
 
+                foreach (int p in this.portList)
+                {
+                    if (p != port)
+                    {
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + p + "/RemoteClient");
+                        client.SendMeeting(topic, rooms, port);
+                    }
+
+                }
+
                 Console.WriteLine("New event: " + topic);
             }
             public string List(int port)

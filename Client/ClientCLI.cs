@@ -52,8 +52,7 @@ namespace MSDAD
                             commandClass.Execute(clientCommunication, port_int);
                             break;
                         case LIST:
-                            string listData = clientCommunication.List(port_int);
-                            Console.WriteLine(listData);
+                            clientCommunication.List(port_int);
                             break;
                         case JOIN:
                             Console.WriteLine("Write meeting topic:");
