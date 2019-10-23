@@ -1,4 +1,5 @@
-﻿using MSDAD.Library;
+﻿using MSDAD.Client.Commands;
+using MSDAD.Library;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace MSDAD
             public const string JOIN = "join";
             public void Display()
             {
+                Command commandClass;
                 ClientCommunication clientCommunication;
                 ServerInterface server;
                 int port_int;
@@ -45,35 +47,8 @@ namespace MSDAD
                             clientCommunication.Ping();                            
                             break;
                         case CREATE:
-                            Console.WriteLine("Insert the folloing parameters");
-                            Console.WriteLine("Meeting topic: ");
-                            string topic = Console.ReadLine();
-
-                            Console.WriteLine("Minimum Attendees: ");
-                            int minAttendees = Int32.Parse(Console.ReadLine());
-
-                            Console.WriteLine("Write slots of the type Lisboa,2020-01-02, then type end:"); 
-                            string room;
-                            List<string> slots = new List<string>();
-                            while (!(room = Console.ReadLine()).Equals("end"))
-                            {
-                                slots.Add(room);
-                            }
-
-                            Console.WriteLine("Want invitees? y:n");
-                            if (Console.ReadLine().Equals("n"))
-                            {
-                                clientCommunication.Create(topic, minAttendees, slots, null, port_int);
-                                break;
-                            }
-                            Console.WriteLine("Write invitees port, then type end \n");
-                            List<int> invitees = new List<int>();
-                            string portInvitee;
-                            while (!(portInvitee = Console.ReadLine()).Equals("end"))
-                            {
-                                invitees.Add(Int32.Parse(portInvitee));
-                            }
-                            clientCommunication.Create(topic, minAttendees, slots, invitees, port_int);
+                            commandClass = new Create();
+                            commandClass.Execute(clientCommunication, port_int);
                             break;
                         case LIST:
                             string listData = clientCommunication.List(port_int);
