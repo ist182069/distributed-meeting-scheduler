@@ -9,7 +9,11 @@ namespace MSDAD.Client.Commands
 {
     class Join : Command
     {
-        public override object Execute(ClientSendComm comm, int port_int)
+        public Join(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
+        {
+
+        }
+        public override object Execute()
         {
             string roomJoin, topicJoin;
             List<string> slotsJoin;
@@ -24,7 +28,7 @@ namespace MSDAD.Client.Commands
                 slotsJoin.Add(roomJoin);
             }
 
-            comm.Join(topicJoin, slotsJoin, port_int);
+            //comm.Join(topicJoin, slotsJoin, port_int);
             return topicJoin;
         }
     }

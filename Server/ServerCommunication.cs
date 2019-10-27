@@ -41,7 +41,7 @@ namespace MSDAD
             }
             public string List(int port)
             {
-                string listData = "";
+                /*string listData = "";
                 foreach(Meeting m in this.eventList)
                 {
                     if (m.isInvited(port))
@@ -53,7 +53,7 @@ namespace MSDAD
                     }
                 }
 
-                return listData;
+                return listData;*/
             }
 
             public void Join(String topic, List<string> slots, int port)
@@ -92,10 +92,13 @@ namespace MSDAD
             }
             public void AddPortArray(int port)
             {
-                lock(this)
+                if(!portList.Contains(port))
                 {
-                    portList.Add(port);
-                }
+                    lock (this)
+                    {
+                        portList.Add(port);
+                    }
+                }               
                 
             }
             public void BroadcastPing(int port, string message)

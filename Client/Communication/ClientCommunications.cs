@@ -14,7 +14,7 @@ namespace MSDAD
 {
     namespace Client.Comunication
     {        
-        class ClientReceiveComm
+        class ClientCommunications
         {
             int port;
 
@@ -25,7 +25,7 @@ namespace MSDAD
             
             List<MeetingView> meetingViews = new List<MeetingView>();
 
-            public ClientReceiveComm(ClientLibrary clientLibrary, int port)
+            public ClientCommunications(ClientLibrary clientLibrary, int port)
             {
                 this.port = port;
                 this.clientLibrary = clientLibrary;
@@ -45,7 +45,7 @@ namespace MSDAD
 
                 meetingView = new MeetingView(topic, rooms, coord_port);
 
-                clientLibrary.AddMeetingView(meetingView);
+                this.clientLibrary.AddMeetingView(meetingView);
             }    
             
             public void List(string status)

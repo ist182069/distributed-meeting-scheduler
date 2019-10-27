@@ -1,6 +1,5 @@
 ﻿using MSDAD.Client.Comunication;
 using MSDAD.Client.Commands;
-using MSDAD.Client.Library;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +11,7 @@ namespace MSDAD.Client
     class ClientLibrary
     {
         int port;
-        ClientReceiveComm receiveComm;
-        ClientSendComm sendComm;
+        ClientCommunications communications;
         Command commandClass;
 
         private List<MeetingView> meetingViews = new List<MeetingView>();
@@ -21,23 +19,56 @@ namespace MSDAD.Client
         public ClientLibrary(int port)
         {
             this.port = port;
-            this.receiveComm = new ClientReceiveComm(this, port);
-            this.sendComm = new ClientSendComm(port);
+            this.communications = new ClientCommunications(this, port);
 
             Console.Write("Starting client remoting service... ");
-            receiveComm.Start();
+            communications.Start();
             Console.WriteLine("Success!");
 
-            Console.Write("Getting the Remoting Communication class from the servers... ");
+            /*Console.Write("Getting the Remoting Communication class from the servers... ");
             sendComm.Start();
             Console.WriteLine("Success!");
 
             Console.Write("Initiating the handshake protocol... ");
             sendComm.Hello();
-            Console.WriteLine("Success!");
+            Console.WriteLine("Success!");*/
         }
 
-        public void Ping()
+        public void AddMeetingView(MeetingView meetingView)
+        {
+            lock(this)
+            {
+                this.meetingViews.Add(meetingView);
+            }
+        }
+
+        public int GetPort()
+        {
+            return this.port;
+        }
+
+        public List<MeetingView> GetMeetingViews()
+        {
+            lock (this)
+            {
+                return this.meetingViews;
+            }   
+        }
+
+        private void SetPort(int port)
+        {
+            this.port = port;
+        }
+
+        private void SetMeetingViews(List<MeetingView> meetingViews)
+        {
+            lock (this)
+            {
+                this.meetingViews = meetingViews;
+            }
+        }      
+
+        /*public void Ping()
         {
             this.sendComm.Ping();
         }
@@ -80,6 +111,6 @@ namespace MSDAD.Client
             {
                 this.meetingViews.Add(meetingView);
             }
-        }
+        }*/
     }
 }

@@ -12,11 +12,11 @@ namespace MSDAD
     namespace Client.Comunication {
         class RemoteClient : MarshalByRefObject, ClientInterface
         {
-            ClientReceiveComm communication; 
+            ClientCommunications communications; 
 
-            public RemoteClient(ClientReceiveComm communication)
+            public RemoteClient(ClientCommunications communications)
             {
-                this.communication = communication;
+                this.communications = communications;
             }
             public void Ping(string message)
             {
@@ -25,7 +25,7 @@ namespace MSDAD
 
             public void SendMeeting(string topic, List<string> rooms, int coord_port)
             {
-                this.communication.Create(topic, rooms, coord_port);
+                this.communications.Create(topic, rooms, coord_port);
             }
         }
     }

@@ -9,9 +9,23 @@ namespace MSDAD.Client.Commands
 {
     class List : Command
     {
-        public override object Execute(ClientSendComm comm, int port_int)
+        public List(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
         {
-            comm.List(port_int);
+
+        }
+        public override object Execute()
+        {
+            List<MeetingView> meetingViews;
+
+            meetingViews = this.clientLibrary.GetMeetingViews();
+
+            foreach (MeetingView meetingView in meetingViews)
+            {
+                // TODO fazer funcao privada local a esta classe para parsar o conteudo das meetingView
+                Console.WriteLine(meetingView.GetTopic());
+            }
+
+            this.server.List(this.port);
 
             // TODO ira processar o estado que ira receber do servidor
 

@@ -20,10 +20,9 @@ namespace MSDAD
 
             public void Display()
             {
-                
                 ClientLibrary clientLibrary;               
                 int port_int;
-                string command, port_string;
+                string input, port_string;
 
                 Console.Write("Pick a client port: ");
                 port_string = Console.ReadLine();
@@ -36,21 +35,21 @@ namespace MSDAD
                 while (true)
                 {                    
                     Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
-                    command = Console.ReadLine();                    
+                    input = Console.ReadLine();                    
 
-                    switch (command)
+                    switch (input)
                     {
-                        case PING_COMMAND:                            
-                            clientLibrary.Ping();                            
+                        case PING_COMMAND:
+                            new Ping(ref clientLibrary).Execute();                                            
                             break;
                         case CREATE:
-                            clientLibrary.Create();
+                            new Create(ref clientLibrary).Execute();
                             break;
                         case LIST:
-                            clientLibrary.List();
+                            new List(ref clientLibrary).Execute();
                             break;
                         case JOIN:
-                            clientLibrary.Join();
+                            //new Join().Execute(clientLibrary);
                             break;
                         case EXIT:
                             Console.WriteLine("Bye!");

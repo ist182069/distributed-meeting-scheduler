@@ -10,13 +10,15 @@ namespace MSDAD
 {
     namespace Client
     {
-        namespace Library
+        namespace Commands
         {
             class Create : Command
             {
-                public override object Execute(ClientSendComm comm, int port_int)
+                public Create(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
                 {
-                    
+                }
+                public override object Execute()
+                {                                  
                     int minAttendees;
                     string portInvitee, room, topic;
                     MeetingView meetingView;
@@ -40,7 +42,8 @@ namespace MSDAD
                     Console.WriteLine("Want invitees? y:n");
                     if (Console.ReadLine().Equals("n"))
                     {
-                        comm.Create(topic, minAttendees, slots, null, port_int);
+                        this.server.Create(topic, minAttendees, slots, null, this.port);
+
 
                     }
                     else
@@ -51,11 +54,14 @@ namespace MSDAD
                         {
                             invitees.Add(Int32.Parse(portInvitee));
                         }
-                        comm.Create(topic, minAttendees, slots, invitees, port_int);                        
-                    }
-                    meetingView = new MeetingView(topic, slots, port_int);
 
-                    return meetingView;
+                        this.server.Create(topic, minAttendees, slots, invitees, this.port);                        
+                    }
+                    meetingView = new MeetingView(topic, null, this.port);
+
+                    this.clientLibrary.AddMeetingView(meetingView);
+
+                    return null;
                 }
             }
         }
