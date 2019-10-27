@@ -31,6 +31,9 @@ namespace MSDAD
                 port_int = Int32.Parse(port_string);
 
                 clientLibrary = new ClientLibrary(port_int);
+                // Serve apenas para inicializar, caso contrario temos de esperar por um comando para registar no servidor
+                new Initialize(ref clientLibrary);
+
 
                 while (true)
                 {                    
@@ -49,7 +52,7 @@ namespace MSDAD
                             new List(ref clientLibrary).Execute();
                             break;
                         case JOIN:
-                            //new Join().Execute(clientLibrary);
+                            new Join(ref clientLibrary).Execute();
                             break;
                         case EXIT:
                             Console.WriteLine("Bye!");

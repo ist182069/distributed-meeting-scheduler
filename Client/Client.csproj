@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientLibrary.cs" />
+    <Compile Include="Commands\Initialize.cs" />
     <Compile Include="Commands\Ping.cs" />
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\List.cs" />

@@ -54,6 +54,8 @@ namespace MSDAD
                 }
 
                 return listData;*/
+
+                return "";
             }
 
             public void Join(String topic, List<string> slots, int port)
@@ -98,8 +100,7 @@ namespace MSDAD
                     {
                         portList.Add(port);
                     }
-                }               
-                
+                }   
             }
             public void BroadcastPing(int port, string message)
             {
