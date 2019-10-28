@@ -112,6 +112,14 @@ namespace MSDAD
         {
             return candidates.Count();
         }
+        public int getVersion()
+        {
+            return this.version;
+        }
+        public List<string> getSlots()
+        {
+            return this.slots;
+        }
 
     }
 }

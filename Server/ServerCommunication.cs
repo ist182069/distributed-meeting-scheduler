@@ -34,7 +34,7 @@ namespace MSDAD
                     if (p != port & (invitees == null | m.isInvited(port)))
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + p + "/RemoteClient");
-                        client.SendMeeting(topic, rooms, port);
+                        client.SendMeeting(topic, rooms, port,1);
                     }
 
                 }
@@ -42,23 +42,17 @@ namespace MSDAD
                 Console.WriteLine("\r\nNew event: " + topic);
                 Console.Write("Please run a command to be run on the server: ");
             }
-            public string List(int port)
+            public void List(Dictionary<string, int> meetingQuery, int port)
             {
-                /*string listData = "";
-                foreach(Meeting m in this.eventList)
+                foreach(KeyValuePair<string,int> mV in meetingQuery)
                 {
-                    if (m.isInvited(port))
+                    Meeting m;
+                    if ((m=GetMeeting(mV.Key))!=null & m.getVersion() > mV.Value)
                     {
-                        listData += m.getTopic();
-                        listData += "\n";
-                        listData += m.getSlotsData();
-                        listData += "\n";
-                    }
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + port + "/RemoteClient");
+                        client.SendMeeting(mV.Key, m.getSlots(), m.Coordinator, m.getVersion());
+                    } 
                 }
-
-                return listData;*/
-
-                return "";
             }
 
             public void Join(String topic, List<string> slots, int port)

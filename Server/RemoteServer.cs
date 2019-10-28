@@ -21,9 +21,9 @@ namespace MSDAD
                 this.communication.Create(topic, minAttendees, rooms, invitees, port);
             }
 
-            public void List(int port)
+            public void List(Dictionary<string, int> meetingQuery, int port)
             {
-                // TODO de momento nao retorna nada. Eventualmente devolve os estados do sistema                
+                this.communication.List(meetingQuery, port);                
             }
 
             public void Join(string topic, List<string> slots, int port)

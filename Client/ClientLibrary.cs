@@ -38,6 +38,13 @@ namespace MSDAD.Client
         {
             lock(this)
             {
+                foreach (MeetingView mV in meetingViews)
+                {
+                    if (mV.GetTopic().Equals(meetingView.GetTopic()))
+                        meetingViews.Remove(mV);
+                    break;
+                }
+
                 this.meetingViews.Add(meetingView);
             }
         }

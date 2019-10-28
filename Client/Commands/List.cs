@@ -15,19 +15,20 @@ namespace MSDAD.Client.Commands
         }
         public override object Execute()
         {
-            List<MeetingView> meetingViews;
+            List<MeetingView> meetingViews = this.clientLibrary.GetMeetingViews();
+            Dictionary<string,int> meetingQuery = new Dictionary<string,int>();
 
-            meetingViews = this.clientLibrary.GetMeetingViews();
-
-            foreach (MeetingView meetingView in meetingViews)
+            foreach (MeetingView mV in meetingViews)
             {
-                // TODO fazer funcao privada local a esta classe para parsar o conteudo das meetingView
-                Console.WriteLine(meetingView.GetTopic());
+                meetingQuery.Add(mV.GetTopic(), mV.getVersion());
             }
 
-            this.server.List(this.port);
+            this.server.List(meetingQuery,port);
 
-            // TODO ira processar o estado que ira receber do servidor
+            foreach (MeetingView mV in meetingViews)
+            {
+                Console.WriteLine(mV.GetTopic() + " "+ mV.getVersion() + "\n");
+            }
 
             return null;
         }

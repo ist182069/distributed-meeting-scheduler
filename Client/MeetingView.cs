@@ -12,14 +12,16 @@ namespace MSDAD
         {
             int coord_port;
             string topic;
+            int version;
 
             List<string> rooms;
             
-            public MeetingView(string topic, List<string> rooms, int coord_port)
+            public MeetingView(string topic, List<string> rooms, int coord_port,int version)
             {
                 this.coord_port = coord_port;
                 this.topic = topic;
                 this.rooms = rooms;
+                this.version = version;
             }
 
             public int GetPort()
@@ -35,6 +37,11 @@ namespace MSDAD
             public List<string> GetRooms()
             {
                 return this.rooms;
+            }
+
+            public int getVersion()
+            {
+                return this.version;
             }
         }
     }
