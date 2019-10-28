@@ -65,7 +65,7 @@ namespace MSDAD
                 try
                 {
                     meeting = GetMeeting(topic);
-                    meeting.Join(slots, port);                    
+                    meeting.Apply(slots, port);                    
                 } catch (ServerCommunicationException e)
                 {
                     throw e;
@@ -85,7 +85,7 @@ namespace MSDAD
                     }
                     if (m.Topic == topic && m.Coordinator == port)
                     {
-                        m.Close();
+                        m.Schedule();
                         Console.WriteLine("\r\nEvent Scheduled: " + topic);
                         Console.Write("Please run a command to be run on the server: ");
                         return;

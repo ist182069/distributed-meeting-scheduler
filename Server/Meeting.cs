@@ -43,7 +43,7 @@ namespace MSDAD
             return candidates.ContainsKey(port);
         }
 
-        public void Join(List<string> slots, int port)
+        public void Apply(List<string> slots, int port)
         {
             lock (this)
             {
@@ -51,7 +51,7 @@ namespace MSDAD
             }
         }
 
-        public void Close()
+        public void Schedule()
         {
             scheduled = true;
 
