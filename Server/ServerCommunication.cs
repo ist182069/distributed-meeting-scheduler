@@ -22,14 +22,16 @@ namespace MSDAD
             TcpChannel channel;
             public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port)
             {
+                Meeting m;
                 lock (this)
                 {
-                    eventList.Add(new Meeting(topic, minAttendees, rooms,invitees, port));
+                    m = new Meeting(topic, minAttendees, rooms, invitees, port);
+                    eventList.Add(m);
                 }
 
                 foreach (int p in this.portList)
                 {
-                    if (p != port)
+                    if (p != port & (invitees == null | m.isInvited(port)))
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + p + "/RemoteClient");
                         client.SendMeeting(topic, rooms, port);
