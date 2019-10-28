@@ -16,23 +16,23 @@ namespace MSDAD.Client.Commands
         }
         public override object Execute()
         {
-            string roomJoin, topicJoin;
-            List<string> slotsJoin;
+            string room, topic;
+            List<string> slots;
 
             Console.WriteLine("Write meeting topic:");
-            topicJoin = Console.ReadLine();
+            topic = Console.ReadLine();
             Console.WriteLine("Write slots of the type Lisboa,2020-01-02 you can attend, then type end:");
-            slotsJoin = new List<string>();
+            slots = new List<string>();
 
-            while (!(roomJoin = Console.ReadLine()).Equals("end"))
+            while (!(room = Console.ReadLine()).Equals("end"))
             {
-                slotsJoin.Add(roomJoin);
+                slots.Add(room);
             }
 
             try
             {
-                this.server.Join(topicJoin, slotsJoin, this.port);
-                Console.WriteLine("Registered in " + topicJoin);
+                this.server.Join(topic, slots, this.port);
+                Console.WriteLine("Registered in " + topic);
             } catch (ServerCommunicationException e)
             {
                 Console.WriteLine(e.Message);

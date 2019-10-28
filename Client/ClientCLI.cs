@@ -17,6 +17,7 @@ namespace MSDAD
             public const string EXIT = "exit";
             public const string LIST = "list";
             public const string JOIN = "join";
+            public const string CLOSE = "close";
 
             public void Display()
             {
@@ -53,6 +54,9 @@ namespace MSDAD
                             break;
                         case JOIN:
                             new Join(ref clientLibrary).Execute();
+                            break;
+                        case CLOSE:
+                            new Close(ref clientLibrary).Execute();
                             break;
                         case EXIT:
                             Console.WriteLine("Bye!");

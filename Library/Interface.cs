@@ -22,7 +22,7 @@ namespace MSDAD
             void List(int port);
             void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port);
             void Join(string topic, List<string> slots, int port);
-            void Close(string meeting_topic);
+            void Close(string topic, int port);
             void Wait(int milliseconds);
         }
     }    

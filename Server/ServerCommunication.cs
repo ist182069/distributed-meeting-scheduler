@@ -37,7 +37,8 @@ namespace MSDAD
 
                 }
 
-                Console.WriteLine("New event: " + topic);
+                Console.WriteLine("\r\nNew event: " + topic);
+                Console.Write("Please run a command to be run on the server: ");
             }
             public string List(int port)
             {
@@ -68,17 +69,36 @@ namespace MSDAD
                 } catch (ServerCommunicationException e)
                 {
                     throw e;
-                } catch (ArgumentException a)
+                } catch (ArgumentException)
                 {
                     throw new ServerCommunicationException("You are already a candidate to that meeting.");
                 }
+            }
+
+            public void Close(String topic, int port)
+            {
+                foreach (Meeting m in eventList)
+                {
+                    if (m.Topic == topic && m.Coordinator != port)
+                    {
+                        throw new ServerCommunicationException("You're not coordinating that meeting.");
+                    }
+                    if (m.Topic == topic && m.Coordinator == port)
+                    {
+                        m.Close();
+                        Console.WriteLine("\r\nEvent Scheduled: " + topic);
+                        Console.Write("Please run a command to be run on the server: ");
+                        return;
+                    }
+                }
+                throw new ServerCommunicationException("That meeting doesn't seem to exist.");
             }
 
             private Meeting GetMeeting(string topic)
             {
                 foreach(Meeting m in this.eventList)
                 {
-                    if (m.getTopic() == topic)
+                    if (m.Topic == topic)
                     {
                         return m;
                     }

@@ -57,7 +57,6 @@ namespace MSDAD
 
             public void Join()
             {
-
             }
         }
     }

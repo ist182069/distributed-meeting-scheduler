@@ -15,14 +15,15 @@ namespace MSDAD
             {
                 this.communication = communication;
             }
-            public void Close(string meeting_topic)
-            {
-                throw new NotImplementedException();
-            }
 
             public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port)
             {
                 this.communication.Create(topic, minAttendees, rooms, invitees, port);
+            }
+
+            public void List(int port)
+            {
+                // TODO de momento nao retorna nada. Eventualmente devolve os estados do sistema                
             }
 
             public void Join(string topic, List<string> slots, int port)
@@ -30,9 +31,9 @@ namespace MSDAD
                 this.communication.Join(topic, slots, port);
             }
 
-            public void List(int port)
+            public void Close(string meeting_topic, int port)
             {
-                // TODO de momento nao retorna nada. Eventualmente devolve os estados do sistema                
+                this.communication.Close(meeting_topic, port);
             }
 
             public void Ping(int port, string message)
