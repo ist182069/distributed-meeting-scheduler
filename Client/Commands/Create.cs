@@ -57,7 +57,7 @@ namespace MSDAD
 
                         this.server.Create(topic, minAttendees, slots, invitees, this.port);                        
                     }
-                    meetingView = new MeetingView(topic, null, this.port, 1);
+                    meetingView = new MeetingView(topic, null, this.port, 1, "OPEN");
 
                     this.clientLibrary.AddMeetingView(meetingView);
 

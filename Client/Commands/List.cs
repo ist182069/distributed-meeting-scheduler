@@ -27,7 +27,7 @@ namespace MSDAD.Client.Commands
 
             foreach (MeetingView mV in meetingViews)
             {
-                Console.WriteLine(mV.GetTopic() + " "+ mV.getVersion() + "\n");
+                Console.WriteLine("Topic:"+mV.GetTopic() + " State:" + mV.getState() + " Version:" + mV.getVersion() + "\n");
             }
 
             return null;

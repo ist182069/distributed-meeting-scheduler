@@ -12,7 +12,7 @@ namespace MSDAD
         {
             void Ping(string message);
 
-            void SendMeeting(string topic, List<string> rooms, int coord_port, int version);
+            void SendMeeting(string topic, List<string> rooms, int coord_port, int version, string state);
         }
 
         public interface ServerInterface

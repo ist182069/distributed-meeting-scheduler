@@ -120,6 +120,10 @@ namespace MSDAD
         {
             return this.slots;
         }
+        public string getState()
+        {
+            return this.state.ToString();
+        }
 
     }
 }

@@ -34,7 +34,7 @@ namespace MSDAD
                     if (p != port & (invitees == null | m.isInvited(port)))
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + p + "/RemoteClient");
-                        client.SendMeeting(topic, rooms, port,1);
+                        client.SendMeeting(topic, rooms, port,1, "OPEN");
                     }
 
                 }
@@ -50,7 +50,7 @@ namespace MSDAD
                     if ((m=GetMeeting(mV.Key))!=null & m.getVersion() > mV.Value)
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + port + "/RemoteClient");
-                        client.SendMeeting(mV.Key, m.getSlots(), m.Coordinator, m.getVersion());
+                        client.SendMeeting(mV.Key, m.getSlots(), m.Coordinator, m.getVersion(), m.getState());
                     } 
                 }
             }

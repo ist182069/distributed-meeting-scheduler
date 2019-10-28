@@ -8,20 +8,21 @@ namespace MSDAD
 {
     namespace Client
     {
-        class MeetingView
+        public class MeetingView
         {
-            int coord_port;
-            string topic;
-            int version;
-
-            List<string> rooms;
+            private int coord_port;
+            private string topic;
+            private int version;
+            private string state;
+            private List<string> rooms;
             
-            public MeetingView(string topic, List<string> rooms, int coord_port,int version)
+            public MeetingView(string topic, List<string> rooms, int coord_port,int version,string state)
             {
                 this.coord_port = coord_port;
                 this.topic = topic;
                 this.rooms = rooms;
                 this.version = version;
+                this.state = state;
             }
 
             public int GetPort()
@@ -42,6 +43,11 @@ namespace MSDAD
             public int getVersion()
             {
                 return this.version;
+            }
+
+            public string getState()
+            {
+                return this.state;
             }
         }
     }
