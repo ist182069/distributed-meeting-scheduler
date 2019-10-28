@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace MSDAD
 {
+    enum state { OPEN, SCHEDULED, CANCELED };
+
     public class Meeting
     {
         private string topic;
@@ -14,7 +17,8 @@ namespace MSDAD
         private int coordinator;
         private List<int> invitees;
         private Dictionary<int, List<string>> candidates;
-        private Boolean scheduled;
+        private state state;
+        private int version;
 
         public Meeting(string topic, int minAttendees, List<string> slots, List<int> invitees, int port)
         {
@@ -24,7 +28,8 @@ namespace MSDAD
             this.coordinator = port;
             this.invitees = invitees;
             this.candidates = new Dictionary<int, List<string>>();
-            this.scheduled = false;
+            this.state = state.OPEN;
+            this.version = 1;
         }
 
 
@@ -45,15 +50,24 @@ namespace MSDAD
 
         public void Apply(List<string> slots, int port)
         {
+            if (state == state.CANCELED)
+            {
+                throw new ServerCommunicationException("This Meeting is already CANCELED");
+            }
             lock (this)
             {
                 this.candidates.Add(port, slots);
+                this.version += 1;
             }
         }
 
         public void Schedule()
         {
-            scheduled = true;
+            if (getNumberOfCandidates() < MinAttendees)
+            {
+                this.state = state.CANCELED;
+            }
+            this.state = state.SCHEDULED;
 
             //TO DO logica do close
         }
@@ -74,6 +88,14 @@ namespace MSDAD
             }
         }
 
+        public int MinAttendees
+        {
+            get
+            {
+                return this.minAttendees;
+            }
+        }
+
         public string getSlotsData()
         {
             string slotsData = "";
@@ -85,6 +107,10 @@ namespace MSDAD
             }
 
             return slotsData;
+        }
+        public int getNumberOfCandidates()
+        {
+            return candidates.Count();
         }
 
     }
