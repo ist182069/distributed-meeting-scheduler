@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MSDAD.Client.Comunication;
+using MSDAD.Library;
 
 namespace MSDAD.Client.Commands
 {
@@ -28,8 +29,15 @@ namespace MSDAD.Client.Commands
                 slotsJoin.Add(roomJoin);
             }
 
-            this.server.Join(topicJoin, slotsJoin, this.port);
-            return topicJoin;
+            try
+            {
+                this.server.Join(topicJoin, slotsJoin, this.port);
+                Console.WriteLine("Registered in " + topicJoin);
+            } catch (ServerCommunicationException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return null;
         }
     }
 }
