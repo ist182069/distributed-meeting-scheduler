@@ -13,21 +13,21 @@ namespace MSDAD
     {
         private string topic;
         private int minAttendees;
-        private List<string> slots;
+        private List<Tuple<Location, DateTime>> slots;
         private int coordinator;
         private List<int> invitees;
-        private Dictionary<int, List<string>> candidates;
+        private Dictionary<int, List<Tuple<Location, DateTime>>> candidates;
         private state state;
         private int version;
 
-        public Meeting(string topic, int minAttendees, List<string> slots, List<int> invitees, int port)
+        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<int> invitees, int port)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;
             this.slots = slots;
             this.coordinator = port;
             this.invitees = invitees;
-            this.candidates = new Dictionary<int, List<string>>();
+            this.candidates = new Dictionary<int, List<Tuple<Location, DateTime>>>();
             this.state = state.OPEN;
             this.version = 1;
         }
@@ -48,7 +48,7 @@ namespace MSDAD
             return candidates.ContainsKey(port);
         }
 
-        public void Apply(List<string> slots, int port)
+        public void Apply(List<Tuple<Location, DateTime>> slots, int port)
         {
             if (state == state.CANCELED)
             {
@@ -100,9 +100,9 @@ namespace MSDAD
         {
             string slotsData = "";
 
-            foreach (string s in this.slots)
+            foreach (Tuple<Location, DateTime> s in this.slots)
             {
-                slotsData += s;
+                slotsData += s.Item1.Name + ", " + s.Item2.ToString();
                 slotsData += "\n";
             }
 
@@ -118,7 +118,16 @@ namespace MSDAD
         }
         public List<string> getSlots()
         {
-            return this.slots;
+            List<string> result = new List<String>();
+            foreach (Tuple<Location, DateTime> t in slots)
+            {
+                string slot = "";
+                slot += t.Item1.Name;
+                slot += t.Item2.ToString();
+                result.Add(slot);
+            }
+
+            return result;
         }
         public string getState()
         {

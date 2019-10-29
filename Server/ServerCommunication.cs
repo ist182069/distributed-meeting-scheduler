@@ -20,12 +20,15 @@ namespace MSDAD
             List<Meeting> eventList = new List<Meeting>();
             RemoteServer remoteServer;
             TcpChannel channel;
+            List<Location> knownLocations = new List<Location>();
             public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port)
             {
                 Meeting m;
+                List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(rooms);
+
                 lock (this)
                 {
-                    m = new Meeting(topic, minAttendees, rooms, invitees, port);
+                    m = new Meeting(topic, minAttendees, parsedSlots, invitees, port);
                     eventList.Add(m);
                 }
 
@@ -60,8 +63,9 @@ namespace MSDAD
                 Meeting meeting = null;
                 try
                 {
+                    List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
                     meeting = GetMeeting(topic);
-                    meeting.Apply(slots, port);                    
+                    meeting.Apply(parsedSlots, port);                    
                 } catch (ServerCommunicationException e)
                 {
                     throw e;
@@ -107,6 +111,11 @@ namespace MSDAD
                 ChannelServices.RegisterChannel(channel, true);
                 this.remoteServer = new RemoteServer(this);
                 RemotingServices.Marshal(this.remoteServer, "RemoteServer", typeof(RemoteServer));
+
+                LocationAndRoomInit();
+
+                //TO DO predefinir locations e rooms.
+
             }
             public void AddPortArray(int port)
             {
@@ -130,6 +139,58 @@ namespace MSDAD
                     }
                     
                 }             
+            }
+
+            public Tuple<Location, DateTime> ParseSlot(String slot)
+            {
+                Location location = null;
+                String[] data = slot.Split(',');
+                DateTime date = DateTime.Parse(data[1]);
+
+                foreach (Location l in knownLocations)
+                {
+                    if (l.Name == data[0])
+                    {
+                        location = l;
+                    }
+                }
+                if (location == null)
+                {
+                    throw new ServerCommunicationException(data[0] + " is not a valid location.");
+                }
+
+                return new Tuple<Location, DateTime>(location, date);
+            }
+
+            public List<Tuple<Location, DateTime>> ListOfParsedSlots(List<string> slots)
+            {
+                List<Tuple<Location, DateTime>> parsedSlots = new List<Tuple<Location, DateTime>>();
+                foreach (string s in slots)
+                {
+                    parsedSlots.Add(ParseSlot(s));
+                }
+                return parsedSlots;
+            }
+
+            public void LocationAndRoomInit()
+            {
+                Location Lisboa = new Location("Lisboa");
+                Lisboa.AddRoom(new Room("LisboaA", 20));
+                Lisboa.AddRoom(new Room("LisboaB", 10));
+                Location Coimbra = new Location("Coimbra");
+                Coimbra.AddRoom(new Room("CoimbraA", 10));
+                Coimbra.AddRoom(new Room("CoimbraB", 5));
+                Location Guarda = new Location("Guarda");
+                Guarda.AddRoom(new Room("GuardaA", 5));
+                Guarda.AddRoom(new Room("GuardaB", 4));
+                Location Porto = new Location("Porto");
+                Porto.AddRoom(new Room("PortoA", 3));
+                Porto.AddRoom(new Room("PortoB", 2));
+
+                knownLocations.Add(Lisboa);
+                knownLocations.Add(Coimbra);
+                knownLocations.Add(Guarda);
+                knownLocations.Add(Porto);
             }
 
         }
