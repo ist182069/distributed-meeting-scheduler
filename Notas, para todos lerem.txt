@@ -1,0 +1,6 @@
+Na replicação:
+- Servidores vão ter uma Meeting View também, mas diferente da do cliente. Esta Meeting View tem o estado TODO de uma Meeting, menos a lógica, e é enviada para cada servidor durante os protocols de replicação, cada servidor depois tem de construir a Meeting com base na view. Vantagem: é mais rápida a troca de mensagens na rede.
+
+- Clientes vão atualizar-se com a alteração de estado, porque: OPEN = 1; CANCEL = 2; SCHEDULE = 2; (e possivelmente CLOSED = 3) e nunca volta atrás. As versões no entanto são importantes para depois os servidores replicados trocarem informação entre eles.
+~
+- O Cliente verifica primeiro se a MeetingView local está no ultimo estado, se estiver não faz pedido de atualização, para poupar trafego na rede. (O ultimo estado será CANCEL/SCHEDULED, ou CLOSED caso decidamos colocar um quarto estado)
