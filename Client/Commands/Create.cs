@@ -1,5 +1,6 @@
 ﻿using MSDAD.Client.Commands;
 using MSDAD.Client.Comunication;
+using MSDAD.Library;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,22 +41,27 @@ namespace MSDAD
                     }
 
                     Console.WriteLine("Want invitees? y:n");
-                    if (Console.ReadLine().Equals("n"))
+                    try
                     {
-                        this.server.Create(topic, minAttendees, slots, null, this.port);
-
-
-                    }
-                    else
-                    {
-                        Console.WriteLine("Write invitees port, then type end \n");
-                        
-                        while (!(portInvitee = Console.ReadLine()).Equals("end"))
+                        if (Console.ReadLine().Equals("n"))
                         {
-                            invitees.Add(Int32.Parse(portInvitee));
-                        }
+                            this.server.Create(topic, minAttendees, slots, null, this.port);
 
-                        this.server.Create(topic, minAttendees, slots, invitees, this.port);                        
+
+                        }
+                        else
+                        {
+                            Console.WriteLine("Write invitees port, then type end \n");
+
+                            while (!(portInvitee = Console.ReadLine()).Equals("end"))
+                            {
+                                invitees.Add(Int32.Parse(portInvitee));
+                            }
+
+                            this.server.Create(topic, minAttendees, slots, invitees, this.port);
+                        }
+                    } catch (ServerCommunicationException e) {
+                        Console.WriteLine(e.Message);
                     }
                     meetingView = new MeetingView(topic, null, this.port, 1, "OPEN");
 
