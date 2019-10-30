@@ -11,23 +11,22 @@ namespace MSDAD
 
     public class Meeting
     {
-        private string topic;
+        private string coordinator, topic;
         private int minAttendees;
         private List<Tuple<Location, DateTime>> slots;
-        private int coordinator;
         private List<int> invitees;
-        private Dictionary<int, List<Tuple<Location, DateTime>>> candidates;
+        private Dictionary<string, List<Tuple<Location, DateTime>>> candidates;
         private state state;
         private int version;
 
-        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<int> invitees, int port)
+        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<int> invitees, string client_address)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;
             this.slots = slots;
-            this.coordinator = port;
+            this.coordinator = client_address;
             this.invitees = invitees;
-            this.candidates = new Dictionary<int, List<Tuple<Location, DateTime>>>();
+            this.candidates = new Dictionary<string, List<Tuple<Location, DateTime>>>();
             this.state = state.OPEN;
             this.version = 1;
         }
@@ -43,20 +42,21 @@ namespace MSDAD
             return this.invitees.Contains(port);
         }
 
-        public Boolean isCandidate(int port)
+        public Boolean isCandidate(string client_address)
         {
-            return candidates.ContainsKey(port);
+            return candidates.ContainsKey(client_address);
         }
 
-        public void Apply(List<Tuple<Location, DateTime>> slots, int port)
+        public void Apply(List<Tuple<Location, DateTime>> slots, string client_address)
         {
+
             if (state == state.CANCELED)
             {
                 throw new ServerCommunicationException("This Meeting is already CANCELED");
             }
             lock (this)
             {
-                this.candidates.Add(port, slots);
+                this.candidates.Add(client_address, slots);
                 this.version += 1;
             }
         }
@@ -80,7 +80,7 @@ namespace MSDAD
             }
         }
 
-        public int Coordinator
+        public string Coordinator
         {
             get
             {

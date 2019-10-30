@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientUtils.cs" />
     <Compile Include="ClientLibrary.cs" />
     <Compile Include="Commands\Initialize.cs" />
     <Compile Include="Commands\Close.cs" />

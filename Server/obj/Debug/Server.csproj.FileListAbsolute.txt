@@ -28,3 +28,13 @@ C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Pro
 C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Projecto-DAD-2018-2019\Server\obj\Debug\Server.csproj.CopyComplete
 C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Projecto-DAD-2018-2019\Server\obj\Debug\Server.exe
 C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Projecto-DAD-2018-2019\Server\obj\Debug\Server.pdb
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\obj\Debug\Server.csprojAssemblyReference.cache
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\obj\Debug\Server.exe
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\obj\Debug\Server.pdb
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\bin\Debug\Server.exe.config
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\bin\Debug\Server.exe
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\bin\Debug\Server.pdb
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\bin\Debug\Library.dll
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\bin\Debug\Library.pdb
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Server\obj\Debug\Server.csproj.CopyComplete

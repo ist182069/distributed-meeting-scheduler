@@ -16,3 +16,9 @@ C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Pro
 C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Projecto-DAD-2018-2019\Library\obj\Debug\Library.csproj.CoreCompileInputs.cache
 C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Projecto-DAD-2018-2019\Library\obj\Debug\Library.dll
 C:\Users\José Eduardo\Google Drive\MEIC-T\2º Ano\1º Semestre\DAD\Projecto\Projecto-DAD-2018-2019\Library\obj\Debug\Library.pdb
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Library\bin\Debug\Library.dll
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Library\bin\Debug\Library.pdb
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Library\obj\Debug\Library.csprojAssemblyReference.cache
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Library\obj\Debug\Library.csproj.CoreCompileInputs.cache
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Library\obj\Debug\Library.dll
+C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Library\obj\Debug\Library.pdb

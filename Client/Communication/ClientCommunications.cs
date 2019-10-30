@@ -17,6 +17,7 @@ namespace MSDAD
         class ClientCommunications
         {
             int port;
+            string ip;
 
             ClientLibrary clientLibrary;
             RemoteClient client;
@@ -25,9 +26,10 @@ namespace MSDAD
             
             List<MeetingView> meetingViews = new List<MeetingView>();
 
-            public ClientCommunications(ClientLibrary clientLibrary, int port)
+            public ClientCommunications(ClientLibrary clientLibrary, string ip, int port)
             {
                 this.port = port;
+                this.ip = ip;
                 this.clientLibrary = clientLibrary;
             }
             public void Start()
@@ -39,11 +41,11 @@ namespace MSDAD
                 RemotingServices.Marshal(this.client, "RemoteClient", typeof(RemoteClient));
             }
   
-            public void addMeetingView(string topic, List<string> rooms, int coord_port, int version, string state)
+            public void AddMeetingView(string topic, List<string> rooms, string coordinator, int version, string state)
             {
                 MeetingView meetingView;
 
-                meetingView = new MeetingView(topic, rooms, coord_port, version, state);
+                meetingView = new MeetingView(topic, rooms, coordinator, version, state);
 
                 this.clientLibrary.AddMeetingView(meetingView);
             }    

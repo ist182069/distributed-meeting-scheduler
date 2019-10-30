@@ -18,7 +18,7 @@ namespace MSDAD.Client.Commands
 
             message = "ping";
 
-            this.server.Ping(this.port, message);
+            this.server.Ping(this.ip, this.port, message);
 
             return null;
         }

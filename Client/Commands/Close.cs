@@ -23,7 +23,7 @@ namespace MSDAD.Client.Commands
 
             try
             {
-                this.server.Close(topic, port);
+                this.server.Close(topic, ip, port);
                 Console.WriteLine("Successfully scheduled " + topic);
             } catch (ServerCommunicationException e)
             {

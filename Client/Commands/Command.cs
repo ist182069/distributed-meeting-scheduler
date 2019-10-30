@@ -15,6 +15,7 @@ namespace MSDAD
             abstract class Command
             {
                 public int port;
+                public string ip;
                 public ClientLibrary clientLibrary;
                 public ServerInterface server;
 
@@ -28,8 +29,9 @@ namespace MSDAD
                 void Init()
                 {
                     this.port = this.clientLibrary.GetPort();
+                    this.ip = this.clientLibrary.GetIP();
                     this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://localhost:11000/RemoteServer");
-                    this.server.Hello(this.port);
+                    this.server.Hello(this.ip, this.port);
                 }
                 public abstract object Execute();
             }

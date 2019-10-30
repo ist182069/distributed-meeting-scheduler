@@ -10,24 +10,23 @@ namespace MSDAD
     {
         public class MeetingView
         {
-            private int coord_port;
-            private string topic;
+            private string coordinator, topic;
             private int version;
             private string state;
             private List<string> rooms;
             
-            public MeetingView(string topic, List<string> rooms, int coord_port,int version,string state)
+            public MeetingView(string topic, List<string> rooms, string coordinator, int version, string state)
             {
-                this.coord_port = coord_port;
+                this.coordinator = coordinator;
                 this.topic = topic;
                 this.rooms = rooms;
                 this.version = version;
                 this.state = state;
             }
 
-            public int GetPort()
+            public string GetAddress()
             {
-                return this.coord_port;
+                return this.coordinator;
             }
 
             public string GetTopic()

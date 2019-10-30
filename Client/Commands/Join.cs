@@ -31,7 +31,7 @@ namespace MSDAD.Client.Commands
 
             try
             {
-                this.server.Join(topic, slots, this.port);
+                this.server.Join(topic, slots, this.ip, this.port);
                 Console.WriteLine("Registered in " + topic);
             } catch (ServerCommunicationException e)
             {

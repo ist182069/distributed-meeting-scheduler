@@ -23,7 +23,7 @@ namespace MSDAD.Client.Commands
                 meetingQuery.Add(mV.GetTopic(), mV.getVersion());
             }
 
-            this.server.List(meetingQuery,port);
+            this.server.List(meetingQuery, ip, port);
 
             foreach (MeetingView mV in meetingViews)
             {

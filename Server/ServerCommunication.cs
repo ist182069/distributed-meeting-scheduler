@@ -16,28 +16,31 @@ namespace MSDAD
     {
         class ServerCommunication
         {
-            ArrayList portList = new ArrayList();
+            ArrayList clientAddresses = new ArrayList();
             List<Meeting> eventList = new List<Meeting>();
             RemoteServer remoteServer;
             TcpChannel channel;
             List<Location> knownLocations = new List<Location>();
-            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port)
+            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, string ip, int port)
             {
+                string client_address; 
                 Meeting m;
                 List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(rooms);
 
+                client_address = ServerUtils.AssembleClientAddress(ip, port);
+
                 lock (this)
                 {
-                    m = new Meeting(topic, minAttendees, parsedSlots, invitees, port);
+                    m = new Meeting(topic, minAttendees, parsedSlots, invitees, client_address);
                     eventList.Add(m);
                 }
 
-                foreach (int p in this.portList)
+                foreach (string address_iter in this.clientAddresses)
                 {
-                    if (p != port & (invitees == null | m.isInvited(port)))
+                    if (address_iter != client_address & (invitees == null | m.isInvited(port)))
                     {
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + p + "/RemoteClient");
-                        client.SendMeeting(topic, rooms, port,1, "OPEN");
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
+                        client.SendMeeting(topic, rooms, client_address, 1, "OPEN");
                     }
 
                 }
@@ -45,27 +48,33 @@ namespace MSDAD
                 Console.WriteLine("\r\nNew event: " + topic);
                 Console.Write("Please run a command to be run on the server: ");
             }
-            public void List(Dictionary<string, int> meetingQuery, int port)
+            public void List(Dictionary<string, int> meetingQuery, string ip, int port)
             {
+                string client_address;
+
+                client_address = ServerUtils.AssembleClientAddress(ip, port);
+
                 foreach(KeyValuePair<string,int> mV in meetingQuery)
                 {
                     Meeting m;
                     if ((m=GetMeeting(mV.Key))!=null & m.getVersion() > mV.Value)
                     {
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + port + "/RemoteClient");
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address + "/RemoteClient");
                         client.SendMeeting(mV.Key, m.getSlots(), m.Coordinator, m.getVersion(), m.getState());
                     } 
                 }
             }
 
-            public void Join(String topic, List<string> slots, int port)
+            public void Join(String topic, List<string> slots, string ip, int port)
             {
+                string client_address;
                 Meeting meeting = null;
                 try
                 {
+                    client_address = ServerUtils.AssembleClientAddress(ip, port);
                     List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
                     meeting = GetMeeting(topic);
-                    meeting.Apply(parsedSlots, port);                    
+                    meeting.Apply(parsedSlots, client_address);                    
                 } catch (ServerCommunicationException e)
                 {
                     throw e;
@@ -75,15 +84,19 @@ namespace MSDAD
                 }
             }
 
-            public void Close(String topic, int port)
+            public void Close(String topic, string ip, int port)
             {
+                string client_address;
+
+                client_address = ServerUtils.AssembleClientAddress(ip, port);
+
                 foreach (Meeting m in eventList)
                 {
-                    if (m.Topic == topic && m.Coordinator != port)
+                    if (m.Topic == topic && m.Coordinator != client_address)
                     {
                         throw new ServerCommunicationException("You're not coordinating that meeting.");
                     }
-                    if (m.Topic == topic && m.Coordinator == port)
+                    if (m.Topic == topic && m.Coordinator == client_address)
                     {
                         m.Schedule();
                         Console.WriteLine("\r\nEvent Scheduled: " + topic);
@@ -117,24 +130,31 @@ namespace MSDAD
                 //TO DO predefinir locations e rooms.
 
             }
-            public void AddPortArray(int port)
+            public void AddClientAddress(string ip, int port)
             {
-                if(!portList.Contains(port))
+                string client_address;
+
+                client_address = ServerUtils.AssembleClientAddress(ip, port);
+
+                if(!clientAddresses.Contains(client_address))
                 {
                     lock (this)
                     {
-                        portList.Add(port);
+                        clientAddresses.Add(client_address);
                     }
                 }   
             }
-            public void BroadcastPing(int port, string message)
+            public void BroadcastPing(string ip, int port, string message)
             {
-                
-                foreach (int p in this.portList)
+                string client_address;
+
+                client_address = ServerUtils.AssembleClientAddress(ip, port);
+
+                foreach (string address_iter in this.clientAddresses)
                 {
-                    if (p != port)
+                    if (address_iter != client_address)
                     {
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://localhost:" + p + "/RemoteClient");
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
                         client.Ping(message);
                     }
                     

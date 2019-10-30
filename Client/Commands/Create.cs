@@ -21,7 +21,7 @@ namespace MSDAD
                 public override object Execute()
                 {                                  
                     int minAttendees;
-                    string portInvitee, room, topic;
+                    string client_string, portInvitee, room, topic;
                     MeetingView meetingView;
 
                     List<int> invitees = new List<int>();
@@ -45,7 +45,7 @@ namespace MSDAD
                     {
                         if (Console.ReadLine().Equals("n"))
                         {
-                            this.server.Create(topic, minAttendees, slots, null, this.port);
+                            this.server.Create(topic, minAttendees, slots, null, this.ip, this.port);
 
 
                         }
@@ -58,12 +58,15 @@ namespace MSDAD
                                 invitees.Add(Int32.Parse(portInvitee));
                             }
 
-                            this.server.Create(topic, minAttendees, slots, invitees, this.port);
+                            this.server.Create(topic, minAttendees, slots, invitees, this.ip, this.port);
                         }
                     } catch (ServerCommunicationException e) {
                         Console.WriteLine(e.Message);
                     }
-                    meetingView = new MeetingView(topic, null, this.port, 1, "OPEN");
+
+                    client_string = ClientUtils.AssembleClientAddress(this.ip, this.port);
+    
+                    meetingView = new MeetingView(topic, null, client_string, 1, "OPEN");
 
                     this.clientLibrary.AddMeetingView(meetingView);
 

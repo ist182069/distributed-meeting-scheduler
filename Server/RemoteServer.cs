@@ -16,31 +16,31 @@ namespace MSDAD
                 this.communication = communication;
             }
 
-            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, int port)
+            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, string ip, int port)
             {
-                this.communication.Create(topic, minAttendees, rooms, invitees, port);
+                this.communication.Create(topic, minAttendees, rooms, invitees, ip, port);
             }
 
-            public void List(Dictionary<string, int> meetingQuery, int port)
+            public void List(Dictionary<string, int> meetingQuery, string ip, int port)
             {
-                this.communication.List(meetingQuery, port);                
+                this.communication.List(meetingQuery, ip, port);                
             }
 
-            public void Join(string topic, List<string> slots, int port)
+            public void Join(string topic, List<string> slots, string ip, int port)
             {
-                this.communication.Join(topic, slots, port);
+                this.communication.Join(topic, slots, ip,  port);
             }
 
-            public void Close(string meeting_topic, int port)
+            public void Close(string meeting_topic, string ip, int port)
             {
-                this.communication.Close(meeting_topic, port);
+                this.communication.Close(meeting_topic, ip, port);
             }
 
-            public void Ping(int port, string message)
+            public void Ping(string ip, int port, string message)
             {
                 Console.WriteLine("Received message: " + message);
                 Console.WriteLine("Will broadcast it to all available clients... ");
-                communication.BroadcastPing(port, message);
+                communication.BroadcastPing(ip, port, message);
                 Console.Write("Success!");
             }
 
@@ -49,9 +49,9 @@ namespace MSDAD
                 throw new NotImplementedException();
             }
 
-            public void Hello(int port)
+            public void Hello(string ip, int port)
             {
-                communication.AddPortArray(port);
+                communication.AddClientAddress(ip, port);
             }
         }
     }
