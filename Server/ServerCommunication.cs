@@ -52,11 +52,12 @@ namespace MSDAD
 
                     foreach (string invitee_iter in invitees)
                     {
-                        if(ServerUtils.ValidateAddress(invitee_iter))
+                        if(ServerUtils.ValidateAddress(invitee_iter) && invitee_iter!=client_address)
                         {
                             Console.WriteLine("tcp://" + invitee_iter + "/RemoteClient");
                             ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + invitee_iter + "/RemoteClient");
                             client.SendMeeting(topic, rooms, client_address, 1, "OPEN");
+
                         } else
                         {
                             // TODO throw remote exception
@@ -64,6 +65,9 @@ namespace MSDAD
                             
                     }
                 }
+
+
+                // TODO excepcao caso tentemos adicionar uma data repetida (da para viciar o sistema desta forma)
 
                 Console.WriteLine("\r\nNew event: " + topic);
                 Console.Write("Please run a command to be run on the server: ");
@@ -118,8 +122,26 @@ namespace MSDAD
                     }
                     if (m.Topic == topic && m.Coordinator == client_address)
                     {
-                        m.Schedule();
-                        Console.WriteLine("\r\nEvent Scheduled: " + topic);
+                        int version;
+                        bool result = m.Schedule();
+                        
+                        if(result)
+                        {
+                            foreach (string address_iter in this.clientAddresses)
+                            {
+                                version = m.getVersion();
+                                ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
+                                client.SendMeeting(topic, null, client_address, version, "CLOSED");
+                            }
+                        } else
+                        {
+                            foreach (string address_iter in this.clientAddresses)
+                            {
+                                version = m.getVersion();
+                                ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
+                                client.SendMeeting(topic, null, client_address, version, "CANCELED");
+                            }
+                        }
                         Console.Write("Please run a command to be run on the server: ");
                         return;
                     }

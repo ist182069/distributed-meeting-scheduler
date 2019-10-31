@@ -11,14 +11,20 @@ namespace MSDAD
 
     public class Meeting
     {
-        private string coordinator, topic;
-        private int minAttendees;
+        private static readonly DateTime ERRONEOUS_DATE = new DateTime(1900, 1, 31);
+
+        private int minAttendees, version;
+        private string coordinator, topic;        
+
+        private state state;
+
+        private Dictionary<string, List<Tuple<Location, DateTime>>> candidates;
+
         private List<Tuple<Location, DateTime>> slots;
         private List<string> invitees;
-        private Dictionary<string, List<Tuple<Location, DateTime>>> candidates;
-        private state state;
-        private int version;
 
+        private Tuple<DateTime, string> dateTimeRoomTuple;
+    
         public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
         {
             this.topic = topic;
@@ -27,6 +33,7 @@ namespace MSDAD
             this.coordinator = client_address;
             this.invitees = invitees;
             this.candidates = new Dictionary<string, List<Tuple<Location, DateTime>>>();
+            this.candidates[client_address] = this.slots;
             this.state = state.OPEN;
             this.version = 1;
         }
@@ -42,7 +49,7 @@ namespace MSDAD
             return this.invitees.Contains(client_address);
         }
 
-        public Boolean isCandidate(string client_address)
+        public Boolean IsCandidate(string client_address)
         {
             return candidates.ContainsKey(client_address);
         }
@@ -61,17 +68,158 @@ namespace MSDAD
             }
         }
 
-        public void Schedule()
+        public bool Schedule()
         {
-            if (getNumberOfCandidates() < MinAttendees)
+            Console.WriteLine(this.GetNumberOfCandidates());            
+            Console.WriteLine("Entrou no Schedule");
+            lock (this)
             {
-                this.state = state.CANCELED;
-            }
-            this.state = state.SCHEDULED;
+                if (this.GetNumberOfCandidates() < MinAttendees)
+                {
+                    this.version++;
+                    this.state = state.CANCELED;
+                    
+                    // TODO lancar excepcao remota                    
+                    Console.WriteLine("\r\nEvent Canceled: " + topic);
+                    Console.WriteLine("\r\nThe number of candidates was less than the number of minimum attendees...");
 
-            //TO DO logica do close
+                    return false;
+
+                } else
+                {
+
+                    DateTime chosenDate;
+                    Dictionary<Location, List<Tuple<DateTime, int>>> locationsDictionary;
+
+                    locationsDictionary = this.ScheduleSortEntries();
+
+                    chosenDate = this.ScheduleChooseEntries(locationsDictionary);                   
+
+                    if(chosenDate!=ERRONEOUS_DATE)
+                    {
+                        this.version++;
+                        this.state = state.SCHEDULED;
+
+                        dateTimeRoomTuple = new Tuple<DateTime, string>(chosenDate, null);
+                        // TODO escolhe um room                        
+
+                        Console.WriteLine("\r\nEvent Scheduled: " + topic);
+
+                        return true;
+
+                    }
+                    else
+                    {
+                        this.version++;
+                        this.state = state.CANCELED;
+                        // TODO lancar excepcao remota   
+                        return false;
+                    }
+                    
+                }
+            }
         }
 
+        private Dictionary<Location, List<Tuple<DateTime, int>>> ScheduleSortEntries()
+        {
+            List<Tuple<Location, DateTime>> tuplesListIter;
+            Location locationIter;
+            DateTime dateTimeIter;
+
+            Tuple<DateTime, int> tuple;
+            Dictionary<Location, List<Tuple<DateTime, int>>> locationsDictionary;
+
+            locationsDictionary = new Dictionary<Location, List<Tuple<DateTime, int>>>();
+
+            foreach (KeyValuePair<string, List<Tuple<Location, DateTime>>> entry in this.candidates)
+            {
+                
+                tuplesListIter = entry.Value;
+
+                foreach (Tuple<Location, DateTime> tupleLocDateIter in tuplesListIter)
+                {
+                    locationIter = tupleLocDateIter.Item1;
+                    dateTimeIter = tupleLocDateIter.Item2;
+
+                    if (!locationsDictionary.ContainsKey(locationIter))
+                    {
+                        List<Tuple<DateTime, int>> newList = new List<Tuple<DateTime, int>>();
+                        Tuple<DateTime, int> tmpTuple = new Tuple<DateTime, int>(dateTimeIter, 1);
+
+                        newList.Add(tmpTuple);
+
+                        locationsDictionary.Add(locationIter, newList);
+                    }
+                    else
+                    {
+                        bool isNewDate = true;
+                        List<Tuple<DateTime, int>> iterList, tmpList;
+
+                        iterList = locationsDictionary[locationIter];
+                        tmpList = new List<Tuple<DateTime, int>>(iterList);
+
+                        foreach (Tuple<DateTime, int> tupleDateIntIter in iterList)
+                        {
+                            int dateCount = tupleDateIntIter.Item2;
+                            DateTime tupleDateTime = tupleDateIntIter.Item1;
+
+                            if (dateTimeIter == tupleDateTime)
+                            {
+                                dateCount++;
+                                tmpList.Remove(tupleDateIntIter);                                
+                                tmpList.Add(new Tuple<DateTime, int>(dateTimeIter, dateCount));
+                                locationsDictionary[locationIter] = tmpList;
+                                isNewDate = false;
+                            }
+
+                        }
+
+                        if (isNewDate)
+                        {
+                            tmpList.Add(new Tuple<DateTime, int>(dateTimeIter, 1));
+                            locationsDictionary[locationIter] = tmpList;
+                        }
+                    }
+                }
+
+            }
+
+            return locationsDictionary;
+        }
+
+        private DateTime ScheduleChooseEntries(Dictionary<Location, List<Tuple<DateTime, int>>> dictionary)
+        {            
+            int biggestCount = 0;
+            DateTime mostPopularDateTime = new DateTime(1900, 1, 31);
+
+            foreach (KeyValuePair<Location, List<Tuple<DateTime, int>>> listTupleIter in dictionary)
+            {
+                Console.WriteLine("###");
+                Console.WriteLine("Location: ");
+                Console.WriteLine(listTupleIter.Key.Name);
+                Console.WriteLine("DateTimes: ");
+                
+                foreach(Tuple<DateTime, int> tupleDateTime in listTupleIter.Value)
+                {
+                    int currentCount = tupleDateTime.Item2;
+
+                    Console.WriteLine(tupleDateTime.Item1.ToString());
+                    Console.WriteLine(tupleDateTime.Item2.ToString());
+
+                    if(biggestCount < currentCount)
+                    {
+                        mostPopularDateTime = tupleDateTime.Item1;
+                        biggestCount = currentCount;
+                    }
+
+                }
+
+                Console.WriteLine("###");                
+            }
+
+            // TODO neste momento ele apenas escolhe o local mais popular. Deveriamos ter uma coisa, que em caso de empate ele escolhe o Local com a data mais popular
+            return mostPopularDateTime;
+        }
         public string Topic
         {
             get
@@ -108,7 +256,7 @@ namespace MSDAD
 
             return slotsData;
         }
-        public int getNumberOfCandidates()
+        public int GetNumberOfCandidates()
         {
             return candidates.Count();
         }

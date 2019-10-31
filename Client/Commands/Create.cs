@@ -46,8 +46,8 @@ namespace MSDAD
                         if (Console.ReadLine().Equals("n"))
                         {
                             this.server.Create(topic, minAttendees, slots, null, this.ip, this.port);
-
-
+                            meetingView = new MeetingView(topic, null, this.client_address, 1, "OPEN");
+                            this.clientLibrary.AddMeetingView(meetingView);
                         }
                         else
                         {
@@ -55,6 +55,11 @@ namespace MSDAD
 
                             while (!(invitee_address = Console.ReadLine()).Equals("end"))
                             {
+                                if(invitee_address == this.client_address)
+                                {
+                                    meetingView = new MeetingView(topic, null, this.client_address, 1, "OPEN");
+                                    this.clientLibrary.AddMeetingView(meetingView);
+                                }
                                 invitees.Add(invitee_address);
                             }
 
@@ -63,13 +68,7 @@ namespace MSDAD
                     } catch (ServerCommunicationException e) {
                         Console.WriteLine(e.Message);
                     }
-
-                    client_string = ClientUtils.AssembleClientAddress(this.ip, this.port);
-    
-                    meetingView = new MeetingView(topic, null, client_string, 1, "OPEN");
-
-                    this.clientLibrary.AddMeetingView(meetingView);
-
+                    
                     return null;
                 }
             }
