@@ -21,7 +21,7 @@ namespace MSDAD
             RemoteServer remoteServer;
             TcpChannel channel;
             List<Location> knownLocations = new List<Location>();
-            public void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, string ip, int port)
+            public void Create(string topic, int minAttendees, List<string> rooms, List<string> invitees, string ip, int port)
             {
                 string client_address; 
                 Meeting m;
@@ -35,14 +35,34 @@ namespace MSDAD
                     eventList.Add(m);
                 }
 
-                foreach (string address_iter in this.clientAddresses)
+                
+                if(invitees == null)
                 {
-                    if (address_iter != client_address & (invitees == null | m.isInvited(port)))
+                    foreach (string address_iter in this.clientAddresses)
                     {
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
-                        client.SendMeeting(topic, rooms, client_address, 1, "OPEN");
-                    }
+                        if (address_iter != client_address)
+                        {
+                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
+                            client.SendMeeting(topic, rooms, client_address, 1, "OPEN");
+                        }
 
+                    }
+                } else
+                {
+
+                    foreach (string invitee_iter in invitees)
+                    {
+                        if(ServerUtils.ValidateAddress(invitee_iter))
+                        {
+                            Console.WriteLine("tcp://" + invitee_iter + "/RemoteClient");
+                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + invitee_iter + "/RemoteClient");
+                            client.SendMeeting(topic, rooms, client_address, 1, "OPEN");
+                        } else
+                        {
+                            // TODO throw remote exception
+                        }
+                            
+                    }
                 }
 
                 Console.WriteLine("\r\nNew event: " + topic);

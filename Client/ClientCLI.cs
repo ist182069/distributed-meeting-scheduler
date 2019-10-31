@@ -32,6 +32,7 @@ namespace MSDAD
                 // TODO adicionar excepcao aqui
                 port_int = Int32.Parse(port_string);
 
+                Console.WriteLine("Your current Meeting Scheduler IP and port combination is: \"" + ip_string + ":" + port_string);
                 clientLibrary = new ClientLibrary(ip_string, port_int);
                 // Serve apenas para inicializar, caso contrario temos de esperar por um comando para registar no servidor
                 new Initialize(ref clientLibrary);

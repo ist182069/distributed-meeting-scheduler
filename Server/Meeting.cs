@@ -14,12 +14,12 @@ namespace MSDAD
         private string coordinator, topic;
         private int minAttendees;
         private List<Tuple<Location, DateTime>> slots;
-        private List<int> invitees;
+        private List<string> invitees;
         private Dictionary<string, List<Tuple<Location, DateTime>>> candidates;
         private state state;
         private int version;
 
-        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<int> invitees, string client_address)
+        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;
@@ -32,14 +32,14 @@ namespace MSDAD
         }
 
 
-        public Boolean isInvited(int port)
+        public Boolean IsInvited(string client_address)
         {
             if(this.invitees == null)
             {
                 return true;
             }
 
-            return this.invitees.Contains(port);
+            return this.invitees.Contains(client_address);
         }
 
         public Boolean isCandidate(string client_address)
@@ -132,6 +132,11 @@ namespace MSDAD
         public string getState()
         {
             return this.state.ToString();
+        }
+
+        public List<string> GetInvitees()
+        {
+            return this.invitees;
         }
 
     }

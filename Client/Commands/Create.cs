@@ -21,10 +21,10 @@ namespace MSDAD
                 public override object Execute()
                 {                                  
                     int minAttendees;
-                    string client_string, portInvitee, room, topic;
+                    string client_string, invitee_address, room, topic;
                     MeetingView meetingView;
 
-                    List<int> invitees = new List<int>();
+                    List<string> invitees = new List<string>();
 
                     Console.WriteLine("Insert the following parameters");
                     Console.WriteLine("Meeting topic: ");
@@ -51,11 +51,11 @@ namespace MSDAD
                         }
                         else
                         {
-                            Console.WriteLine("Write invitees port, then type end \n");
+                            Console.WriteLine("Write invitees of the type ip:port, then type end \n");
 
-                            while (!(portInvitee = Console.ReadLine()).Equals("end"))
+                            while (!(invitee_address = Console.ReadLine()).Equals("end"))
                             {
-                                invitees.Add(Int32.Parse(portInvitee));
+                                invitees.Add(invitee_address);
                             }
 
                             this.server.Create(topic, minAttendees, slots, invitees, this.ip, this.port);

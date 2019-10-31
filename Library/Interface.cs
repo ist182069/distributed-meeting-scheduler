@@ -20,7 +20,7 @@ namespace MSDAD
             void Hello(string ip, int port);
             void Ping(string ip, int port, string message);
             void List(Dictionary<string, int> meetingQuery, string ip, int port);
-            void Create(string topic, int minAttendees, List<string> rooms, List<int> invitees, string ip, int port);
+            void Create(string topic, int minAttendees, List<string> rooms, List<string> invitees, string ip, int port);
             void Join(string topic, List<string> slots, string ip, int port);
             void Close(string topic, string ip, int port);
             void Wait(int milliseconds);
