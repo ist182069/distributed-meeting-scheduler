@@ -16,9 +16,9 @@ namespace MSDAD
                 this.communication = communication;
             }
 
-            public void Create(string topic, int minAttendees, List<string> rooms, List<string> invitees, string ip, int port)
+            public void Create(string topic, int minAttendees, List<string> rooms, List<string> clients, string ip, int port)
             {
-                this.communication.Create(topic, minAttendees, rooms, invitees, ip, port);
+                this.communication.Create(topic, minAttendees, rooms, clients, ip, port);
             }
 
             public void List(Dictionary<string, int> meetingQuery, string ip, int port)

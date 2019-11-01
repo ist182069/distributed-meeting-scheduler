@@ -41,11 +41,11 @@ namespace MSDAD
                 RemotingServices.Marshal(this.client, "RemoteClient", typeof(RemoteClient));
             }
   
-            public void AddMeetingView(string topic, List<string> rooms, string coordinator, int version, string state)
+            public void AddMeetingView(string topic, int version, string state)
             {
                 MeetingView meetingView;
 
-                meetingView = new MeetingView(topic, rooms, coordinator, version, state);
+                meetingView = new MeetingView(topic, version, state);
 
                 this.clientLibrary.AddMeetingView(meetingView);
             }    

@@ -21,42 +21,42 @@ namespace MSDAD
             RemoteServer remoteServer;
             TcpChannel channel;
             List<Location> knownLocations = new List<Location>();
-            public void Create(string topic, int minAttendees, List<string> rooms, List<string> invitees, string ip, int port)
+            public void Create(string topic, int minAttendees, List<string> venues, List<string> clients, string ip, int port)
             {
                 string client_address; 
                 Meeting m;
-                List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(rooms);
+                List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(venues);
 
                 client_address = ServerUtils.AssembleClientAddress(ip, port);
 
                 lock (this)
                 {
-                    m = new Meeting(topic, minAttendees, parsedSlots, invitees, client_address);
+                    m = new Meeting(topic, minAttendees, parsedSlots, clients, client_address);
                     eventList.Add(m);
                 }
 
                 
-                if(invitees == null)
+                if(clients == null)
                 {
                     foreach (string address_iter in this.clientAddresses)
                     {
                         if (address_iter != client_address)
                         {
                             ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
-                            client.SendMeeting(topic, rooms, client_address, 1, "OPEN");
+                            client.SendMeeting(topic, 1, "OPEN");
                         }
 
                     }
                 } else
                 {
 
-                    foreach (string invitee_iter in invitees)
+                    foreach (string client_iter in clients)
                     {
-                        if(ServerUtils.ValidateAddress(invitee_iter) && invitee_iter!=client_address)
+                        if(ServerUtils.ValidateAddress(client_iter) && client_iter != client_address)
                         {
-                            Console.WriteLine("tcp://" + invitee_iter + "/RemoteClient");
-                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + invitee_iter + "/RemoteClient");
-                            client.SendMeeting(topic, rooms, client_address, 1, "OPEN");
+                            Console.WriteLine("tcp://" + client_iter + "/RemoteClient");
+                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_iter + "/RemoteClient");
+                            client.SendMeeting(topic, 1, "OPEN");
 
                         } else
                         {
@@ -84,12 +84,12 @@ namespace MSDAD
                     if ((m=GetMeeting(mV.Key))!=null & m.GetVersion() > mV.Value)
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address + "/RemoteClient");
-                        client.SendMeeting(mV.Key, m.GetSlots(), m.Coordinator, m.GetVersion(), m.GetState());
+                        client.SendMeeting(mV.Key, m.GetVersion(), m.GetState());
                     } 
                 }
             }
 
-            public void Join(String topic, List<string> slots, string ip, int port)
+            public void Join(string topic, List<string> slots, string ip, int port)
             {
                 string client_address;
                 Meeting meeting = null;
@@ -99,9 +99,8 @@ namespace MSDAD
                     List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
                     meeting = GetMeeting(topic);
                     meeting.Apply(parsedSlots, client_address);                    
-                } catch (ServerCommunicationException e)
-                {
-                    throw e;
+                } catch (ServerCommunicationException sce) {
+                    throw sce;
                 } catch (ArgumentException)
                 {
                     throw new ServerCommunicationException("You are already a candidate to that meeting.");
@@ -131,7 +130,7 @@ namespace MSDAD
                             {
                                 version = m.GetVersion();
                                 ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
-                                client.SendMeeting(topic, null, client_address, version, "CLOSED");
+                                client.SendMeeting(topic, version, "CLOSED");
                             }
                         } else
                         {
@@ -139,7 +138,7 @@ namespace MSDAD
                             {
                                 version = m.GetVersion();
                                 ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
-                                client.SendMeeting(topic, null, client_address, version, "CANCELED");
+                                client.SendMeeting(topic, version, "CANCELED");
                             }
                         }
                         Console.Write("Please run a command to be run on the server: ");

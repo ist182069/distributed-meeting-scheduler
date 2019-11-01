@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MSDAD
 {
-    enum state { OPEN, SCHEDULED, CANCELED };
+    enum state {OPEN, SCHEDULED, CANCELED};
 
     public class Meeting
     {
@@ -19,25 +19,35 @@ namespace MSDAD
         private state state;
 
         private List<string> clients;
-        private List<string> invitees;
 
         Tuple<Location, string, DateTime> chosenVenue;
 
         private List<Tuple<Location, DateTime>> proposedVenues;
 
-        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
+        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> clients, string client_address)
         {
             this.topic = topic;
-            this.minAttendees = minAttendees;
-            this.coordinator = client_address;
-            this.clients = new List<string>();
+            this.minAttendees = minAttendees;            
+            this.coordinator = client_address;            
             this.clients.Add(client_address);
-            this.proposedVenues = new List<Tuple<Location, DateTime>>(slots);
-            this.invitees = invitees;            
+            this.proposedVenues = new List<Tuple<Location, DateTime>>(slots);          
             this.state = state.OPEN;
             this.version = 1;
+            this.InitClientList(clients);
         }
 
+        private void InitClientList(List<string> clients)
+        {
+            if (clients != null)
+            {
+                this.clients = clients;
+
+            }
+            else
+            {
+                this.clients = new List<string>();
+            }
+        }
         public void Apply(List<Tuple<Location, DateTime>> slots, string client_address)
         {
 
@@ -75,8 +85,8 @@ namespace MSDAD
                     bool result;                    
                     SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary;
 
-                    dictionary = this.ScheduleOrganizeEntries();
-                    this.chosenVenue = this.ScheduleSortEntries(dictionary);
+                    dictionary = this.ScheduleSortEntries();
+                    this.chosenVenue = this.SchedulePickEntries(dictionary);
 
                     if(chosenVenue!=null)
                     {
@@ -102,7 +112,7 @@ namespace MSDAD
             }
         }
 
-        private SortedDictionary<int, List<Tuple<Location, DateTime>>> ScheduleOrganizeEntries()
+        private SortedDictionary<int, List<Tuple<Location, DateTime>>> ScheduleSortEntries()
         {
             SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary = new SortedDictionary<int, List<Tuple<Location, DateTime>>>();
             List<Tuple<Location, DateTime>> explored = new List<Tuple<Location, DateTime>>(), tmpList;
@@ -141,7 +151,7 @@ namespace MSDAD
             return dictionary;
         }
 
-        private Tuple<Location, string, DateTime> ScheduleSortEntries(SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary)
+        private Tuple<Location, string, DateTime> SchedulePickEntries(SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary)
         {
 
             bool end_iteration = false;
@@ -242,9 +252,9 @@ namespace MSDAD
             return this.state.ToString();
         }
 
-        public List<string> GetInvitees()
+        public List<string> GetClients()
         {
-            return this.invitees;
+            return this.clients;
         }
 
     }

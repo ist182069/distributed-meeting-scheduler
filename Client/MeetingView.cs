@@ -10,41 +10,28 @@ namespace MSDAD
     {
         public class MeetingView
         {
-            private string coordinator, topic;
+            private string state, topic;
             private int version;
-            private string state;
-            private List<string> rooms;
             
-            public MeetingView(string topic, List<string> rooms, string coordinator, int version, string state)
+            
+            public MeetingView(string topic, int version, string state)
             {
-                this.coordinator = coordinator;
                 this.topic = topic;
-                this.rooms = rooms;
                 this.version = version;
                 this.state = state;
-            }
-
-            public string GetAddress()
-            {
-                return this.coordinator;
             }
 
             public string GetTopic()
             {
                 return this.topic;
-            }
+            }          
 
-            public List<string> GetRooms()
-            {
-                return this.rooms;
-            }
-
-            public int getVersion()
+            public int GetVersion()
             {
                 return this.version;
             }
 
-            public string getState()
+            public string GetState()
             {
                 return this.state;
             }

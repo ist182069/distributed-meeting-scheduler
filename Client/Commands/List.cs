@@ -20,14 +20,14 @@ namespace MSDAD.Client.Commands
 
             foreach (MeetingView mV in meetingViews)
             {
-                meetingQuery.Add(mV.GetTopic(), mV.getVersion());
+                meetingQuery.Add(mV.GetTopic(), mV.GetVersion());
             }
 
             this.server.List(meetingQuery, ip, port);
 
             foreach (MeetingView mV in meetingViews)
             {
-                Console.WriteLine("Topic:"+mV.GetTopic() + " State:" + mV.getState() + " Version:" + mV.getVersion() + "\n");
+                Console.WriteLine("Topic:"+mV.GetTopic() + " State:" + mV.GetState() + " Version:" + mV.GetVersion() + "\n");
             }
 
             return null;
