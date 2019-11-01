@@ -10,20 +10,19 @@ namespace MSDAD
     {
         private String identifier;
         private int capacity;
-        private bool reserved;
+        private List<DateTime> reservations = new List<DateTime>();
 
         public Room(String identifier, int capacity)
         {
             this.identifier = identifier;
-            this.capacity = capacity;
-            this.reserved = false;
+            this.capacity = capacity;            
         }
 
         public String Identifier
         {
             get
             {
-                return this.Identifier;
+                return this.identifier;
             }
         }
 
@@ -34,14 +33,21 @@ namespace MSDAD
                 return this.capacity;
             }
         }
-
-        public bool Reserved
+        
+        public bool ReserveRoom(DateTime dateTime)
         {
-            get
-            {
-                return this.reserved;
-            }
-        }
+            bool reserved;
 
+            if(reservations.Contains(dateTime))
+            {
+                reserved = true;
+            } else
+            {
+                reserved = false;
+                reservations.Add(dateTime);
+            }
+
+            return reserved;
+        }
     }
 }

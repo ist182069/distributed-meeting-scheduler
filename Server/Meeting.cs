@@ -14,44 +14,28 @@ namespace MSDAD
         private static readonly DateTime ERRONEOUS_DATE = new DateTime(1900, 1, 31);
 
         private int minAttendees, version;
-        private string coordinator, topic;        
+        private string coordinator, topic;
 
         private state state;
 
-        private Dictionary<string, List<Tuple<Location, DateTime>>> candidates;
-
-        private List<Tuple<Location, DateTime>> slots;
+        private List<string> clients;
         private List<string> invitees;
 
-        private Tuple<DateTime, string> dateTimeRoomTuple;
-    
+        Tuple<Location, string, DateTime> chosenVenue;
+
+        private List<Tuple<Location, DateTime>> proposedVenues;
+
         public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;
-            this.slots = slots;
             this.coordinator = client_address;
-            this.invitees = invitees;
-            this.candidates = new Dictionary<string, List<Tuple<Location, DateTime>>>();
-            this.candidates[client_address] = this.slots;
+            this.clients = new List<string>();
+            this.clients.Add(client_address);
+            this.proposedVenues = new List<Tuple<Location, DateTime>>(slots);
+            this.invitees = invitees;            
             this.state = state.OPEN;
             this.version = 1;
-        }
-
-
-        public Boolean IsInvited(string client_address)
-        {
-            if(this.invitees == null)
-            {
-                return true;
-            }
-
-            return this.invitees.Contains(client_address);
-        }
-
-        public Boolean IsCandidate(string client_address)
-        {
-            return candidates.ContainsKey(client_address);
         }
 
         public void Apply(List<Tuple<Location, DateTime>> slots, string client_address)
@@ -63,13 +47,14 @@ namespace MSDAD
             }
             lock (this)
             {
-                this.candidates.Add(client_address, slots);
+                this.clients.Add(client_address);
+                this.proposedVenues.Concat(slots);
                 this.version += 1;
             }
         }
 
         public bool Schedule()
-        {
+        {            
             Console.WriteLine(this.GetNumberOfCandidates());            
             Console.WriteLine("Entrou no Schedule");
             lock (this)
@@ -87,138 +72,113 @@ namespace MSDAD
 
                 } else
                 {
+                    bool result;                    
+                    SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary;
 
-                    DateTime chosenDate;
-                    Dictionary<Location, List<Tuple<DateTime, int>>> locationsDictionary;
+                    dictionary = this.ScheduleOrganizeEntries();
+                    this.chosenVenue = this.ScheduleSortEntries(dictionary);
 
-                    locationsDictionary = this.ScheduleSortEntries();
-
-                    chosenDate = this.ScheduleChooseEntries(locationsDictionary);                   
-
-                    if(chosenDate!=ERRONEOUS_DATE)
+                    if(chosenVenue!=null)
                     {
+                        result = true;
+
                         this.version++;
                         this.state = state.SCHEDULED;
 
-                        dateTimeRoomTuple = new Tuple<DateTime, string>(chosenDate, null);
-                        // TODO escolhe um room                        
-
-                        Console.WriteLine("\r\nEvent Scheduled: " + topic);
-
-                        return true;
+                        return result;
 
                     }
                     else
                     {
+                        result = false; 
+
                         this.version++;
                         this.state = state.CANCELED;
                         // TODO lancar excepcao remota   
-                        return false;
+                        return result;
                     }
                     
                 }
             }
         }
 
-        private Dictionary<Location, List<Tuple<DateTime, int>>> ScheduleSortEntries()
+        private SortedDictionary<int, List<Tuple<Location, DateTime>>> ScheduleOrganizeEntries()
         {
-            List<Tuple<Location, DateTime>> tuplesListIter;
-            Location locationIter;
-            DateTime dateTimeIter;
+            SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary = new SortedDictionary<int, List<Tuple<Location, DateTime>>>();
+            List<Tuple<Location, DateTime>> explored = new List<Tuple<Location, DateTime>>(), tmpList;
 
-            Tuple<DateTime, int> tuple;
-            Dictionary<Location, List<Tuple<DateTime, int>>> locationsDictionary;
-
-            locationsDictionary = new Dictionary<Location, List<Tuple<DateTime, int>>>();
-
-            foreach (KeyValuePair<string, List<Tuple<Location, DateTime>>> entry in this.candidates)
+            foreach (Tuple<Location, DateTime> outter_tuple in this.proposedVenues)
             {
-                
-                tuplesListIter = entry.Value;
+                int count = 0;
 
-                foreach (Tuple<Location, DateTime> tupleLocDateIter in tuplesListIter)
+                if(!explored.Contains(outter_tuple))
                 {
-                    locationIter = tupleLocDateIter.Item1;
-                    dateTimeIter = tupleLocDateIter.Item2;
-
-                    if (!locationsDictionary.ContainsKey(locationIter))
+                    foreach (Tuple<Location, DateTime> inner_tuple in this.proposedVenues)
                     {
-                        List<Tuple<DateTime, int>> newList = new List<Tuple<DateTime, int>>();
-                        Tuple<DateTime, int> tmpTuple = new Tuple<DateTime, int>(dateTimeIter, 1);
+                        if (outter_tuple.Equals(inner_tuple))
+                        {
+                            count++;
+                        }
+                    }
+                    explored.Add(outter_tuple);
 
-                        newList.Add(tmpTuple);
-
-                        locationsDictionary.Add(locationIter, newList);
+                    if (dictionary.ContainsKey(count))
+                    {
+                        tmpList = dictionary[count];
+                        tmpList.Add(outter_tuple);
+                        dictionary.Remove(count);
+                        dictionary.Add(count, tmpList);
                     }
                     else
                     {
-                        bool isNewDate = true;
-                        List<Tuple<DateTime, int>> iterList, tmpList;
-
-                        iterList = locationsDictionary[locationIter];
-                        tmpList = new List<Tuple<DateTime, int>>(iterList);
-
-                        foreach (Tuple<DateTime, int> tupleDateIntIter in iterList)
-                        {
-                            int dateCount = tupleDateIntIter.Item2;
-                            DateTime tupleDateTime = tupleDateIntIter.Item1;
-
-                            if (dateTimeIter == tupleDateTime)
-                            {
-                                dateCount++;
-                                tmpList.Remove(tupleDateIntIter);                                
-                                tmpList.Add(new Tuple<DateTime, int>(dateTimeIter, dateCount));
-                                locationsDictionary[locationIter] = tmpList;
-                                isNewDate = false;
-                            }
-
-                        }
-
-                        if (isNewDate)
-                        {
-                            tmpList.Add(new Tuple<DateTime, int>(dateTimeIter, 1));
-                            locationsDictionary[locationIter] = tmpList;
-                        }
+                        tmpList = new List<Tuple<Location, DateTime>>();
+                        tmpList.Add(outter_tuple);
+                        dictionary.Add(count, tmpList);
                     }
                 }
-
+                                
             }
-
-            return locationsDictionary;
+            return dictionary;
         }
 
-        private DateTime ScheduleChooseEntries(Dictionary<Location, List<Tuple<DateTime, int>>> dictionary)
-        {            
-            int biggestCount = 0;
-            DateTime mostPopularDateTime = new DateTime(1900, 1, 31);
+        private Tuple<Location, string, DateTime> ScheduleSortEntries(SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary)
+        {
 
-            foreach (KeyValuePair<Location, List<Tuple<DateTime, int>>> listTupleIter in dictionary)
+            bool end_iteration = false;
+            string room_identifier; 
+            
+            Location sortEntriesLocation;
+            DateTime sortEntriesDateTime;
+
+            Tuple<Location, string, DateTime> tupleLocationRoomDate = null;
+
+            List<Tuple<Location, DateTime>> sortEntriesList = new List<Tuple<Location, DateTime>>();
+
+            foreach (int iter in dictionary.Keys.Reverse())
             {
-                Console.WriteLine("###");
-                Console.WriteLine("Location: ");
-                Console.WriteLine(listTupleIter.Key.Name);
-                Console.WriteLine("DateTimes: ");
-                
-                foreach(Tuple<DateTime, int> tupleDateTime in listTupleIter.Value)
+                foreach(Tuple<Location, DateTime> tuple in dictionary[iter])
                 {
-                    int currentCount = tupleDateTime.Item2;
+                    sortEntriesLocation = tuple.Item1;
+                    sortEntriesDateTime = tuple.Item2;
 
-                    Console.WriteLine(tupleDateTime.Item1.ToString());
-                    Console.WriteLine(tupleDateTime.Item2.ToString());
+                    room_identifier = sortEntriesLocation.PickRoom(sortEntriesDateTime, this.clients.Count);
 
-                    if(biggestCount < currentCount)
+                    if(room_identifier != null)
                     {
-                        mostPopularDateTime = tupleDateTime.Item1;
-                        biggestCount = currentCount;
+                        tupleLocationRoomDate = new Tuple<Location, string, DateTime>(sortEntriesLocation, room_identifier, sortEntriesDateTime);
+                        end_iteration = true;
+                        break;                       
                     }
-
                 }
 
-                Console.WriteLine("###");                
+                if(end_iteration)
+                {
+                    break;
+                }
+                    
             }
 
-            // TODO neste momento ele apenas escolhe o local mais popular. Deveriamos ter uma coisa, que em caso de empate ele escolhe o Local com a data mais popular
-            return mostPopularDateTime;
+            return tupleLocationRoomDate;
         }
         public string Topic
         {
@@ -244,11 +204,11 @@ namespace MSDAD
             }
         }
 
-        public string getSlotsData()
+        public string GetSlotsData()
         {
             string slotsData = "";
 
-            foreach (Tuple<Location, DateTime> s in this.slots)
+            foreach (Tuple<Location, DateTime> s in this.proposedVenues)
             {
                 slotsData += s.Item1.Name + ", " + s.Item2.ToString();
                 slotsData += "\n";
@@ -258,16 +218,16 @@ namespace MSDAD
         }
         public int GetNumberOfCandidates()
         {
-            return candidates.Count();
+            return clients.Count();
         }
-        public int getVersion()
+        public int GetVersion()
         {
             return this.version;
         }
-        public List<string> getSlots()
+        public List<string> GetSlots()
         {
             List<string> result = new List<String>();
-            foreach (Tuple<Location, DateTime> t in slots)
+            foreach (Tuple<Location, DateTime> t in this.proposedVenues)
             {
                 string slot = "";
                 slot += t.Item1.Name;
@@ -277,7 +237,7 @@ namespace MSDAD
 
             return result;
         }
-        public string getState()
+        public string GetState()
         {
             return this.state.ToString();
         }

@@ -81,10 +81,10 @@ namespace MSDAD
                 foreach(KeyValuePair<string,int> mV in meetingQuery)
                 {
                     Meeting m;
-                    if ((m=GetMeeting(mV.Key))!=null & m.getVersion() > mV.Value)
+                    if ((m=GetMeeting(mV.Key))!=null & m.GetVersion() > mV.Value)
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address + "/RemoteClient");
-                        client.SendMeeting(mV.Key, m.getSlots(), m.Coordinator, m.getVersion(), m.getState());
+                        client.SendMeeting(mV.Key, m.GetSlots(), m.Coordinator, m.GetVersion(), m.GetState());
                     } 
                 }
             }
@@ -129,7 +129,7 @@ namespace MSDAD
                         {
                             foreach (string address_iter in this.clientAddresses)
                             {
-                                version = m.getVersion();
+                                version = m.GetVersion();
                                 ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
                                 client.SendMeeting(topic, null, client_address, version, "CLOSED");
                             }
@@ -137,7 +137,7 @@ namespace MSDAD
                         {
                             foreach (string address_iter in this.clientAddresses)
                             {
-                                version = m.getVersion();
+                                version = m.GetVersion();
                                 ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
                                 client.SendMeeting(topic, null, client_address, version, "CANCELED");
                             }
