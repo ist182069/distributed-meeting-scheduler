@@ -73,6 +73,10 @@ namespace MSDAD
                 {
                     if (this.invitees.Contains(client_address))
                     {
+                        if(this.CheckClientIfInVenues(slots, client_address))
+                        {
+                            throw new ServerCommunicationException("Apply(): Client:\"" + client_address + "\" is already a candidate.");
+                        }
                         this.AddClientToVenues(slots, client_address);
                     }
                     else
@@ -82,6 +86,10 @@ namespace MSDAD
                 }
                 else
                 {
+                    if(this.CheckClientIfInVenues(slots, client_address))
+                    {
+                        throw new ServerCommunicationException("Apply(): Client:\"" + client_address + "\" is already a candidate.");
+                    }
                     this.AddClientToVenues(slots, client_address);
                 } 
                     
@@ -89,6 +97,22 @@ namespace MSDAD
             }
         }
 
+        private bool CheckClientIfInVenues(List<Tuple<Location, DateTime>> slots, string client_address)
+        {
+            bool result = false; 
+
+            foreach(List<string> client_list in this.venuesClientMapping.Values)
+            {
+                result = client_list.Contains(client_address);
+
+                if(result)
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
         private void AddClientToVenues(List<Tuple<Location, DateTime>> slots, string client_address)
         {
             string location_string, date_string;
@@ -96,7 +120,7 @@ namespace MSDAD
             foreach (Tuple<Location, DateTime> tuple in slots)
             {
                 if (this.venuesClientMapping.ContainsKey(tuple))
-                {                    
+                {                           
                     this.venuesClientMapping[tuple].Add(client_address);
                 }
                 else
