@@ -18,11 +18,9 @@ namespace MSDAD
 
         private state state;
 
-        private List<string> candidates, invitees;
+        private List<string> invitees;
 
-        Tuple<Location, string, DateTime> chosenVenue;
-
-        // private Dictionary<Tuple<Location, DateTime>, List<string>> candidates;
+        private Dictionary<Tuple<Location, DateTime>, List<string>> venuesClientMapping;
 
         private List<Tuple<Location, DateTime>> proposedVenues;
 
@@ -31,14 +29,14 @@ namespace MSDAD
             this.topic = topic;
             this.minAttendees = minAttendees;            
             this.coordinator = client_address;
-            this.candidates = = new List<string>();
             this.proposedVenues = new List<Tuple<Location, DateTime>>(slots);          
             this.state = state.OPEN;
             this.version = 1;            
-            this.InitClientList(invitees, client_address);
+            this.InitInviteesList(invitees, client_address);
+            this.InitVenuesDictionary(slots);
         }
 
-        private void InitClientList(List<string> invitees, string client_address)
+        private void InitInviteesList(List<string> invitees, string client_address)
         {
             if (invitees != null)
             {
@@ -50,6 +48,20 @@ namespace MSDAD
                 this.invitees = null;
             }    
         }
+
+        private void InitVenuesDictionary(List<Tuple<Location, DateTime>> slots)
+        {
+            List<string> candidates = new List<string>();
+
+            this.venuesClientMapping = new Dictionary<Tuple<Location, DateTime>, List<string>>();
+
+            foreach (Tuple<Location,DateTime> tuple in slots)
+            {
+                this.venuesClientMapping.Add(tuple, candidates);
+            }
+                
+        }
+
         public void Apply(List<Tuple<Location, DateTime>> slots, string client_address)
         {
 
@@ -63,7 +75,7 @@ namespace MSDAD
                 {
                     if (this.invitees.Contains(client_address))
                     {
-                        this.candidates.Add(client_address);
+                        this.AddClientToVenues(slots, client_address);
                     }
                     else
                     {
@@ -72,13 +84,37 @@ namespace MSDAD
                 }
                 else
                 {
-                    this.candidates.Add(client_address);
+                    this.AddClientToVenues(slots, client_address);                    
                 } 
-    
-                
-
+                    
                 this.proposedVenues.Concat(slots);
                 this.version += 1;
+            }
+        }
+
+        private void AddClientToVenues(List<Tuple<Location, DateTime>> slots, string client_address)
+        {
+            string location_string, date_string;
+            List<string> updatedList;
+
+
+            foreach (Tuple<Location, DateTime> tuple in slots)
+            {
+                if (this.venuesClientMapping.ContainsKey(tuple))
+                {
+                    updatedList = this.venuesClientMapping[tuple];
+                    updatedList.Add(client_address);
+
+                    this.venuesClientMapping.Remove(tuple);
+                    this.venuesClientMapping.Add(tuple, updatedList);
+                }
+                else
+                {
+                    location_string = tuple.Item1.Name;
+                    date_string = tuple.Item2.ToString();
+
+                    throw new ServerCommunicationException("ValidateSlots(): slot \"" + location_string + "," + date_string + "\" was not proposed by the coordinator");
+                }
             }
         }
 
@@ -132,7 +168,17 @@ namespace MSDAD
         }
         public int GetNumberOfCandidates()
         {
-            return this.candidates.Count();
+            int count = 0;
+
+            foreach (List<string> client_list in this.venuesClientMapping.Values)
+            {
+                foreach(string client_string in client_list)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
         public int GetVersion()
         {
@@ -154,12 +200,7 @@ namespace MSDAD
         public string GetState()
         {
             return this.state.ToString();
-        }
-
-        public List<string> GetClients()
-        {
-            return this.candidates;
-        }
+        }    
 
     }
 }
