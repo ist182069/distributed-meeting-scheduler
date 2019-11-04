@@ -18,178 +18,82 @@ namespace MSDAD
 
         private state state;
 
-        private List<string> clients;
+        private List<string> candidates, invitees;
 
         Tuple<Location, string, DateTime> chosenVenue;
 
+        // private Dictionary<Tuple<Location, DateTime>, List<string>> candidates;
+
         private List<Tuple<Location, DateTime>> proposedVenues;
 
-        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> clients, string client_address)
+        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;            
-            this.coordinator = client_address;            
-            this.clients.Add(client_address);
+            this.coordinator = client_address;
+            this.candidates = = new List<string>();
             this.proposedVenues = new List<Tuple<Location, DateTime>>(slots);          
             this.state = state.OPEN;
-            this.version = 1;
-            this.InitClientList(clients);
+            this.version = 1;            
+            this.InitClientList(invitees, client_address);
         }
 
-        private void InitClientList(List<string> clients)
+        private void InitClientList(List<string> invitees, string client_address)
         {
-            if (clients != null)
+            if (invitees != null)
             {
-                this.clients = clients;
-
+                this.invitees = invitees;
+                this.invitees.Add(client_address);                   
             }
             else
             {
-                this.clients = new List<string>();
-            }
+                this.invitees = null;
+            }    
         }
         public void Apply(List<Tuple<Location, DateTime>> slots, string client_address)
         {
 
             if (state == state.CANCELED)
             {
-                throw new ServerCommunicationException("This Meeting is already CANCELED");
+                throw new ServerCommunicationException("This Meeting is already CANCELED.");
             }
             lock (this)
             {
-                this.clients.Add(client_address);
+                if(this.invitees!=null)
+                {
+                    if (this.invitees.Contains(client_address))
+                    {
+                        this.candidates.Add(client_address);
+                    }
+                    else
+                    {
+                        throw new ServerCommunicationException("Apply(): Client:\"" + client_address + "\" is not invited to the said meeting.");
+                    }
+                }
+                else
+                {
+                    this.candidates.Add(client_address);
+                } 
+    
+                
+
                 this.proposedVenues.Concat(slots);
                 this.version += 1;
             }
         }
 
-        public bool Schedule()
-        {            
-            Console.WriteLine(this.GetNumberOfCandidates());            
-            Console.WriteLine("Entrou no Schedule");
-            lock (this)
-            {
-                if (this.GetNumberOfCandidates() < MinAttendees)
-                {
-                    this.version++;
-                    this.state = state.CANCELED;
-                    
-                    // TODO lancar excepcao remota                    
-                    Console.WriteLine("\r\nEvent Canceled: " + topic);
-                    Console.WriteLine("\r\nThe number of candidates was less than the number of minimum attendees...");
-
-                    return false;
-
-                } else
-                {
-                    bool result;                    
-                    SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary;
-
-                    dictionary = this.ScheduleSortEntries();
-                    this.chosenVenue = this.SchedulePickEntries(dictionary);
-
-                    if(chosenVenue!=null)
-                    {
-                        result = true;
-
-                        this.version++;
-                        this.state = state.SCHEDULED;
-
-                        return result;
-
-                    }
-                    else
-                    {
-                        result = false; 
-
-                        this.version++;
-                        this.state = state.CANCELED;
-                        // TODO lancar excepcao remota   
-                        return result;
-                    }
-                    
-                }
-            }
-        }
-
-        private SortedDictionary<int, List<Tuple<Location, DateTime>>> ScheduleSortEntries()
+        public void Schedule()
         {
-            SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary = new SortedDictionary<int, List<Tuple<Location, DateTime>>>();
-            List<Tuple<Location, DateTime>> explored = new List<Tuple<Location, DateTime>>(), tmpList;
-
-            foreach (Tuple<Location, DateTime> outter_tuple in this.proposedVenues)
+            if(GetNumberOfCandidates() < MinAttendees)
             {
-                int count = 0;
-
-                if(!explored.Contains(outter_tuple))
-                {
-                    foreach (Tuple<Location, DateTime> inner_tuple in this.proposedVenues)
-                    {
-                        if (outter_tuple.Equals(inner_tuple))
-                        {
-                            count++;
-                        }
-                    }
-                    explored.Add(outter_tuple);
-
-                    if (dictionary.ContainsKey(count))
-                    {
-                        tmpList = dictionary[count];
-                        tmpList.Add(outter_tuple);
-                        dictionary.Remove(count);
-                        dictionary.Add(count, tmpList);
-                    }
-                    else
-                    {
-                        tmpList = new List<Tuple<Location, DateTime>>();
-                        tmpList.Add(outter_tuple);
-                        dictionary.Add(count, tmpList);
-                    }
-                }
-                                
-            }
-            return dictionary;
-        }
-
-        private Tuple<Location, string, DateTime> SchedulePickEntries(SortedDictionary<int, List<Tuple<Location, DateTime>>> dictionary)
-        {
-
-            bool end_iteration = false;
-            string room_identifier; 
-            
-            Location sortEntriesLocation;
-            DateTime sortEntriesDateTime;
-
-            Tuple<Location, string, DateTime> tupleLocationRoomDate = null;
-
-            List<Tuple<Location, DateTime>> sortEntriesList = new List<Tuple<Location, DateTime>>();
-
-            foreach (int iter in dictionary.Keys.Reverse())
-            {
-                foreach(Tuple<Location, DateTime> tuple in dictionary[iter])
-                {
-                    sortEntriesLocation = tuple.Item1;
-                    sortEntriesDateTime = tuple.Item2;
-
-                    room_identifier = sortEntriesLocation.PickRoom(sortEntriesDateTime, this.clients.Count);
-
-                    if(room_identifier != null)
-                    {
-                        tupleLocationRoomDate = new Tuple<Location, string, DateTime>(sortEntriesLocation, room_identifier, sortEntriesDateTime);
-                        end_iteration = true;
-                        break;                       
-                    }
-                }
-
-                if(end_iteration)
-                {
-                    break;
-                }
-                    
+                this.state = state.CANCELED;
             }
 
-            return tupleLocationRoomDate;
+            this.state = state.SCHEDULED;
+
+            // TODO logica do close
         }
+
         public string Topic
         {
             get
@@ -228,7 +132,7 @@ namespace MSDAD
         }
         public int GetNumberOfCandidates()
         {
-            return clients.Count();
+            return this.candidates.Count();
         }
         public int GetVersion()
         {
@@ -254,7 +158,7 @@ namespace MSDAD
 
         public List<string> GetClients()
         {
-            return this.clients;
+            return this.candidates;
         }
 
     }

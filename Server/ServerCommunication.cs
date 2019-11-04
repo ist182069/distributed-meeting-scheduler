@@ -21,7 +21,7 @@ namespace MSDAD
             RemoteServer remoteServer;
             TcpChannel channel;
             List<Location> knownLocations = new List<Location>();
-            public void Create(string topic, int minAttendees, List<string> venues, List<string> clients, string ip, int port)
+            public void Create(string topic, int minAttendees, List<string> venues, List<string> invitees, string ip, int port)
             {
                 string client_address; 
                 Meeting m;
@@ -31,12 +31,12 @@ namespace MSDAD
 
                 lock (this)
                 {
-                    m = new Meeting(topic, minAttendees, parsedSlots, clients, client_address);
+                    m = new Meeting(topic, minAttendees, parsedSlots, invitees, client_address);
                     eventList.Add(m);
                 }
 
                 
-                if(clients == null)
+                if(invitees == null)
                 {
                     foreach (string address_iter in this.clientAddresses)
                     {
@@ -47,15 +47,16 @@ namespace MSDAD
                         }
 
                     }
-                } else
+                }
+                else
                 {
 
-                    foreach (string client_iter in clients)
+                    foreach (string invitee_iter in invitees)
                     {
-                        if(ServerUtils.ValidateAddress(client_iter) && client_iter != client_address)
+                        if(ServerUtils.ValidateAddress(invitee_iter) && invitee_iter != client_address)
                         {
-                            Console.WriteLine("tcp://" + client_iter + "/RemoteClient");
-                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_iter + "/RemoteClient");
+                            Console.WriteLine("tcp://" + invitee_iter + "/RemoteClient");
+                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + invitee_iter + "/RemoteClient");
                             client.SendMeeting(topic, 1, "OPEN");
 
                         } else
@@ -122,25 +123,8 @@ namespace MSDAD
                     if (m.Topic == topic && m.Coordinator == client_address)
                     {
                         int version;
-                        bool result = m.Schedule();
-                        
-                        if(result)
-                        {
-                            foreach (string address_iter in this.clientAddresses)
-                            {
-                                version = m.GetVersion();
-                                ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
-                                client.SendMeeting(topic, version, "CLOSED");
-                            }
-                        } else
-                        {
-                            foreach (string address_iter in this.clientAddresses)
-                            {
-                                version = m.GetVersion();
-                                ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
-                                client.SendMeeting(topic, version, "CANCELED");
-                            }
-                        }
+                        //bool result = m.Schedule();                                               
+
                         Console.Write("Please run a command to be run on the server: ");
                         return;
                     }
