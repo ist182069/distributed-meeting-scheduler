@@ -16,11 +16,11 @@ namespace MSDAD.Client.Commands
         public override object Execute()
         {
             List<MeetingView> meetingViews = this.clientLibrary.GetMeetingViews();
-            Dictionary<string,int> meetingQuery = new Dictionary<string,int>();
+            Dictionary<string,string> meetingQuery = new Dictionary<string,string>();
 
             foreach (MeetingView mV in meetingViews)
             {
-                meetingQuery.Add(mV.GetTopic(), mV.GetVersion());
+                meetingQuery.Add(mV.GetTopic(), mV.GetState());
             }
 
             this.server.List(meetingQuery, ip, port);

@@ -73,16 +73,16 @@ namespace MSDAD
                 Console.WriteLine("\r\nNew event: " + topic);
                 Console.Write("Please run a command to be run on the server: ");
             }
-            public void List(Dictionary<string, int> meetingQuery, string ip, int port)
+            public void List(Dictionary<string, string> meetingQuery, string ip, int port)
             {
                 string client_address;
 
                 client_address = ServerUtils.AssembleClientAddress(ip, port);
 
-                foreach(KeyValuePair<string,int> mV in meetingQuery)
+                foreach(KeyValuePair<string,string> mV in meetingQuery)
                 {
                     Meeting m;
-                    if ((m=GetMeeting(mV.Key))!=null & m.GetVersion() > mV.Value)
+                    if ((m=GetMeeting(mV.Key))!=null & !m.GetState().Equals(mV.Value))
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address + "/RemoteClient");
                         client.SendMeeting(mV.Key, m.GetVersion(), m.GetState());
