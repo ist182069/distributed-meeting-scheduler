@@ -48,12 +48,13 @@ namespace MSDAD
 
         private void InitVenuesDictionary(List<Tuple<Location, DateTime>> slots)
         {
-            List<string> candidates = new List<string>();
+            List<string> candidates;
 
             this.venuesClientMapping = new Dictionary<Tuple<Location, DateTime>, List<string>>();
 
             foreach (Tuple<Location,DateTime> tuple in slots)
             {
+                candidates = new List<string>();
                 this.venuesClientMapping.Add(tuple, candidates);
             }
                 
@@ -81,7 +82,7 @@ namespace MSDAD
                 }
                 else
                 {
-                    this.AddClientToVenues(slots, client_address);                    
+                    this.AddClientToVenues(slots, client_address);
                 } 
                     
                 this.version += 1;
@@ -91,18 +92,12 @@ namespace MSDAD
         private void AddClientToVenues(List<Tuple<Location, DateTime>> slots, string client_address)
         {
             string location_string, date_string;
-            List<string> updatedList;
-
 
             foreach (Tuple<Location, DateTime> tuple in slots)
             {
                 if (this.venuesClientMapping.ContainsKey(tuple))
-                {
-                    updatedList = this.venuesClientMapping[tuple];
-                    updatedList.Add(client_address);
-
-                    this.venuesClientMapping.Remove(tuple);
-                    this.venuesClientMapping.Add(tuple, updatedList);
+                {                    
+                    this.venuesClientMapping[tuple].Add(client_address);
                 }
                 else
                 {
@@ -113,6 +108,7 @@ namespace MSDAD
                 }
             }
         }
+        
 
         public void Schedule()
         {
