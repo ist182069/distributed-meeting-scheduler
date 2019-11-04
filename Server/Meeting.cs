@@ -91,8 +91,7 @@ namespace MSDAD
                         throw new ServerCommunicationException("Apply(): Client:\"" + client_address + "\" is already a candidate.");
                     }
                     this.AddClientToVenues(slots, client_address);
-                } 
-                    
+                }                                    
                 this.version += 1;
             }
         }

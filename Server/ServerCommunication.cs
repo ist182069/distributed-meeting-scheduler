@@ -45,8 +45,8 @@ namespace MSDAD
                             ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
                             client.SendMeeting(topic, 1, "OPEN");
                         }
-
                     }
+
                 }
                 else
                 {
