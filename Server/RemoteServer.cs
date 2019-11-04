@@ -21,7 +21,7 @@ namespace MSDAD
                 this.communication.Create(topic, minAttendees, rooms, clients, ip, port);
             }
 
-            public void List(Dictionary<string, int> meetingQuery, string ip, int port)
+            public void List(Dictionary<string, string> meetingQuery, string ip, int port)
             {
                 this.communication.List(meetingQuery, ip, port);                
             }
