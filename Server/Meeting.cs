@@ -22,14 +22,11 @@ namespace MSDAD
 
         private Dictionary<Tuple<Location, DateTime>, List<string>> venuesClientMapping;
 
-        private List<Tuple<Location, DateTime>> proposedVenues;
-
         public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;            
-            this.coordinator = client_address;
-            this.proposedVenues = new List<Tuple<Location, DateTime>>(slots);          
+            this.coordinator = client_address;      
             this.state = state.OPEN;
             this.version = 1;            
             this.InitInviteesList(invitees, client_address);
@@ -87,7 +84,6 @@ namespace MSDAD
                     this.AddClientToVenues(slots, client_address);                    
                 } 
                     
-                this.proposedVenues.Concat(slots);
                 this.version += 1;
             }
         }
@@ -153,19 +149,7 @@ namespace MSDAD
                 return this.minAttendees;
             }
         }
-
-        public string GetSlotsData()
-        {
-            string slotsData = "";
-
-            foreach (Tuple<Location, DateTime> s in this.proposedVenues)
-            {
-                slotsData += s.Item1.Name + ", " + s.Item2.ToString();
-                slotsData += "\n";
-            }
-
-            return slotsData;
-        }
+      
         public int GetNumberOfCandidates()
         {
             int count = 0;
@@ -184,19 +168,7 @@ namespace MSDAD
         {
             return this.version;
         }
-        public List<string> GetSlots()
-        {
-            List<string> result = new List<String>();
-            foreach (Tuple<Location, DateTime> t in this.proposedVenues)
-            {
-                string slot = "";
-                slot += t.Item1.Name;
-                slot += t.Item2.ToString();
-                result.Add(slot);
-            }
-
-            return result;
-        }
+       
         public string GetState()
         {
             return this.state.ToString();
