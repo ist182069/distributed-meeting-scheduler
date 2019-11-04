@@ -11,8 +11,6 @@ namespace MSDAD
 
     public class Meeting
     {
-        private static readonly DateTime ERRONEOUS_DATE = new DateTime(1900, 1, 31);
-
         private int minAttendees, version;
         private string coordinator, topic;
 
