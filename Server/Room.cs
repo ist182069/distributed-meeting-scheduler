@@ -34,20 +34,24 @@ namespace MSDAD
             }
         }
         
-        public bool ReserveRoom(DateTime dateTime)
+        public void Reserve(DateTime dateTime)
         {
-            bool reserved;
+            reservations.Add(dateTime);
+        }   
+        
+        public bool Vacancy(DateTime dateTime)
+        {
+            bool vacated;
 
             if(reservations.Contains(dateTime))
             {
-                reserved = true;
+                vacated = false;
             } else
             {
-                reserved = false;
-                reservations.Add(dateTime);
+                vacated = true;
             }
 
-            return reserved;
+            return vacated;
         }
     }
 }

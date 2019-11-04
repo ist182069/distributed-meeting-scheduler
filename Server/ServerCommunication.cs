@@ -123,7 +123,7 @@ namespace MSDAD
                     if (m.Topic == topic && m.Coordinator == client_address)
                     {
                         int version;
-                        //bool result = m.Schedule();                                               
+                        m.Schedule();                                               
 
                         Console.Write("Please run a command to be run on the server: ");
                         return;
@@ -220,17 +220,17 @@ namespace MSDAD
             public void LocationAndRoomInit()
             {
                 Location Lisboa = new Location("Lisboa");
-                Lisboa.AddRoom(new Room("LisboaA", 20));
-                Lisboa.AddRoom(new Room("LisboaB", 10));
+                Lisboa.Add(new Room("LisboaA", 10));
+                Lisboa.Add(new Room("LisboaB", 20));                
                 Location Coimbra = new Location("Coimbra");
-                Coimbra.AddRoom(new Room("CoimbraA", 10));
-                Coimbra.AddRoom(new Room("CoimbraB", 5));
+                Coimbra.Add(new Room("CoimbraA", 5));
+                Coimbra.Add(new Room("CoimbraB", 10));
                 Location Guarda = new Location("Guarda");
-                Guarda.AddRoom(new Room("GuardaA", 5));
-                Guarda.AddRoom(new Room("GuardaB", 4));
+                Guarda.Add(new Room("GuardaA", 4));
+                Guarda.Add(new Room("GuardaB", 10));
                 Location Porto = new Location("Porto");
-                Porto.AddRoom(new Room("PortoA", 3));
-                Porto.AddRoom(new Room("PortoB", 2));
+                Porto.Add(new Room("PortoA", 4));
+                Porto.Add(new Room("PortoB", 6));
 
                 knownLocations.Add(Lisboa);
                 knownLocations.Add(Coimbra);

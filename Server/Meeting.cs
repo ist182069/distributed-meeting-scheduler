@@ -133,14 +133,83 @@ namespace MSDAD
 
         public void Schedule()
         {
-            if(GetNumberOfCandidates() < MinAttendees)
+            int client_count, going_people;
+
+            int chosen_people = 0;
+           
+            DateTime dateTime, resultDateTime = new DateTime();
+            Location location, resultLocation = null;
+            Room resultRoom = null;
+
+            Tuple<Location, DateTime> tuple;
+            Dictionary<Location, Tuple<Room, DateTime, int>> proposedRoomsLocation = new Dictionary<Location, Tuple<Room, DateTime, int>>();
+
+            lock(this)
             {
-                this.state = state.CANCELED;
+                foreach (KeyValuePair<Tuple<Location, DateTime>, List<string>> entry in this.venuesClientMapping)
+                {
+                    client_count = entry.Value.Count;
+                    tuple = entry.Key;
+
+                    if (entry.Value.Count >= MinAttendees)
+                    {
+                        location = tuple.Item1;
+                        dateTime = tuple.Item2;
+
+                        resultRoom = location.Select(dateTime, client_count, MinAttendees);
+
+                        if(resultRoom.Capacity>=client_count)
+                        {
+                            going_people = client_count;
+                        }
+                        else
+                        {
+                            going_people = resultRoom.Capacity;
+                        }
+
+                        Tuple<Room, DateTime, int> newTuple = new Tuple<Room, DateTime, int>(resultRoom, dateTime, going_people);
+                        proposedRoomsLocation.Add(location, newTuple);
+                    }
+                }
+                               
+                foreach (KeyValuePair<Location, Tuple<Room, DateTime, int>> entry in proposedRoomsLocation)
+                {
+                    resultRoom = null;
+                    going_people = entry.Value.Item3;
+                    int room_cap = entry.Value.Item1.Capacity;
+                    if (resultRoom == null)
+                    {
+                        resultLocation = entry.Key;
+                        resultRoom = entry.Value.Item1;
+                        resultDateTime = entry.Value.Item2;
+                    }
+                    if(going_people > chosen_people)
+                    {
+                        chosen_people = going_people;
+
+                        resultLocation = entry.Key;
+                        resultRoom = entry.Value.Item1;
+                        resultDateTime = entry.Value.Item2;
+                    }
+                    else if (going_people == chosen_people && resultRoom.Capacity > entry.Value.Item1.Capacity)
+                    {
+                        resultLocation = entry.Key;
+                        resultRoom = entry.Value.Item1;
+                        resultDateTime = entry.Value.Item2;
+                    }
+                }
+                resultLocation.Pick(resultRoom, resultDateTime);
+
+                List<string> goingClients = new List<string>();
+
+                for(int i = 0; i<chosen_people; i++)
+                {
+                    goingClients.Add(this.venuesClientMapping[new Tuple<Location, DateTime>(resultLocation, resultDateTime)][i]);
+                }
             }
-
-            this.state = state.SCHEDULED;
-
-            // TODO logica do close
+            
+           
+            this.state = state.CANCELED;
         }
 
         public string Topic
@@ -166,21 +235,7 @@ namespace MSDAD
                 return this.minAttendees;
             }
         }
-      
-        public int GetNumberOfCandidates()
-        {
-            int count = 0;
-
-            foreach (List<string> client_list in this.venuesClientMapping.Values)
-            {
-                foreach(string client_string in client_list)
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
+            
         public int GetVersion()
         {
             return this.version;
