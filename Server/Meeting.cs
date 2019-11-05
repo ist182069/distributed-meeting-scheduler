@@ -64,11 +64,11 @@ namespace MSDAD
 
             if (state == state.CANCELED)
             {
-                throw new ServerCommunicationException("This Meeting is already CANCELED.");
+                throw new ServerCommunicationException(ErrorCodes.MEETING_ALREADY_CANCELED);
             }
             else if (state == state.SCHEDULED)
             {
-                throw new ServerCommunicationException("This Meeting is already SCHEDULED.");
+                throw new ServerCommunicationException(ErrorCodes.MEETING_ALREADY_SCHEDULED);
             }
             lock (this)
             {
