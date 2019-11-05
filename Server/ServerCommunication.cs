@@ -88,7 +88,20 @@ namespace MSDAD
                     }
                     else if (meetingQuery.ContainsKey(meeting.Topic) && !meeting.GetState().Equals(meetingQuery[meeting.Topic]))
                     {
-                        client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
+                        string state = meeting.GetState();
+                        if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_address));
+                        {
+                            Console.WriteLine("Nice");
+                            string aux = state + "Client Confirmed at" + meeting.GetFinalSlot();
+                            client.SendMeeting(meeting.Topic, meeting.GetVersion(), aux);
+                        }
+                        if (!meeting.ClientConfirmed(client_address))
+                        {
+                            Console.WriteLine("Bosta");
+                            client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
+                        }
+                        
+                        
                     }
                 }
             }
@@ -125,7 +138,6 @@ namespace MSDAD
                     }
                     if (m.Topic == topic && m.Coordinator == client_address)
                     {
-                        int version;
                         m.Schedule();                                               
 
                         Console.Write("Please run a command to be run on the server: ");

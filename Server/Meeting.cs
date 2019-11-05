@@ -13,12 +13,13 @@ namespace MSDAD
     {
         private int minAttendees, version;
         private string coordinator, topic;
-
         private state state;
-
         private List<string> invitees;
 
         private Dictionary<Tuple<Location, DateTime>, List<string>> venuesClientMapping;
+        
+        private List<string> goingClients;
+        private string finalSlot;
 
         public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
         {
@@ -151,14 +152,14 @@ namespace MSDAD
                     client_count = entry.Value.Count;
                     tuple = entry.Key;
 
-                    if (entry.Value.Count >= MinAttendees)
+                    if (client_count >= MinAttendees)
                     {
                         location = tuple.Item1;
                         dateTime = tuple.Item2;
-
+                        
                         resultRoom = location.Select(dateTime, client_count, MinAttendees);
 
-                        if(resultRoom.Capacity>=client_count)
+                        if (resultRoom.Capacity>=client_count)
                         {
                             going_people = client_count;
                         }
@@ -170,6 +171,12 @@ namespace MSDAD
                         Tuple<Room, DateTime, int> newTuple = new Tuple<Room, DateTime, int>(resultRoom, dateTime, going_people);
                         proposedRoomsLocation.Add(location, newTuple);
                     }
+                }
+
+                if(proposedRoomsLocation.Count == 0)
+                {
+                    this.state = state.CANCELED;
+                    return;
                 }
                                
                 foreach (KeyValuePair<Location, Tuple<Room, DateTime, int>> entry in proposedRoomsLocation)
@@ -183,7 +190,7 @@ namespace MSDAD
                         resultRoom = entry.Value.Item1;
                         resultDateTime = entry.Value.Item2;
                     }
-                    if(going_people > chosen_people)
+                    else if(going_people > chosen_people)
                     {
                         chosen_people = going_people;
 
@@ -199,17 +206,18 @@ namespace MSDAD
                     }
                 }
                 resultLocation.Pick(resultRoom, resultDateTime);
-
+                this.finalSlot = resultLocation.Name+" "+resultRoom.Identifier+" "+resultDateTime.ToString();
                 List<string> goingClients = new List<string>();
 
                 for(int i = 0; i<chosen_people; i++)
                 {
+                    Console.WriteLine(this.venuesClientMapping[new Tuple<Location, DateTime>(resultLocation, resultDateTime)]);
                     goingClients.Add(this.venuesClientMapping[new Tuple<Location, DateTime>(resultLocation, resultDateTime)][i]);
                 }
+
+                this.goingClients = goingClients;
+                this.state = state.SCHEDULED;
             }
-            
-           
-            this.state = state.CANCELED;
         }
 
         public string Topic
@@ -249,6 +257,16 @@ namespace MSDAD
         public List<string> GetInvitees()
         {
             return this.invitees;
+        }
+        
+        public Boolean ClientConfirmed(string client_addr)
+        {
+            return goingClients.Contains(client_addr);
+        }
+
+        public string GetFinalSlot()
+        {
+            return this.finalSlot;
         }
 
     }
