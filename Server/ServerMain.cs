@@ -1,17 +1,13 @@
-﻿namespace MSDAD
+﻿namespace MSDAD.Server
 {
-    namespace Server
+    class ServerMain
     {
-        class ServerMain
+        static void Main(string[] args)
         {
-            static void Main(string[] args)
-            {
-                ServerCLI serverCLI;
+            ServerCLI serverCLI;
 
-                serverCLI = new ServerCLI();
-                serverCLI.Display();
-            }
+            serverCLI = new ServerCLI();
+            serverCLI.Display();
         }
-    }
-    
+    }    
 }
