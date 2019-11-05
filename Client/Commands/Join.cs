@@ -1,10 +1,11 @@
-﻿using System;
+﻿using MSDAD.Client.Comunication;
+using MSDAD.Client.Exceptions;
+using MSDAD.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MSDAD.Client.Comunication;
-using MSDAD.Library;
 
 namespace MSDAD.Client.Commands
 {
@@ -26,17 +27,17 @@ namespace MSDAD.Client.Commands
 
             while (!(room = Console.ReadLine()).Equals("end"))
             {
+                if (slots.Contains(room))
+                {
+                    throw new ClientLocalException("Create.Execute(): You cannot add the same room twice to the rooms list! Aborting...");
+                }
+
                 slots.Add(room);
             }
 
-            try
-            {
-                this.server.Join(topic, slots, this.ip, this.port);
-                Console.WriteLine("Registered in " + topic);
-            } catch (ServerCommunicationException e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            this.server.Join(topic, slots, this.ip, this.port);
+            Console.WriteLine("Registered in " + topic);
+
             return null;
         }
     }

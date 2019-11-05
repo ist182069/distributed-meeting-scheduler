@@ -17,9 +17,6 @@ namespace MSDAD
         internal static String NOT_COORDINATOR = "You're not the coordinator of that meeting.";
         internal static String NONEXISTENT_MEETING = "That meeting doesn't exist.";
         internal static String NOT_A_LOCATION = "One or more of your given locations isn't valid.";
-        
-
-
     }
 
 }

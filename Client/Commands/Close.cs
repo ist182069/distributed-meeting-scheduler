@@ -21,14 +21,10 @@ namespace MSDAD.Client.Commands
             Console.WriteLine("Write meeting topic:");
             topic = Console.ReadLine();
 
-            try
-            {
-                this.server.Close(topic, ip, port);
-                Console.WriteLine("Successfully scheduled " + topic);
-            } catch (ServerCommunicationException e)
-            {
-                Console.WriteLine(e.Message);
-            }
+
+            this.server.Close(topic, ip, port);
+            Console.WriteLine("Successfully scheduled " + topic);
+
             return null;
         }
     }

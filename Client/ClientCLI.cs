@@ -1,4 +1,5 @@
 ﻿using MSDAD.Client.Commands;
+using MSDAD.Client.Exceptions;
 using MSDAD.Library;
 using System;
 using System.Collections.Generic;
@@ -43,30 +44,40 @@ namespace MSDAD
                     Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
                     input = Console.ReadLine();                    
 
-                    switch (input)
+                    try
                     {
-                        case PING_COMMAND:
-                            new Ping(ref clientLibrary).Execute();                                            
-                            break;
-                        case CREATE:
-                            new Create(ref clientLibrary).Execute();
-                            break;
-                        case LIST:
-                            new List(ref clientLibrary).Execute();
-                            break;
-                        case JOIN:
-                            new Join(ref clientLibrary).Execute();
-                            break;
-                        case CLOSE:
-                            new Close(ref clientLibrary).Execute();
-                            break;
-                        case EXIT:
-                            Console.WriteLine("Bye!");
-                            return;
-                        default:
-                            Console.WriteLine("You must insert a valid command");
-                            break;
-                    }
+                        switch (input)
+                        {
+                            case PING_COMMAND:
+                                new Ping(ref clientLibrary).Execute();
+                                break;
+                            case CREATE:
+                                new Create(ref clientLibrary).Execute();
+                                break;
+                            case LIST:
+                                new List(ref clientLibrary).Execute();
+                                break;
+                            case JOIN:
+                                new Join(ref clientLibrary).Execute();
+                                break;
+                            case CLOSE:
+                                new Close(ref clientLibrary).Execute();
+                                break;
+                            case EXIT:
+                                Console.WriteLine("Bye!");
+                                return;
+                            default:
+                                Console.WriteLine("You must insert a valid command");
+                                break;
+                        }
+                    } catch(ClientLocalException cle)
+                    {
+                        Console.WriteLine(cle.Message);
+                    } catch(ServerCoreException sce)
+                    {
+                        Console.WriteLine(sce.Message);
+                    } 
+                    
                 }
             }
         }
