@@ -186,6 +186,8 @@ namespace MSDAD
                     int room_cap = entry.Value.Item1.Capacity;
                     if (resultRoom == null)
                     {
+                        chosen_people = going_people;
+
                         resultLocation = entry.Key;
                         resultRoom = entry.Value.Item1;
                         resultDateTime = entry.Value.Item2;
