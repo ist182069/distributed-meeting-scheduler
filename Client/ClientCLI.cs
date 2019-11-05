@@ -70,12 +70,9 @@ namespace MSDAD
                                 Console.WriteLine("You must insert a valid command");
                                 break;
                         }
-                    } catch(ClientLocalException cle)
+                    } catch(Exception exception) when (exception is ClientLocalException || exception is ServerCoreException)
                     {
-                        Console.WriteLine(cle.Message);
-                    } catch(ServerCoreException sce)
-                    {
-                        Console.WriteLine(sce.Message);
+                        Console.WriteLine(exception.Message);
                     } 
                     
                 }
