@@ -142,7 +142,7 @@ namespace MSDAD
                         return m;
                     }
                 }
-                throw new ServerCommunicationException("That meeting doesn't seem to exist.");
+                throw new ServerCommunicationException(ErrorCodes.NONEXISTENT_MEETING);
             }
             public void Start(string port)
             {                           
@@ -200,7 +200,7 @@ namespace MSDAD
                 }
                 if (location == null)
                 {
-                    throw new ServerCommunicationException(data[0] + " is not a valid location.");
+                    throw new ServerCommunicationException(ErrorCodes.NOT_A_LOCATION);
                 }
 
                 return new Tuple<Location, DateTime>(location, date);

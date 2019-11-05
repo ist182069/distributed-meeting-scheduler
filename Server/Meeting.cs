@@ -72,27 +72,24 @@ namespace MSDAD
             }
             lock (this)
             {
-                if(this.invitees!=null)
+                if (this.CheckClientIfInVenues(slots, client_address))
+                {
+                    throw new ServerCommunicationException(ErrorCodes.CLIENT_IS_ALREADY_CANDIDATE);
+                }
+                
+                if (this.invitees!=null)
                 {
                     if (this.invitees.Contains(client_address))
                     {
-                        if(this.CheckClientIfInVenues(slots, client_address))
-                        {
-                            throw new ServerCommunicationException(ErrorCodes.CLIENT_IS_ALREADY_CANDIDATE);
-                        }
                         this.AddClientToVenues(slots, client_address);
                     }
                     else
                     {
-                        throw new ServerCommunicationException("Apply(): Client:\"" + client_address + "\" is not invited to the said meeting.");
+                        throw new ServerCommunicationException(ErrorCodes.CLIENT_IS_NOT_INVITED);
                     }
                 }
                 else
                 {
-                    if(this.CheckClientIfInVenues(slots, client_address))
-                    {
-                        throw new ServerCommunicationException("Apply(): Client:\"" + client_address + "\" is already a candidate.");
-                    }
                     this.AddClientToVenues(slots, client_address);
                 }                                    
                 this.version += 1;
@@ -128,13 +125,13 @@ namespace MSDAD
                 }
                 else
                 {
-                    throw new ServerCommunicationException("One or more slots does not match the proposed for that meeting. However, you're a candidate for the valid ones.");
+                    throw new ServerCommunicationException(ErrorCodes.ONE_INVALID_SLOT);
                 }
             }
             
             if (client_not_added_flag)
             {
-                throw new ServerCommunicationException("None of your slots match the proposed for that meeting.");
+                throw new ServerCommunicationException(ErrorCodes.ALL_INVALID_SLOTS);
             }
         }
         
@@ -143,7 +140,7 @@ namespace MSDAD
         {
             if (client_address != this.coordinator)
             {
-                throw new ServerCommunicationException("You're not the coordinator of that meeting");
+                throw new ServerCommunicationException(ErrorCodes.NOT_COORDINATOR);
             }
 
             int client_count, going_people;
