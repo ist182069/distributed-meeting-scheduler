@@ -244,7 +244,12 @@ namespace MSDAD
         public string GetState()
         {
             return this.state.ToString();
-        }    
+        }  
+        
+        public List<string> GetInvitees()
+        {
+            return this.invitees;
+        }
 
     }
 }

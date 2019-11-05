@@ -78,15 +78,18 @@ namespace MSDAD
                 string client_address;
 
                 client_address = ServerUtils.AssembleClientAddress(ip, port);
+                ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address + "/RemoteClient");
 
-                foreach(KeyValuePair<string,string> mV in meetingQuery)
+                foreach (Meeting meeting in eventList)
                 {
-                    Meeting m;
-                    if ((m=GetMeeting(mV.Key))!=null & !m.GetState().Equals(mV.Value))
+                    if (!meetingQuery.ContainsKey(meeting.Topic) && meeting.GetInvitees() == null)
                     {
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address + "/RemoteClient");
-                        client.SendMeeting(mV.Key, m.GetVersion(), m.GetState());
-                    } 
+                        client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
+                    }
+                    else if (meetingQuery.ContainsKey(meeting.Topic) && !meeting.GetState().Equals(meetingQuery[meeting.Topic]))
+                    {
+                        client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
+                    }
                 }
             }
 

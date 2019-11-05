@@ -49,13 +49,6 @@ namespace MSDAD
 
                 this.clientLibrary.AddMeetingView(meetingView);
             }    
-            
-            public void List(string status)
-            {
-                // TODO receive status from RemoteClient which in turn received it from the server
-
-                // TODO passes the status to the ClientLibrary
-            }
 
             public void Join()
             {
