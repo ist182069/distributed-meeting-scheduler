@@ -64,17 +64,17 @@ namespace MSDAD
 
             if (state == state.CANCELED)
             {
-                throw new ServerCommunicationException(ErrorCodes.MEETING_ALREADY_CANCELED);
+                throw new ServerCoreException(ErrorCodes.MEETING_ALREADY_CANCELED);
             }
             else if (state == state.SCHEDULED)
             {
-                throw new ServerCommunicationException(ErrorCodes.MEETING_ALREADY_SCHEDULED);
+                throw new ServerCoreException(ErrorCodes.MEETING_ALREADY_SCHEDULED);
             }
             lock (this)
             {
                 if (this.CheckClientIfInVenues(slots, client_address))
                 {
-                    throw new ServerCommunicationException(ErrorCodes.CLIENT_IS_ALREADY_CANDIDATE);
+                    throw new ServerCoreException(ErrorCodes.CLIENT_IS_ALREADY_CANDIDATE);
                 }
                 
                 if (this.invitees!=null)
@@ -85,7 +85,7 @@ namespace MSDAD
                     }
                     else
                     {
-                        throw new ServerCommunicationException(ErrorCodes.CLIENT_IS_NOT_INVITED);
+                        throw new ServerCoreException(ErrorCodes.CLIENT_IS_NOT_INVITED);
                     }
                 }
                 else
@@ -125,13 +125,13 @@ namespace MSDAD
                 }
                 else
                 {
-                    throw new ServerCommunicationException(ErrorCodes.ONE_INVALID_SLOT);
+                    throw new ServerCoreException(ErrorCodes.ONE_INVALID_SLOT);
                 }
             }
             
             if (client_not_added_flag)
             {
-                throw new ServerCommunicationException(ErrorCodes.ALL_INVALID_SLOTS);
+                throw new ServerCoreException(ErrorCodes.ALL_INVALID_SLOTS);
             }
         }
         
@@ -140,7 +140,7 @@ namespace MSDAD
         {
             if (client_address != this.coordinator)
             {
-                throw new ServerCommunicationException(ErrorCodes.NOT_COORDINATOR);
+                throw new ServerCoreException(ErrorCodes.NOT_COORDINATOR);
             }
 
             int client_count, going_people;

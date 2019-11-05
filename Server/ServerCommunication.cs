@@ -117,7 +117,7 @@ namespace MSDAD
                     meeting = GetMeeting(topic);
                     meeting.Apply(parsedSlots, client_address);
                 }
-                catch (ServerCommunicationException sce)
+                catch (ServerCoreException sce)
                 {
                     throw sce;
                 }
@@ -142,7 +142,7 @@ namespace MSDAD
                         return m;
                     }
                 }
-                throw new ServerCommunicationException(ErrorCodes.NONEXISTENT_MEETING);
+                throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);
             }
             public void Start(string port)
             {                           
@@ -200,7 +200,7 @@ namespace MSDAD
                 }
                 if (location == null)
                 {
-                    throw new ServerCommunicationException(ErrorCodes.NOT_A_LOCATION);
+                    throw new ServerCoreException(ErrorCodes.NOT_A_LOCATION);
                 }
 
                 return new Tuple<Location, DateTime>(location, date);

@@ -11,21 +11,21 @@ namespace MSDAD
     namespace Library
     {
         [Serializable]
-        public class ServerCommunicationException : RemotingException, ISerializable
+        public class ServerCoreException : RemotingException, ISerializable
         {
             private string message;
 
-            public ServerCommunicationException()
+            public ServerCoreException()
             {
                 this.message = String.Empty;
             }
 
-            public ServerCommunicationException(string message)
+            public ServerCoreException(string message)
             {
                 this.message = message;
             }
 
-            public ServerCommunicationException(SerializationInfo info, StreamingContext context)
+            public ServerCoreException(SerializationInfo info, StreamingContext context)
             {
                 this.message = (string)info.GetValue("message", typeof(string));
             }
