@@ -230,11 +230,15 @@ namespace MSDAD
                 Location Porto = new Location("Porto");
                 Porto.Add(new Room("PortoA", 4));
                 Porto.Add(new Room("PortoB", 6));
+                Location Braga = new Location("Braga");
+                Braga.Add(new Room("BragaA", 10));
+                Braga.Add(new Room("BragaB", 20));
 
                 knownLocations.Add(Lisboa);
                 knownLocations.Add(Coimbra);
                 knownLocations.Add(Guarda);
                 knownLocations.Add(Porto);
+                knownLocations.Add(Braga);
             }
 
         }
