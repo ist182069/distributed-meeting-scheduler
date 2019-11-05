@@ -1,41 +1,39 @@
 ﻿using System;
 
-namespace MSDAD
+namespace MSDAD.Server
 {
-    namespace Server
+    class ServerCLI
     {
-        class ServerCLI
+        public const string EXIT = "exit";
+        public void Display()
         {
-            public const string EXIT = "exit";
-            public void Display()
+            string command;
+            ServerCommunication serverCommunication;
+                
+            Console.Write("Starting up server...");
+                
+            serverCommunication = new ServerCommunication();
+            serverCommunication.Start("11000");
+
+            Console.WriteLine("the server has been successfully started!");
+
+            while (true)
             {
-                string command;
-                ServerCommunication serverCommunication;
-                
-                Console.Write("Starting up server...");
-                
-                serverCommunication = new ServerCommunication();
-                serverCommunication.Start("11000");
 
-                Console.WriteLine("the server has been successfully started!");
+                Console.Write("Please run a command to be run on the server: ");
+                command = Console.ReadLine();
 
-                while (true)
+                switch (command)
                 {
-
-                    Console.Write("Please run a command to be run on the server: ");
-                    command = Console.ReadLine();
-
-                    switch (command)
-                    {
-                        case EXIT:
-                            Console.Write("Bye!");
-                            return;
-                        default:
-                            Console.WriteLine("That command does not exist. You must insert another one");
-                            break;
-                    }
+                    case EXIT:
+                        Console.Write("Bye!");
+                        return;
+                    default:
+                        Console.WriteLine("That command does not exist. You must insert another one");
+                        break;
                 }
             }
         }
     }
 }
+
