@@ -1,0 +1,11 @@
+/Clients/bin/
+/Clients/obj/
+/Library/bin/
+/Library/obj/
+/PCS/bin
+/PCS/obj
+/PuppetMaster/bin
+/PuppetMaster/obj
+/Server/bin
+/Server/obj
+.vs
