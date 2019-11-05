@@ -115,12 +115,11 @@ namespace MSDAD
                     client_address = ServerUtils.AssembleClientAddress(ip, port);
                     List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
                     meeting = GetMeeting(topic);
-                    meeting.Apply(parsedSlots, client_address);                    
-                } catch (ServerCommunicationException sce) {
-                    throw sce;
-                } catch (ArgumentException)
+                    meeting.Apply(parsedSlots, client_address);
+                }
+                catch (ServerCommunicationException sce)
                 {
-                    throw new ServerCommunicationException("You are already a candidate to that meeting.");
+                    throw sce;
                 }
             }
 
@@ -130,21 +129,8 @@ namespace MSDAD
 
                 client_address = ServerUtils.AssembleClientAddress(ip, port);
 
-                foreach (Meeting m in eventList)
-                {
-                    if (m.Topic == topic && m.Coordinator != client_address)
-                    {
-                        throw new ServerCommunicationException("You're not coordinating that meeting.");
-                    }
-                    if (m.Topic == topic && m.Coordinator == client_address)
-                    {
-                        m.Schedule();                                               
-
-                        Console.Write("Please run a command to be run on the server: ");
-                        return;
-                    }
-                }
-                throw new ServerCommunicationException("That meeting doesn't seem to exist.");
+                GetMeeting(topic).Schedule(client_address);
+                Console.Write("Please run a command to be run on the server: ");
             }
 
             private Meeting GetMeeting(string topic)
@@ -166,8 +152,6 @@ namespace MSDAD
                 RemotingServices.Marshal(this.remoteServer, "RemoteServer", typeof(RemoteServer));
 
                 LocationAndRoomInit();
-
-                //TO DO predefinir locations e rooms.
 
             }
             public void AddClientAddress(string ip, int port)

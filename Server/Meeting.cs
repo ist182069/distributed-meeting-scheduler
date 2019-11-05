@@ -66,6 +66,10 @@ namespace MSDAD
             {
                 throw new ServerCommunicationException("This Meeting is already CANCELED.");
             }
+            else if (state == state.SCHEDULED)
+            {
+                throw new ServerCommunicationException("This Meeting is already SCHEDULED.");
+            }
             lock (this)
             {
                 if(this.invitees!=null)
@@ -74,7 +78,7 @@ namespace MSDAD
                     {
                         if(this.CheckClientIfInVenues(slots, client_address))
                         {
-                            throw new ServerCommunicationException("Apply(): Client:\"" + client_address + "\" is already a candidate.");
+                            throw new ServerCommunicationException(ErrorCodes.CLIENT_IS_ALREADY_CANDIDATE);
                         }
                         this.AddClientToVenues(slots, client_address);
                     }
@@ -113,27 +117,35 @@ namespace MSDAD
         }
         private void AddClientToVenues(List<Tuple<Location, DateTime>> slots, string client_address)
         {
-            string location_string, date_string;
+            bool client_not_added_flag = true;
 
             foreach (Tuple<Location, DateTime> tuple in slots)
             {
                 if (this.venuesClientMapping.ContainsKey(tuple))
                 {                           
                     this.venuesClientMapping[tuple].Add(client_address);
+                    client_not_added_flag = false;
                 }
                 else
                 {
-                    location_string = tuple.Item1.Name;
-                    date_string = tuple.Item2.ToString();
-
-                    throw new ServerCommunicationException("ValidateSlots(): slot \"" + location_string + "," + date_string + "\" was not proposed by the coordinator");
+                    throw new ServerCommunicationException("One or more slots does not match the proposed for that meeting. However, you're a candidate for the valid ones.");
                 }
+            }
+            
+            if (client_not_added_flag)
+            {
+                throw new ServerCommunicationException("None of your slots match the proposed for that meeting.");
             }
         }
         
 
-        public void Schedule()
+        public void Schedule(string client_address)
         {
+            if (client_address != this.coordinator)
+            {
+                throw new ServerCommunicationException("You're not the coordinator of that meeting");
+            }
+
             int client_count, going_people;
 
             int chosen_people = 0;
@@ -186,6 +198,8 @@ namespace MSDAD
                     int room_cap = entry.Value.Item1.Capacity;
                     if (resultRoom == null)
                     {
+                        chosen_people = going_people;
+
                         resultLocation = entry.Key;
                         resultRoom = entry.Value.Item1;
                         resultDateTime = entry.Value.Item2;
