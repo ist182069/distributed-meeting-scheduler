@@ -187,12 +187,14 @@ namespace MSDAD.Server
                     this.state = state.CANCELED;
                     return;
                 }
-                               
+
+                resultRoom = null;
+
                 foreach (KeyValuePair<Location, Tuple<Room, DateTime, int>> entry in proposedRoomsLocation)
                 {
-                    resultRoom = null;
                     going_people = entry.Value.Item3;
                     int room_cap = entry.Value.Item1.Capacity;
+
                     if (resultRoom == null)
                     {
                         chosen_people = going_people;
@@ -216,13 +218,13 @@ namespace MSDAD.Server
                         resultDateTime = entry.Value.Item2;
                     }
                 }
+
                 resultLocation.Pick(resultRoom, resultDateTime);
                 this.finalSlot = resultLocation.Name+" "+resultRoom.Identifier+" "+resultDateTime.ToString();
                 List<string> goingClients = new List<string>();
 
                 for(int i = 0; i<chosen_people; i++)
                 {
-                    Console.WriteLine(this.venuesClientMapping[new Tuple<Location, DateTime>(resultLocation, resultDateTime)]);
                     goingClients.Add(this.venuesClientMapping[new Tuple<Location, DateTime>(resultLocation, resultDateTime)][i]);
                 }
 
