@@ -74,7 +74,7 @@ namespace MSDAD
                                 Console.WriteLine("Bye!");
                                 return;
                             default:
-                                Console.WriteLine("Error: You must insert a valid command!");
+                                Console.WriteLine(ErrorCodes.INVALID_COMMAND);
                                 break;
                         }
                     } catch(Exception exception) when (exception is ClientLocalException || exception is ServerCoreException)

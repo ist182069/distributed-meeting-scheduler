@@ -56,7 +56,7 @@ namespace MSDAD.Client
             }
             else
             {
-                throw new ClientLocalException("Error: The script name you have inserted could not be found!");
+                throw new ClientLocalException(ErrorCodes.NONEXISTENT_SCRIPT);
             }
             while (true) ;
         }
@@ -90,23 +90,19 @@ namespace MSDAD.Client
             switch(words[0])
             {
                 case CREATE:
-                    command = new Create(ref this.clientLibrary, words);
-                    command.Execute();
+                    new Create(ref this.clientLibrary, words).Execute();
                     break;
                 case LIST:
-                    command = new List(ref this.clientLibrary);
-                    command.Execute();
+                    new List(ref this.clientLibrary).Execute();
                     break;
                 case JOIN:
-                    command = new Join(ref this.clientLibrary, words);
-                    command.Execute();
+                    new Join(ref this.clientLibrary, words).Execute();
                     break;
                 case CLOSE:
-                    command = new Close(ref this.clientLibrary, words);
-                    command.Execute();
+                    new Close(ref this.clientLibrary, words).Execute();
                     break;
                 default:
-                    Console.WriteLine("Error: You must insert a valid command!");
+                    Console.WriteLine(ErrorCodes.INVALID_COMMAND);
                     break;
             }
         }

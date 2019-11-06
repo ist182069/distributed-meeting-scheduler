@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Commands\Parser\Close.cs" />
     <Compile Include="Commands\Parser\Join.cs" />
+    <Compile Include="ErrorCodes.cs" />
     <Compile Include="Exceptions\ClientLocalException.cs" />
     <Compile Include="ClientUtils.cs" />
     <Compile Include="ClientLibrary.cs" />
