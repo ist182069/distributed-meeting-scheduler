@@ -29,13 +29,50 @@ namespace MSDAD.Client.Commands.CLI
             topic = Console.ReadLine();
 
             Console.WriteLine("Minimum Attendees: ");
-            minAttendees = Int32.Parse(Console.ReadLine());
+            try
+            {
+                minAttendees = Int32.Parse(Console.ReadLine());
+            }
+            catch(FormatException e)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_MIN_ATTENDES);
+            }
+
+            if (minAttendees < 1)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_MIN_ATTENDES);
+            }
 
             Console.WriteLine("Number of slots: ");
-            num_slots = Int32.Parse(Console.ReadLine());
+            try
+            {
+                num_slots = Int32.Parse(Console.ReadLine());
+            }
+            catch (FormatException e)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_SLOTS);
+            }
+
+            if (num_slots < 1)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_SLOTS);
+            }
 
             Console.WriteLine("Number of invitees: ");
-            num_invitees = Int32.Parse(Console.ReadLine());
+            try
+            {
+                num_invitees = Int32.Parse(Console.ReadLine());
+            }
+            catch (FormatException e)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_INVITEES);
+            }
+
+            if (num_invitees < 0)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_INVITEES);
+            }
+            
 
             Console.WriteLine("Insert slots of the type \"Lisboa,2020-01-02\":");
             List<string> slots = new List<string>();
