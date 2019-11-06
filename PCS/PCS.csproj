@@ -44,6 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Server.cs" />
+    <Compile Include="PCSLibrary.cs" />
+    <Compile Include="Commands\AddRoom.cs" />
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="PCSUtils.cs" />
     <Compile Include="RemotePCS.cs" />
     <Compile Include="PCSParser.cs" />
     <Compile Include="PCSMain.cs" />
