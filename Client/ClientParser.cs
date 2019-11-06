@@ -97,6 +97,14 @@ namespace MSDAD.Client
                     command = new List(ref this.clientLibrary);
                     command.Execute();
                     break;
+                case JOIN:
+                    command = new Join(ref this.clientLibrary, words);
+                    command.Execute();
+                    break;
+                case CLOSE:
+                    command = new Close(ref this.clientLibrary, words);
+                    command.Execute();
+                    break;
                 default:
                     Console.WriteLine("Error: You must insert a valid command!");
                     break;

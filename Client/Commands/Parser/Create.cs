@@ -22,7 +22,7 @@ namespace MSDAD.Client.Commands.Parser
         {
 
             int min_attendees, num_slots, num_invitees;
-            string invitee_address, topic;
+            string invitee_address, room, topic;
 
             MeetingView meetingView;
             List<string> slots = new List<string>(), invitees;
@@ -34,7 +34,13 @@ namespace MSDAD.Client.Commands.Parser
 
             for(int i = 5; i <= (num_slots+4); i++)
             {
-                slots.Add(this.words[i]);                
+                room = this.words[i];
+                
+                if (slots.Contains(room))
+                {
+                    throw new ClientLocalException("Error! You cannot add the same room twice to the rooms list! Aborting...");
+                }
+                slots.Add(room);                
             }
 
             if(num_invitees==0)

@@ -272,8 +272,12 @@ namespace MSDAD.Server
             return this.invitees;
         }
         
-        public Boolean ClientConfirmed(string client_addr)
+        public bool ClientConfirmed(string client_addr)
         {
+            if(goingClients==null)
+            {
+                return false;
+            }
             return goingClients.Contains(client_addr);
         }
 

@@ -35,7 +35,7 @@ namespace MSDAD.Client.Commands.CLI
 
                 if (slots.Contains(room))
                 {
-                    throw new ClientLocalException("Create.Execute(): You cannot add the same room twice to the rooms list! Aborting...");
+                    throw new ClientLocalException("Error! You cannot add the same room twice to the rooms list! Aborting...");
                 }
 
                 slots.Add(room);

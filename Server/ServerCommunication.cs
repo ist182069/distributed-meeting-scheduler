@@ -97,7 +97,7 @@ namespace MSDAD.Server
                         client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
                     }
                 }
-            }
+            } 
         }
 
         public void Join(string topic, List<string> slots, string ip, int port)
