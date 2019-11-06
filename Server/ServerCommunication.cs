@@ -89,17 +89,13 @@ namespace MSDAD.Server
                     string state = meeting.GetState();
                     if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_address));
                     {
-                        Console.WriteLine("Nice");
                         string aux = state + "Client Confirmed at" + meeting.GetFinalSlot();
                         client.SendMeeting(meeting.Topic, meeting.GetVersion(), aux);
                     }
                     if (!meeting.ClientConfirmed(client_address))
                     {
-                        Console.WriteLine("Bosta");
                         client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
                     }
-                        
-                        
                 }
             }
         }
