@@ -25,5 +25,11 @@ namespace MSDAD
             void Close(string topic, string user);
             void Wait(int milliseconds);
         }
+
+        public interface PCSInterface
+        {
+            void Send(string text);
+        }
+
     }    
 }
