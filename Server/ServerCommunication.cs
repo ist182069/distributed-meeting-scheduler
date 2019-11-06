@@ -14,11 +14,33 @@ namespace MSDAD.Server
 {
     class ServerCommunication
     {
+        int port;
+        string ip, server_identifier;
+
         Dictionary<string, string> clientAddresses = new Dictionary<string, string>();
         List<Meeting> eventList = new List<Meeting>();
         RemoteServer remoteServer;
         TcpChannel channel;
         List<Location> knownLocations = new List<Location>();
+
+        public ServerCommunication(string server_identifier, string ip, int port)
+        {
+            this.server_identifier = server_identifier;
+            this.port = port;
+            this.ip = ip;
+        }
+
+        public void Start()
+        {
+            channel = new TcpChannel(this.port);
+            ChannelServices.RegisterChannel(channel, true);
+
+            this.remoteServer = new RemoteServer(this);
+            RemotingServices.Marshal(this.remoteServer, server_identifier, typeof(RemoteServer));
+
+            LocationAndRoomInit(); // isto vai mudar quando fizermos o PuppetMaster
+        }
+
         public void Create(string topic, int minAttendees, List<string> venues, List<string> invitees, string user)
         {
             string client_address; 
@@ -127,15 +149,7 @@ namespace MSDAD.Server
             }
             throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);
         }
-        public void Start(string server_identifier, string port)
-        {                           
-            channel = new TcpChannel(Int32.Parse(port));
-            ChannelServices.RegisterChannel(channel, true);
-            this.remoteServer = new RemoteServer(this);
-            RemotingServices.Marshal(this.remoteServer, server_identifier, typeof(RemoteServer));
 
-            LocationAndRoomInit();
-        }
         public void AddClientAddress(string user, string ip, int port)
         {
             string client_address, client_identifier;
