@@ -28,9 +28,48 @@ namespace MSDAD.Client.Commands.Parser
             List<string> slots = new List<string>(), invitees;
 
             topic = this.words[1];
-            min_attendees = Int32.Parse(this.words[2]);
-            num_slots = Int32.Parse(this.words[3]);
-            num_invitees = Int32.Parse(this.words[4]);                        
+
+            try
+            {
+                min_attendees = Int32.Parse(this.words[2]);
+            }
+            catch (FormatException e)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_MIN_ATTENDES);
+            }
+
+            if (min_attendees < 1)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_MIN_ATTENDES);
+            }
+
+            try
+            {
+                num_slots = Int32.Parse(this.words[3]);
+            }
+            catch (FormatException e)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_SLOTS);
+            }
+
+            if (num_slots < 1)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_SLOTS);
+            }
+
+            try
+            {
+                num_invitees = Int32.Parse(this.words[4]);
+            }
+            catch (FormatException e)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_INVITEES);
+            }
+
+            if (num_invitees < 0)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_INVITEES);
+            }                        
 
             for(int i = 5; i <= (num_slots+4); i++)
             {
