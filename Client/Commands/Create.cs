@@ -17,7 +17,7 @@ namespace MSDAD.Client.Commands
         }
         public override object Execute()
         {                                  
-            int minAttendees;
+            int minAttendees, num_slots, num_invitees;
             string client_string, invitee_address, room, topic;
             MeetingView meetingView;
 
@@ -30,20 +30,26 @@ namespace MSDAD.Client.Commands
             Console.WriteLine("Minimum Attendees: ");
             minAttendees = Int32.Parse(Console.ReadLine());
 
-            Console.WriteLine("Write slots of the type Lisboa,2020-01-02, then type end:");
+            Console.WriteLine("Number of slots: ");
+            num_slots = Int32.Parse(Console.ReadLine());
+
+            Console.WriteLine("Number of invitees: ");
+            num_invitees = Int32.Parse(Console.ReadLine());
+
+            Console.WriteLine("Insert slots of the type \"Lisboa,2020-01-02\":\n");
             List<string> slots = new List<string>();
-            while (!(room = Console.ReadLine()).Equals("end"))
+            for (int i = 0; i<num_slots; i++)
             {
-                if(slots.Contains(room))
+                room = Console.ReadLine();
+
+                if (slots.Contains(room))
                 {
                     throw new ClientLocalException("Create.Execute(): You cannot add the same room twice to the rooms list! Aborting...");
                 }
                 slots.Add(room);
             }
-
-            Console.WriteLine("Want invitees? y:n");
-
-            if (Console.ReadLine().Equals("n"))
+           
+            if (num_invitees==0)
             {
                 this.server.Create(topic, minAttendees, slots, null, this.ip, this.port);
                 meetingView = new MeetingView(topic, 1, "OPEN");
@@ -51,11 +57,13 @@ namespace MSDAD.Client.Commands
             }
             else
             {
-                Console.WriteLine("Write invitees of the type ip:port, then type end \n");
+                Console.WriteLine("Insert invitees of the type \"ip:port\":\n");
 
-                while (!(invitee_address = Console.ReadLine()).Equals("end"))
+                for (int i = 0; i<num_invitees; i++)
                 {
-                    if(invitees.Contains(invitee_address))
+                    invitee_address = Console.ReadLine();
+
+                    if (invitees.Contains(invitee_address))
                     {
                         throw new ClientLocalException("Create.Execute(): You cannot add the same invitee twice to the rooms list! Aborting...");
                     }

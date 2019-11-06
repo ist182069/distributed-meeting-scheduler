@@ -17,16 +17,21 @@ namespace MSDAD.Client.Commands
         }
         public override object Execute()
         {
+            int num_slots;
             string room, topic;
             List<string> slots;
 
             Console.WriteLine("Write meeting topic:");
             topic = Console.ReadLine();
-            Console.WriteLine("Write slots of the type Lisboa,2020-01-02 you can attend, then type end:");
+            Console.WriteLine("Insert slots of the type \"Lisboa,2020-01-02\":");
             slots = new List<string>();
+            Console.WriteLine("Number of slots: ");
+            num_slots = Int32.Parse(Console.ReadLine());
 
-            while (!(room = Console.ReadLine()).Equals("end"))
+            for(int i = 0; i<num_slots; i++)
             {
+                room = Console.ReadLine();
+
                 if (slots.Contains(room))
                 {
                     throw new ClientLocalException("Create.Execute(): You cannot add the same room twice to the rooms list! Aborting...");
