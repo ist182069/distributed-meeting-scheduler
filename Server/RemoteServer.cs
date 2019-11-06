@@ -14,31 +14,31 @@ namespace MSDAD.Server
             this.communication = communication;
         }
 
-        public void Create(string topic, int minAttendees, List<string> rooms, List<string> clients, string ip, int port)
+        public void Create(string topic, int minAttendees, List<string> rooms, List<string> clients, string user)
         {
-            this.communication.Create(topic, minAttendees, rooms, clients, ip, port);
+            this.communication.Create(topic, minAttendees, rooms, clients, user);
         }
 
-        public void List(Dictionary<string, string> meetingQuery, string ip, int port)
+        public void List(Dictionary<string, string> meetingQuery, string user)
         {
-            this.communication.List(meetingQuery, ip, port);                
+            this.communication.List(meetingQuery, user);                
         }
 
-        public void Join(string topic, List<string> slots, string ip, int port)
+        public void Join(string topic, List<string> slots, string user)
         {
-            this.communication.Join(topic, slots, ip,  port);
+            this.communication.Join(topic, slots, user);
         }
 
-        public void Close(string meeting_topic, string ip, int port)
+        public void Close(string meeting_topic, string user)
         {
-            this.communication.Close(meeting_topic, ip, port);
+            this.communication.Close(meeting_topic, user);
         }
 
-        public void Ping(string ip, int port, string message)
+        public void Ping(string message, string user)
         {
             Console.WriteLine("Received message: " + message);
             Console.WriteLine("Will broadcast it to all available clients... ");
-            communication.BroadcastPing(ip, port, message);
+            communication.BroadcastPing(message, user);
             Console.Write("Success!");
         }
 
@@ -47,9 +47,9 @@ namespace MSDAD.Server
             throw new NotImplementedException();
         }
 
-        public void Hello(string ip, int port)
+        public void Hello(string user, string ip, int port)
         {
-            communication.AddClientAddress(ip, port);
+            communication.AddClientAddress(user, ip, port);
         }
     }
 }

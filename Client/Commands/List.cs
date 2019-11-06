@@ -24,7 +24,7 @@ namespace MSDAD.Client.Commands
                 meetingQuery.Add(mV.GetTopic(), mV.GetState());
             }
 
-            this.server.List(meetingQuery, ip, port);
+            this.server.List(meetingQuery, this.user);
 
             foreach (MeetingView mV in meetingViews)
             {

@@ -19,7 +19,7 @@ namespace MSDAD.Client.Commands.CLI
 
             message = "ping";
 
-            this.server.Ping(this.ip, this.port, message);
+            this.server.Ping(message, this.user);
 
             return null;
         }

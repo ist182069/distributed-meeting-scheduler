@@ -22,7 +22,7 @@ namespace MSDAD.Client.Commands.CLI
             topic = Console.ReadLine();
 
 
-            this.server.Close(topic, ip, port);
+            this.server.Close(topic, this.user);
             Console.WriteLine("Successfully scheduled " + topic);
 
             return null;

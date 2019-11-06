@@ -14,33 +14,31 @@ namespace MSDAD.Server
 {
     class ServerCommunication
     {
-        ArrayList clientAddresses = new ArrayList();
+        Dictionary<string, string> clientAddresses = new Dictionary<string, string>();
         List<Meeting> eventList = new List<Meeting>();
         RemoteServer remoteServer;
         TcpChannel channel;
         List<Location> knownLocations = new List<Location>();
-        public void Create(string topic, int minAttendees, List<string> venues, List<string> invitees, string ip, int port)
+        public void Create(string topic, int minAttendees, List<string> venues, List<string> invitees, string user)
         {
             string client_address; 
             Meeting m;
             List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(venues);
 
-            client_address = ServerUtils.AssembleClientAddress(ip, port);
-
             lock (this)
             {
-                m = new Meeting(topic, minAttendees, parsedSlots, invitees, client_address);
+                m = new Meeting(topic, minAttendees, parsedSlots, invitees, user);
                 eventList.Add(m);
             }
 
                 
             if(invitees == null)
             {
-                foreach (string address_iter in this.clientAddresses)
+                foreach (KeyValuePair<string, string> address_iter in this.clientAddresses)
                 {
-                    if (address_iter != client_address)
+                    if (address_iter.Key != user)
                     {
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
                         client.SendMeeting(topic, 1, "OPEN");
                     }
                 }
@@ -51,10 +49,10 @@ namespace MSDAD.Server
 
                 foreach (string invitee_iter in invitees)
                 {
-                    if(ServerUtils.ValidateAddress(invitee_iter) && invitee_iter != client_address)
+                    if(invitee_iter != user)
                     {
-                        Console.WriteLine("tcp://" + invitee_iter + "/RemoteClient");
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + invitee_iter + "/RemoteClient");
+                        Console.WriteLine("tcp://" + this.clientAddresses[invitee_iter]);
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + this.clientAddresses[invitee_iter]);
                         client.SendMeeting(topic, 1, "OPEN");
 
                     } else
@@ -71,12 +69,9 @@ namespace MSDAD.Server
             Console.WriteLine("\r\nNew event: " + topic);
             Console.Write("Please run a command to be run on the server: ");
         }
-        public void List(Dictionary<string, string> meetingQuery, string ip, int port)
+        public void List(Dictionary<string, string> meetingQuery, string user)
         {
-            string client_address;
-
-            client_address = ServerUtils.AssembleClientAddress(ip, port);
-            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address + "/RemoteClient");
+            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + this.clientAddresses[user]);
 
             foreach (Meeting meeting in eventList)
             {
@@ -87,12 +82,12 @@ namespace MSDAD.Server
                 else if (meetingQuery.ContainsKey(meeting.Topic) && !meeting.GetState().Equals(meetingQuery[meeting.Topic]))
                 {
                     string state = meeting.GetState();
-                    if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_address));
+                    if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(user));
                     {
                         string aux = state + "\nClient Confirmed at " + meeting.GetFinalSlot();
                         client.SendMeeting(meeting.Topic, meeting.GetVersion(), aux);
                     }
-                    if (!meeting.ClientConfirmed(client_address))
+                    if (!meeting.ClientConfirmed(user))
                     {
                         client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
                     }
@@ -100,16 +95,14 @@ namespace MSDAD.Server
             } 
         }
 
-        public void Join(string topic, List<string> slots, string ip, int port)
+        public void Join(string topic, List<string> slots, string user)
         {
-            string client_address;
             Meeting meeting = null;
             try
             {
-                client_address = ServerUtils.AssembleClientAddress(ip, port);
                 List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
                 meeting = GetMeeting(topic);
-                meeting.Apply(parsedSlots, client_address);
+                meeting.Apply(parsedSlots, user);
             }
             catch (ServerCoreException sce)
             {
@@ -117,13 +110,9 @@ namespace MSDAD.Server
             }
         }
 
-        public void Close(String topic, string ip, int port)
+        public void Close(String topic, string user)
         {
-            string client_address;
-
-            client_address = ServerUtils.AssembleClientAddress(ip, port);
-
-            GetMeeting(topic).Schedule(client_address);
+            GetMeeting(topic).Schedule(user);
             Console.Write("Please run a command to be run on the server: ");
         }
 
@@ -148,31 +137,28 @@ namespace MSDAD.Server
             LocationAndRoomInit();
 
         }
-        public void AddClientAddress(string ip, int port)
+        public void AddClientAddress(string user, string ip, int port)
         {
-            string client_address;
+            string client_address, client_identifier;
 
             client_address = ServerUtils.AssembleClientAddress(ip, port);
 
-            if(!clientAddresses.Contains(client_address))
+            if(!clientAddresses.ContainsKey(user) && ServerUtils.ValidateAddress(client_address))
             {
                 lock (this)
                 {
-                    clientAddresses.Add(client_address);
+                    client_identifier = client_address + "/" + user;
+                    clientAddresses.Add(user, client_identifier);
                 }
             }   
         }
-        public void BroadcastPing(string ip, int port, string message)
+        public void BroadcastPing(string message, string user)
         {
-            string client_address;
-
-            client_address = ServerUtils.AssembleClientAddress(ip, port);
-
-            foreach (string address_iter in this.clientAddresses)
+            foreach (KeyValuePair<string, string> address_iter in this.clientAddresses)
             {
-                if (address_iter != client_address)
+                if (address_iter.Key != user)
                 {
-                    ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter + "/RemoteClient");
+                    ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
                     client.Ping(message);
                 }
                     

@@ -52,13 +52,13 @@ namespace MSDAD.Client.Commands.CLI
            
             if (num_invitees==0)
             {
-                this.server.Create(topic, minAttendees, slots, null, this.ip, this.port);
+                this.server.Create(topic, minAttendees, slots, null, this.user);
                 meetingView = new MeetingView(topic, 1, "OPEN");
                 this.clientLibrary.AddMeetingView(meetingView);
             }
             else
             {
-                Console.WriteLine("Insert invitees of the type \"ip:port\":\n");
+                Console.WriteLine("Insert the user identifier of the invitees:\n");
 
                 for (int i = 0; i<num_invitees; i++)
                 {
@@ -77,7 +77,7 @@ namespace MSDAD.Client.Commands.CLI
                     invitees.Add(invitee_address);
                 }
 
-                this.server.Create(topic, minAttendees, slots, invitees, this.ip, this.port);
+                this.server.Create(topic, minAttendees, slots, invitees, this.user);
             }
                     
             return null;

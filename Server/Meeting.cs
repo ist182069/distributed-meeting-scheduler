@@ -21,23 +21,23 @@ namespace MSDAD.Server
         private List<string> goingClients;
         private string finalSlot;
 
-        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_address)
+        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string user)
         {
             this.topic = topic;
             this.minAttendees = minAttendees;            
-            this.coordinator = client_address;      
+            this.coordinator = user;      
             this.state = state.OPEN;
             this.version = 1;            
-            this.InitInviteesList(invitees, client_address);
+            this.InitInviteesList(invitees, user);
             this.InitVenuesDictionary(slots);
         }
 
-        private void InitInviteesList(List<string> invitees, string client_address)
+        private void InitInviteesList(List<string> invitees, string user)
         {
             if (invitees != null)
             {
                 this.invitees = invitees;
-                this.invitees.Add(client_address);                   
+                this.invitees.Add(user);                   
             }
             else
             {
@@ -59,7 +59,7 @@ namespace MSDAD.Server
                 
         }
 
-        public void Apply(List<Tuple<Location, DateTime>> slots, string client_address)
+        public void Apply(List<Tuple<Location, DateTime>> slots, string user)
         {
 
             if (state == state.CANCELED)
@@ -72,16 +72,16 @@ namespace MSDAD.Server
             }
             lock (this)
             {
-                if (this.CheckClientIfInVenues(slots, client_address))
+                if (this.CheckClientIfInVenues(slots, user))
                 {
                     throw new ServerCoreException(ErrorCodes.CLIENT_IS_ALREADY_CANDIDATE);
                 }
                 
                 if (this.invitees!=null)
                 {
-                    if (this.invitees.Contains(client_address))
+                    if (this.invitees.Contains(user))
                     {
-                        this.AddClientToVenues(slots, client_address);
+                        this.AddClientToVenues(slots, user);
                     }
                     else
                     {
@@ -90,7 +90,7 @@ namespace MSDAD.Server
                 }
                 else
                 {
-                    this.AddClientToVenues(slots, client_address);
+                    this.AddClientToVenues(slots, user);
                 }                                    
                 this.version += 1;
             }
@@ -136,9 +136,9 @@ namespace MSDAD.Server
         }
         
 
-        public void Schedule(string client_address)
+        public void Schedule(string user)
         {
-            if (client_address != this.coordinator)
+            if (user != this.coordinator)
             {
                 throw new ServerCoreException(ErrorCodes.NOT_COORDINATOR);
             }

@@ -17,12 +17,12 @@ namespace MSDAD
 
         public interface ServerInterface
         {
-            void Hello(string ip, int port);
-            void Ping(string ip, int port, string message);
-            void List(Dictionary<string, string> meetingQuery, string ip, int port);
-            void Create(string topic, int minAttendees, List<string> rooms, List<string> invitees, string ip, int port);
-            void Join(string topic, List<string> slots, string ip, int port);
-            void Close(string topic, string ip, int port);
+            void Hello(string user, string ip, int port);
+            void Ping(string message, string user);
+            void List(Dictionary<string, string> meetingQuery, string user);
+            void Create(string topic, int minAttendees, List<string> rooms, List<string> invitees, string user);
+            void Join(string topic, List<string> slots, string user);
+            void Close(string topic, string user);
             void Wait(int milliseconds);
         }
     }    

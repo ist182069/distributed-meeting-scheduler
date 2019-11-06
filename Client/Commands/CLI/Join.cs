@@ -24,12 +24,13 @@ namespace MSDAD.Client.Commands.CLI
 
             Console.WriteLine("Write meeting topic:");
             topic = Console.ReadLine();
-            Console.WriteLine("Insert slots of the type \"Lisboa,2020-01-02\":");
-            slots = new List<string>();
+            
             Console.WriteLine("Number of slots: ");
             num_slots = Int32.Parse(Console.ReadLine());
 
-            for(int i = 0; i<num_slots; i++)
+            Console.WriteLine("Insert slots of the type \"Lisboa,2020-01-02\":");
+            slots = new List<string>();
+            for (int i = 0; i<num_slots; i++)
             {
                 room = Console.ReadLine();
 
@@ -41,7 +42,7 @@ namespace MSDAD.Client.Commands.CLI
                 slots.Add(room);
             }
 
-            this.server.Join(topic, slots, this.ip, this.port);
+            this.server.Join(topic, slots, this.user);
             Console.WriteLine("Registered in " + topic);
 
             return null;

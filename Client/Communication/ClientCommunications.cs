@@ -17,17 +17,17 @@ namespace MSDAD
         class ClientCommunications
         {
             int port;
-            string ip;
+            string ip, user;
 
             ClientLibrary clientLibrary;
             RemoteClient client;
             TcpChannel channel;
-            ServerInterface server;
             
             List<MeetingView> meetingViews = new List<MeetingView>();
 
-            public ClientCommunications(ClientLibrary clientLibrary, string ip, int port)
+            public ClientCommunications(ClientLibrary clientLibrary, string user, string ip, int port)
             {
+                this.user = user;
                 this.port = port;
                 this.ip = ip;
                 this.clientLibrary = clientLibrary;
@@ -38,7 +38,7 @@ namespace MSDAD
                 ChannelServices.RegisterChannel(channel, true);
 
                 this.client = new RemoteClient(this);
-                RemotingServices.Marshal(this.client, "RemoteClient", typeof(RemoteClient));
+                RemotingServices.Marshal(this.client, user, typeof(RemoteClient));
             }
   
             public void AddMeetingView(string topic, int version, string state)

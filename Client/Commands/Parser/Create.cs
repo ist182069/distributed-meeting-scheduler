@@ -45,7 +45,7 @@ namespace MSDAD.Client.Commands.Parser
 
             if(num_invitees==0)
             {
-                this.server.Create(topic, min_attendees, slots, null, this.ip, this.port);
+                this.server.Create(topic, min_attendees, slots, null, this.user);
                 meetingView = new MeetingView(topic, 1, "OPEN");
                 this.clientLibrary.AddMeetingView(meetingView);
             }
@@ -69,7 +69,7 @@ namespace MSDAD.Client.Commands.Parser
 
                     invitees.Add(invitee_address);
 
-                    this.server.Create(topic, min_attendees, slots, invitees, this.ip, this.port);
+                    this.server.Create(topic, min_attendees, slots, invitees, this.user);
                 }
             }
                 

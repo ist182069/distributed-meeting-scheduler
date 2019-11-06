@@ -13,17 +13,18 @@ namespace MSDAD.Client
     class ClientLibrary
     {
         int port;
-        string ip;
+        string ip, user;
         ClientCommunications communications;
         Command commandClass;
 
         private List<MeetingView> meetingViews = new List<MeetingView>();
 
-        public ClientLibrary(string ip, int port)
+        public ClientLibrary(string user, string ip, int port)
         {
+            this.user = user;
             this.ip = ip;
             this.port = port;
-            this.communications = new ClientCommunications(this, ip,  port); ;
+            this.communications = new ClientCommunications(this, user, ip,  port); ;
 
             Console.Write("Starting client remoting service... ");
             communications.Start();
@@ -45,6 +46,10 @@ namespace MSDAD.Client
             }
         }
 
+        public string GetUser()
+        {
+            return this.user;
+        }
         public int GetPort()
         {
             return this.port;

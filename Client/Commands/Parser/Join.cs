@@ -42,7 +42,7 @@ namespace MSDAD.Client.Commands.Parser
                 slots.Add(room);
             }
 
-            this.server.Join(topic, slots, this.ip, this.port);
+            this.server.Join(topic, slots, this.user);
 
             return null;
         }
