@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MSDAD.Client.Commands
+namespace MSDAD.Client.Commands.CLI
+
 {
     class Ping : Command
     {

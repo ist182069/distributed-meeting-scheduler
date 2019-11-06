@@ -1,4 +1,5 @@
 ﻿using MSDAD.Client.Commands;
+using MSDAD.Client.Commands.CLI;
 using MSDAD.Client.Exceptions;
 using MSDAD.Library;
 using System;
@@ -13,12 +14,12 @@ namespace MSDAD
     {
         class ClientCLI
         {
-            public const string PING_COMMAND = "ping";
-            public const string CREATE = "create";
-            public const string EXIT = "exit";
-            public const string LIST = "list";
-            public const string JOIN = "join";
-            public const string CLOSE = "close";
+            const string PING_COMMAND = "ping";
+            const string CREATE = "create";
+            const string EXIT = "exit";
+            const string LIST = "list";
+            const string JOIN = "join";
+            const string CLOSE = "close";
 
             public void Display()
             {
@@ -67,7 +68,7 @@ namespace MSDAD
                                 Console.WriteLine("Bye!");
                                 return;
                             default:
-                                Console.WriteLine("You must insert a valid command");
+                                Console.WriteLine("Error: You must insert a valid command!");
                                 break;
                         }
                     } catch(Exception exception) when (exception is ClientLocalException || exception is ServerCoreException)

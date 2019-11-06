@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MSDAD.Client.Comunication;
 using MSDAD.Library;
 
-namespace MSDAD.Client.Commands
+namespace MSDAD.Client.Commands.CLI
 {
     class Close : Command
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -34,6 +35,22 @@ namespace MSDAD.Client
             client_address = ip + ":" + port;
 
             return client_address;
+        }
+
+        public static string AssembleCurrentPath()
+        {
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                string[] current_path;
+                current_path = System.AppDomain.CurrentDomain.BaseDirectory.Split(new[] { "\\bin\\Debug" }, StringSplitOptions.None);
+                return current_path[0];
+            }                
+            else
+            {
+                string current_path;
+                current_path = System.AppDomain.CurrentDomain.BaseDirectory;
+                return current_path;
+            }
         }
     }
 }
