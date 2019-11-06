@@ -27,7 +27,20 @@ namespace MSDAD.Client.Commands.Parser
             List<string> slots = new List<string>();
 
             topic = this.words[1];
-            num_slots = Int32.Parse(this.words[2]);
+            
+            try
+            {
+                num_slots = Int32.Parse(this.words[2]);
+            }
+            catch (FormatException e)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_SLOTS);
+            }
+
+            if (num_slots < 1)
+            {
+                throw new ClientLocalException(ErrorCodes.INVALID_N_SLOTS);
+            }
 
             for (int i = 3; i < (num_slots)+3; i++)
             {
