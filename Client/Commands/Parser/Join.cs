@@ -36,7 +36,7 @@ namespace MSDAD.Client.Commands.Parser
 
                 if (slots.Contains(room))
                 {
-                    throw new ClientLocalException("Error! You cannot add the same room twice to the rooms list! Aborting...");
+                    throw new ClientLocalException(ErrorCodes.DUPLICATED_SLOT);
                 }
                 
                 slots.Add(room);
