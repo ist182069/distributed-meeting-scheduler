@@ -13,15 +13,16 @@ namespace MSDAD.Client
     class ClientLibrary
     {
         int port;
-        string ip, user;
+        string ip, user, server;
         ClientCommunications communications;
         Command commandClass;
 
         private List<MeetingView> meetingViews = new List<MeetingView>();
 
-        public ClientLibrary(string user, string ip, int port)
+        public ClientLibrary(string user, string server, string ip, int port)
         {
             this.user = user;
+            this.server = server;
             this.ip = ip;
             this.port = port;
             this.communications = new ClientCommunications(this, user, ip,  port); ;
@@ -49,6 +50,10 @@ namespace MSDAD.Client
         public string GetUser()
         {
             return this.user;
+        }
+        public string GetServerId()
+        {
+            return this.server;
         }
         public int GetPort()
         {

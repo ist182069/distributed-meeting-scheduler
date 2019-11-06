@@ -127,15 +127,14 @@ namespace MSDAD.Server
             }
             throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);
         }
-        public void Start(string port)
+        public void Start(string server_identifier, string port)
         {                           
             channel = new TcpChannel(Int32.Parse(port));
             ChannelServices.RegisterChannel(channel, true);
             this.remoteServer = new RemoteServer(this);
-            RemotingServices.Marshal(this.remoteServer, "RemoteServer", typeof(RemoteServer));
+            RemotingServices.Marshal(this.remoteServer, server_identifier, typeof(RemoteServer));
 
             LocationAndRoomInit();
-
         }
         public void AddClientAddress(string user, string ip, int port)
         {

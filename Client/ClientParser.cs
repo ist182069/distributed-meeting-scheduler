@@ -29,7 +29,7 @@ namespace MSDAD.Client
         public ClientParser(string script_name)
         {
             // TODO portos pre definidos que na verdade sao escolhidos pelo puppet master
-            this.clientLibrary = new ClientLibrary("client1", ClientUtils.GetLocalIPAddress(), 1488);
+            this.clientLibrary = new ClientLibrary("client1", "server1", ClientUtils.GetLocalIPAddress(), 1488);
             new Initialize(ref this.clientLibrary);
 
             this.script_name = script_name;

@@ -37,7 +37,7 @@ namespace MSDAD.Client.Commands.CLI
             Console.WriteLine("Number of invitees: ");
             num_invitees = Int32.Parse(Console.ReadLine());
 
-            Console.WriteLine("Insert slots of the type \"Lisboa,2020-01-02\":\n");
+            Console.WriteLine("Insert slots of the type \"Lisboa,2020-01-02\":");
             List<string> slots = new List<string>();
             for (int i = 0; i<num_slots; i++)
             {
@@ -58,7 +58,7 @@ namespace MSDAD.Client.Commands.CLI
             }
             else
             {
-                Console.WriteLine("Insert the user identifier of the invitees:\n");
+                Console.WriteLine("Insert the user identifier of the invitees:");
 
                 for (int i = 0; i<num_invitees; i++)
                 {
@@ -69,7 +69,7 @@ namespace MSDAD.Client.Commands.CLI
                         throw new ClientLocalException("Create.Execute(): You cannot add the same invitee twice to the rooms list! Aborting...");
                     }
 
-                    if(invitee_address == this.client_address)
+                    if(invitee_address == this.user)
                     {
                         meetingView = new MeetingView(topic, 1, "OPEN");
                         this.clientLibrary.AddMeetingView(meetingView);

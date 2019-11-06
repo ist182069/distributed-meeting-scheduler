@@ -7,13 +7,16 @@ namespace MSDAD.Server
         public const string EXIT = "exit";
         public void Display()
         {
-            string command;
+            string command, server_identifier;
             ServerCommunication serverCommunication;
                 
-            Console.Write("Starting up server...");
-                
+            Console.WriteLine("Starting up server...");
+
+            Console.Write("Type the server identifier: ");
+            server_identifier = Console.ReadLine();
+
             serverCommunication = new ServerCommunication();
-            serverCommunication.Start("11000");
+            serverCommunication.Start(server_identifier, "11000");
 
             Console.WriteLine("the server has been successfully started!");
 

@@ -12,7 +12,7 @@ namespace MSDAD.Client.Commands
     abstract class Command
     {
         public int port;
-        public string ip, client_address, user;
+        public string ip, client_address, user, server_identifier;
         public ClientLibrary clientLibrary;
         public ServerInterface server;
 
@@ -26,10 +26,11 @@ namespace MSDAD.Client.Commands
         void Init()
         {
             this.user = this.clientLibrary.GetUser();
+            this.server_identifier = this.clientLibrary.GetServerId();
             this.port = this.clientLibrary.GetPort();
             this.ip = this.clientLibrary.GetIP();
             this.client_address = ClientUtils.AssembleClientAddress(ip, port);
-            this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://localhost:11000/RemoteServer");
+            this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://localhost:11000/" + server_identifier);
             this.server.Hello(this.user, this.ip, this.port);
         }
         public abstract object Execute();
