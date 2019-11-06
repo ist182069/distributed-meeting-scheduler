@@ -49,7 +49,7 @@ namespace MSDAD.Server
 
                 foreach (string invitee_iter in invitees)
                 {
-                    if(invitee_iter != user)
+                    if(invitee_iter != user && this.clientAddresses.ContainsKey(invitee_iter))
                     {
                         Console.WriteLine("tcp://" + this.clientAddresses[invitee_iter]);
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + this.clientAddresses[invitee_iter]);
