@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 
 namespace MSDAD.Server
@@ -25,6 +27,23 @@ namespace MSDAD.Server
             Console.WriteLine(result);
 
             return result;
+        }
+
+        public static string GetLocalIPAddress()
+        {
+            string client_ip = null;
+
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    client_ip = ip.ToString();
+                }
+            }
+
+            return client_ip;
         }
     }
 }

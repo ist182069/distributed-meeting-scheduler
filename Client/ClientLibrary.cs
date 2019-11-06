@@ -15,7 +15,6 @@ namespace MSDAD.Client
         int port;
         string ip, user, server;
         ClientCommunications communications;
-        Command commandClass;
 
         private List<MeetingView> meetingViews = new List<MeetingView>();
 
