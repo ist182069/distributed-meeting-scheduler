@@ -54,8 +54,8 @@
     <Compile Include="Meeting.cs" />
     <Compile Include="Room.cs" />
     <Compile Include="ServerCLI.cs" />
-    <Compile Include="ServerCommunication.cs" />
-    <Compile Include="RemoteServer.cs" />
+    <Compile Include="Communication\ServerCommunication.cs" />
+    <Compile Include="Communication\RemoteServer.cs" />
     <Compile Include="ServerMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

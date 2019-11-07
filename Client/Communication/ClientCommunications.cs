@@ -47,9 +47,5 @@ namespace MSDAD.Client.Comunication
 
             this.clientLibrary.AddMeetingView(meetingView);
         }    
-
-        public void Join()
-        {
-        }
     }
 }
