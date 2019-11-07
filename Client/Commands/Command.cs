@@ -29,7 +29,7 @@ namespace MSDAD.Client.Commands
             this.server_url = this.clientLibrary.GetServerUrl();
             this.port = this.clientLibrary.GetPort();
             this.ip = this.clientLibrary.GetIP();
-            this.client_address = ClientUtils.AssembleClientAddress(ip, port);
+            this.client_address = ClientUtils.AssembleAddress(ip, port);
             this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
             this.server.Hello(this.user, this.ip, this.port);
         }

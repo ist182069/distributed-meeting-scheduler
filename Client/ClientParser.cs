@@ -23,7 +23,7 @@ namespace MSDAD.Client
         const string JOIN = "join";
         const string CLOSE = "close";
 
-        int port_int;
+        int port_int = 0;
         string client_url, script_name, server_url, user_identifier, ip_string, port_string;
         
         ClientLibrary clientLibrary;
@@ -35,8 +35,14 @@ namespace MSDAD.Client
             Console.Write("Pick a client port: ");
 
             this.port_string = Console.ReadLine();
-            this.port_int = Int32.Parse(port_string);
-            // TODO adicionar excepcao aqui
+
+            try
+            {
+                this.port_int = Int32.Parse(port_string);
+            } catch (FormatException)
+            {
+                Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
+            }
 
             Console.Write("Pick a user identifier: ");
             this.user_identifier = Console.ReadLine();
