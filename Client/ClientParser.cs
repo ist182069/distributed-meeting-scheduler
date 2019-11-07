@@ -22,33 +22,33 @@ namespace MSDAD.Client
         const string JOIN = "join";
         const string CLOSE = "close";
 
-        int port_int = 0;
-        string client_url, script_name, server_url, user_identifier, ip_string, port_string;
+        int client_port = 0;
+        string client_url, script_name, server_url, client_identifier, client_ip, client_port_string;
         
         ClientLibrary client_library;
 
         public ClientParser(string script_name)
         {
-            this.ip_string = ClientUtils.GetLocalIPAddress();
+            this.client_ip = ClientUtils.GetLocalIPAddress();
             Console.Write("Pick a client port: ");
 
-            this.port_string = Console.ReadLine();
+            this.client_port_string = Console.ReadLine();
 
             try
             {
-                this.port_int = Int32.Parse(port_string);
+                this.client_port = Int32.Parse(client_port_string);
             } catch (FormatException)
             {
                 Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
             }
 
             Console.Write("Pick a user identifier: ");
-            this.user_identifier = Console.ReadLine();
+            this.client_identifier = Console.ReadLine();
 
             Console.Write("Type the server identifier to whom you want to connect: ");
             this.server_url = Console.ReadLine();
 
-            this.client_library = new ClientLibrary(user_identifier, server_url, ip_string, port_int);
+            this.client_library = new ClientLibrary(client_identifier, server_url, client_ip, client_port);
             new Initialize(ref this.client_library);
 
             this.script_name = script_name;
@@ -63,7 +63,7 @@ namespace MSDAD.Client
             split_url = client_url.Split('/');
             split_ip = split_url[2].Split(':');
             
-            this.ip_string = split_ip[0];            
+            this.client_ip = split_ip[0];            
             port_string = split_ip[1];
 
             port = Int32.Parse(port_string);
@@ -75,10 +75,10 @@ namespace MSDAD.Client
 
             Console.WriteLine(client_identifier);
             Console.WriteLine(this.server_url);
-            Console.WriteLine(this.ip_string);
+            Console.WriteLine(this.client_ip);
             Console.WriteLine(port);
             Console.WriteLine(script_name);
-            this.client_library = new ClientLibrary(client_identifier, this.server_url, this.ip_string, port);
+            this.client_library = new ClientLibrary(client_identifier, this.server_url, this.client_ip, port);
 
             new Initialize(ref this.client_library);
 
