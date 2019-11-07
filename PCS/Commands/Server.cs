@@ -22,10 +22,13 @@ namespace MSDAD.PCS.Commands
         {
             string server_identifier, server_url, server_path;
             //nao percebo para que servem estes
-            int par_1, par_2, par_3;
+            int tolerated_faults, min_delay_ms, max_delay_ms;
 
             server_identifier = words[1];
             server_url = words[2];
+            tolerated_faults = Int32.Parse(words[3]);
+            min_delay_ms = Int32.Parse(words[4]);
+            max_delay_ms = Int32.Parse(words[5]);
             // usar os restantes campos que nao percebo para que sao words[3], words[4], words[5]
 
             server_path = PCSUtils.AssemblePath(SERVER) + "\\" + SERVER_EXE;

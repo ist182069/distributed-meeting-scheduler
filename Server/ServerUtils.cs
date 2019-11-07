@@ -24,6 +24,13 @@ namespace MSDAD.Server
             pattern = new Regex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):[0-9]+$");
             result = pattern.IsMatch(client_address);
             
+            // If does not work tries for localhost
+            if(!result)
+            {
+                pattern = new Regex("^localhost:[0-9]+$");
+                result = pattern.IsMatch(client_address);
+            }
+
             Console.WriteLine(result);
 
             return result;
@@ -44,6 +51,47 @@ namespace MSDAD.Server
             }
 
             return client_ip;
+        }
+
+        public static int GetPortFromUrl(string url)
+        {
+            int port;
+            string[] split_url;
+            
+            split_url = url.Split(new string[] { "tcp://" }, StringSplitOptions.None);
+            split_url = split_url[1].Split('/');
+            split_url = split_url[0].Split(':');
+
+            port = Int32.Parse(split_url[1]);
+
+            return port;
+        }
+
+        public static string GetIPFromUrl(string url)
+        {
+            string ip;
+            string[] split_url;
+
+            split_url = url.Split(new string[] { "tcp://" }, StringSplitOptions.None);
+            split_url = split_url[1].Split('/');
+            split_url = split_url[0].Split(':');
+
+            ip = split_url[0];
+
+            return ip;
+        }
+
+        public static string GetServerIdFromUrl(string url)
+        {
+            string id;
+            string[] split_url;
+
+            split_url = url.Split(new string[] { "tcp://" }, StringSplitOptions.None);
+            split_url = split_url[1].Split('/');
+
+            id = split_url[1];
+            
+            return id;
         }
     }
 }

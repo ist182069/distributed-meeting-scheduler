@@ -39,18 +39,9 @@ namespace MSDAD.Client
 
         public static string AssembleCurrentPath()
         {
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
-                string[] current_path;
-                current_path = System.AppDomain.CurrentDomain.BaseDirectory.Split(new[] { "\\bin\\Debug" }, StringSplitOptions.None);
-                return current_path[0];
-            }                
-            else
-            {
-                string current_path;
-                current_path = System.AppDomain.CurrentDomain.BaseDirectory;
-                return current_path;
-            }
+            string[] current_path;
+            current_path = System.AppDomain.CurrentDomain.BaseDirectory.Split(new[] { "\\bin\\Debug" }, StringSplitOptions.None);
+            return current_path[0];
         }
     }
 }

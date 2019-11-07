@@ -73,6 +73,7 @@ namespace MSDAD.Client
             Console.WriteLine(this.server_url);
             Console.WriteLine(this.ip_string);
             Console.WriteLine(port);
+            Console.WriteLine(script_name);
             this.clientLibrary = new ClientLibrary(client_identifier, this.server_url, this.ip_string, port);
 
             new Initialize(ref this.clientLibrary);
@@ -84,6 +85,8 @@ namespace MSDAD.Client
             string script_path;
 
             script_path = this.AssembleScript();
+
+            Console.WriteLine(script_path);
 
             if (this.ScriptExists(script_path))
             {
@@ -103,6 +106,7 @@ namespace MSDAD.Client
             {
                 throw new ClientLocalException(ErrorCodes.NONEXISTENT_SCRIPT);
             }
+
             while (true) ;
         }
 
@@ -124,7 +128,7 @@ namespace MSDAD.Client
         {
             string current_path;
 
-            current_path = ClientUtils.AssembleCurrentPath() + "Scripts" + "\\" + this.script_name;            
+            current_path = ClientUtils.AssembleCurrentPath() + "\\" + "Scripts" + "\\" + this.script_name;            
 
             return current_path;
         }
