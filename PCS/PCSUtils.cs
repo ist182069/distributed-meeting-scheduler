@@ -18,10 +18,10 @@ namespace MSDAD.PCS
             switch(option)
             {                
                 case CLIENT:
-                    path = ClientPath();
+                    path = Path(CLIENT);
                     break;
                 case SERVER:
-                    path = ServerPath();
+                    path = Path(SERVER);
                     break;
             }
 
@@ -29,7 +29,7 @@ namespace MSDAD.PCS
         }
 
 
-        private static string ClientPath()
+        private static string Path(string option)
         {
             string server_path;
             string[] current_path;
@@ -38,13 +38,13 @@ namespace MSDAD.PCS
             {
 
                 current_path = System.AppDomain.CurrentDomain.BaseDirectory.Split(new[] { "\\PCS\\bin\\Debug" }, StringSplitOptions.None);
-                server_path = current_path[0] + "\\Client\\bin\\Debug";
+                server_path = current_path[0] + "\\" + option + "\\bin\\Debug";
                 return server_path;
             }
             else
             {
                 current_path = System.AppDomain.CurrentDomain.BaseDirectory.Split(new[] { "\\PCS" }, StringSplitOptions.None);
-                server_path = current_path[0] + "\\Client";
+                server_path = current_path[0] + "\\" + option;
                 return server_path;
             }
         }
