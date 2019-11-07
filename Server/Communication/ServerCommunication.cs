@@ -23,12 +23,12 @@ namespace MSDAD.Server.Communication
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
 
-        public ServerCommunication(ServerLibrary server_library, string server_identifier, string server_ip, int server_port)
+        public ServerCommunication(ServerLibrary server_library)
         {
             this.server_library = server_library;
-            this.server_identifier = server_identifier;
-            this.server_port = server_port;
-            this.server_ip = server_ip;
+            this.server_identifier = server_library.ServerIdentifier;
+            this.server_port = server_library.ServerPort;
+            this.server_ip = server_library.ServerIP;
         }
 
         public void Start()

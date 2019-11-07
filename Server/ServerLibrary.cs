@@ -24,7 +24,7 @@ namespace MSDAD.Server
             this.server_ip = server_ip;
             this.server_port = server_port;
 
-            this.server_communication = new ServerCommunication(this, server_identifier, server_ip, server_port); ;
+            this.server_communication = new ServerCommunication(this); ;
 
             Console.Write("Starting server remoting service... ");
             server_communication.Start();

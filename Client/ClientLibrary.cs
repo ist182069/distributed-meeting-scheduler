@@ -25,7 +25,7 @@ namespace MSDAD.Client
             this.client_ip = client_ip;
             this.client_port = client_port;
 
-            this.client_communication = new ClientCommunication(this, client_identifier, client_ip,  client_port); ;
+            this.client_communication = new ClientCommunication(this);
 
             Console.Write("Starting client remoting service... ");
             client_communication.Start();

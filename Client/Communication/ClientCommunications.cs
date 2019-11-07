@@ -22,12 +22,12 @@ namespace MSDAD.Client.Comunication
         RemoteClient remote_client;
         TcpChannel channel;
 
-        public ClientCommunication(ClientLibrary client_library, string client_identifier, string client_ip, int client_port)
+        public ClientCommunication(ClientLibrary client_library)
         {
-            this.client_identifier = client_identifier;
-            this.client_port = client_port;
-            this.client_ip = client_ip;
             this.client_library = client_library;
+            this.client_identifier = client_library.ClientIdentifier;
+            this.client_port = client_library.ClientPort;
+            this.client_ip = client_library.ClientIP;
         }
         public void Start()
         {
