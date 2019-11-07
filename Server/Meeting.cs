@@ -11,33 +11,33 @@ namespace MSDAD.Server
 
     public class Meeting
     {
-        private int minAttendees, version;
+        private int min_attendees, version;
         private string coordinator, topic;
         private state state;
         private List<string> invitees;
 
-        private Dictionary<Tuple<Location, DateTime>, List<string>> venuesClientMapping;
+        private Dictionary<Tuple<Location, DateTime>, List<string>> slots_clients_mapping;
         
-        private List<string> goingClients;
-        private string finalSlot;
+        private List<string> going_clients;
+        private string final_slot;
 
-        public Meeting(string topic, int minAttendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string user)
+        public Meeting(string meeting_topic, int min_attendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_identifier)
         {
-            this.topic = topic;
-            this.minAttendees = minAttendees;            
-            this.coordinator = user;      
+            this.topic = meeting_topic;
+            this.min_attendees = min_attendees;            
+            this.coordinator = client_identifier;      
             this.state = state.OPEN;
             this.version = 1;            
-            this.InitInviteesList(invitees, user);
+            this.InitInviteesList(invitees, client_identifier);
             this.InitVenuesDictionary(slots);
         }
 
-        private void InitInviteesList(List<string> invitees, string user)
+        private void InitInviteesList(List<string> invitees, string client_identifier)
         {
             if (invitees != null)
             {
                 this.invitees = invitees;
-                this.invitees.Add(user);                   
+                this.invitees.Add(client_identifier);                   
             }
             else
             {
@@ -49,17 +49,17 @@ namespace MSDAD.Server
         {
             List<string> candidates;
 
-            this.venuesClientMapping = new Dictionary<Tuple<Location, DateTime>, List<string>>();
+            this.slots_clients_mapping = new Dictionary<Tuple<Location, DateTime>, List<string>>();
 
             foreach (Tuple<Location,DateTime> tuple in slots)
             {
                 candidates = new List<string>();
-                this.venuesClientMapping.Add(tuple, candidates);
+                this.slots_clients_mapping.Add(tuple, candidates);
             }
                 
         }
 
-        public void Apply(List<Tuple<Location, DateTime>> slots, string user)
+        public void Apply(List<Tuple<Location, DateTime>> slots, string client_identifier)
         {
 
             if (state == state.CANCELED)
@@ -72,16 +72,16 @@ namespace MSDAD.Server
             }
             lock (this)
             {
-                if (this.CheckClientIfInVenues(slots, user))
+                if (this.CheckClientIfInVenues(slots, client_identifier))
                 {
                     throw new ServerCoreException(ErrorCodes.CLIENT_IS_ALREADY_CANDIDATE);
                 }
                 
                 if (this.invitees!=null)
                 {
-                    if (this.invitees.Contains(user))
+                    if (this.invitees.Contains(client_identifier))
                     {
-                        this.AddClientToVenues(slots, user);
+                        this.AddClientToVenues(slots, client_identifier);
                     }
                     else
                     {
@@ -90,7 +90,7 @@ namespace MSDAD.Server
                 }
                 else
                 {
-                    this.AddClientToVenues(slots, user);
+                    this.AddClientToVenues(slots, client_identifier);
                 }                                    
                 this.version += 1;
             }
@@ -100,7 +100,7 @@ namespace MSDAD.Server
         {
             bool result = false; 
 
-            foreach(List<string> client_list in this.venuesClientMapping.Values)
+            foreach(List<string> client_list in this.slots_clients_mapping.Values)
             {
                 result = client_list.Contains(client_address);
 
@@ -116,9 +116,9 @@ namespace MSDAD.Server
         {
             foreach (Tuple<Location, DateTime> tuple in slots)
             {
-                if (this.venuesClientMapping.ContainsKey(tuple))
+                if (this.slots_clients_mapping.ContainsKey(tuple))
                 {                           
-                    this.venuesClientMapping[tuple].Add(client_address);
+                    this.slots_clients_mapping[tuple].Add(client_address);
                 }
                 else
                 {
@@ -128,9 +128,9 @@ namespace MSDAD.Server
         }
         
 
-        public void Schedule(string user)
+        public void Schedule(string client_identifier)
         {
-            if (user != this.coordinator)
+            if (client_identifier != this.coordinator)
             {
                 throw new ServerCoreException(ErrorCodes.NOT_COORDINATOR);
             }
@@ -148,17 +148,17 @@ namespace MSDAD.Server
 
             lock(this)
             {
-                foreach (KeyValuePair<Tuple<Location, DateTime>, List<string>> entry in this.venuesClientMapping)
+                foreach (KeyValuePair<Tuple<Location, DateTime>, List<string>> entry in this.slots_clients_mapping)
                 {
                     client_count = entry.Value.Count;
                     tuple = entry.Key;
 
-                    if (client_count >= MinAttendees)
+                    if (client_count >= min_attendees)
                     {
                         location = tuple.Item1;
                         dateTime = tuple.Item2;
                         
-                        resultRoom = location.Select(dateTime, client_count, MinAttendees);
+                        resultRoom = location.Select(dateTime, client_count, min_attendees);
 
                         if (resultRoom.Capacity>=client_count)
                         {
@@ -212,15 +212,15 @@ namespace MSDAD.Server
                 }
 
                 resultLocation.Pick(resultRoom, resultDateTime);
-                this.finalSlot = resultLocation.Name+" "+resultRoom.Identifier+" "+resultDateTime.ToString();
-                List<string> goingClients = new List<string>();
+                this.final_slot = resultLocation.Name+" "+resultRoom.Identifier+" "+resultDateTime.ToString();
+                List<string> going_clients = new List<string>();
 
                 for(int i = 0; i<chosen_people; i++)
                 {
-                    goingClients.Add(this.venuesClientMapping[new Tuple<Location, DateTime>(resultLocation, resultDateTime)][i]);
+                    going_clients.Add(this.slots_clients_mapping[new Tuple<Location, DateTime>(resultLocation, resultDateTime)][i]);
                 }
 
-                this.goingClients = goingClients;
+                this.going_clients = going_clients;
                 this.state = state.SCHEDULED;
             }
         }
@@ -245,18 +245,24 @@ namespace MSDAD.Server
         {
             get
             {
-                return this.minAttendees;
+                return this.min_attendees;
             }
         }
             
-        public int GetVersion()
+        public int Version
         {
-            return this.version;
+            get
+            {
+                return version;
+            }
         }
        
-        public string GetState()
+        public string State
         {
-            return this.state.ToString();
+            get
+            {
+                return this.state.ToString();
+            }
         }  
         
         public List<string> GetInvitees()
@@ -264,18 +270,21 @@ namespace MSDAD.Server
             return this.invitees;
         }
         
-        public bool ClientConfirmed(string client_addr)
+        public bool ClientConfirmed(string client_address)
         {
-            if(goingClients==null)
+            if(going_clients==null)
             {
                 return false;
             }
-            return goingClients.Contains(client_addr);
+            return going_clients.Contains(client_address);
         }
 
-        public string GetFinalSlot()
+        public string FinalSlot
         {
-            return this.finalSlot;
+            get
+            {
+                return this.final_slot;
+            }
         }
 
     }

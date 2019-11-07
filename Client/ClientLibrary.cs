@@ -12,76 +12,92 @@ namespace MSDAD.Client
 {
     class ClientLibrary
     {
-        int port;
-        string ip, user, server;
-        ClientCommunication communications;
+        int client_port;
+        string client_ip, client_identifier, server_url;
+        ClientCommunication client_communication;
 
-        private List<MeetingView> meetingViews = new List<MeetingView>();
+        private List<MeetingView> meeting_views = new List<MeetingView>();
 
-        public ClientLibrary(string user, string server, string ip, int port)
+        public ClientLibrary(string client_identifier, string server_url, string client_ip, int client_port)
         {
-            this.user = user;
-            this.server = server;
-            this.ip = ip;
-            this.port = port;
+            this.client_identifier = client_identifier;
+            this.server_url = server_url;
+            this.client_ip = client_ip;
+            this.client_port = client_port;
 
-            this.communications = new ClientCommunication(this, user, ip,  port); ;
+            this.client_communication = new ClientCommunication(this, client_identifier, client_ip,  client_port); ;
 
             Console.Write("Starting client remoting service... ");
-            communications.Start();
+            client_communication.Start();
             Console.WriteLine("Success!");  
         }
 
-        public void AddMeetingView(MeetingView meetingView)
+        public void AddMeetingView(MeetingView meeting_view)
         {
             lock(this)
             {
-                foreach (MeetingView mV in meetingViews)
+                foreach (MeetingView mV in meeting_views)
                 {
-                    if (mV.GetTopic().Equals(meetingView.GetTopic()))
-                        meetingViews.Remove(mV);
+                    if (mV.MeetingTopic.Equals(meeting_view.MeetingTopic))
+                        meeting_views.Remove(mV);
                     break;
                 }
 
-                this.meetingViews.Add(meetingView);
+                this.meeting_views.Add(meeting_view);
             }
         }
 
-        public string GetUser()
+        public string ClientIdentifier
         {
-            return this.user;
-        }
-        public string GetServerUrl()
-        {
-            return this.server;
-        }
-        public int GetPort()
-        {
-            return this.port;
+            get
+            {
+                return this.client_identifier;
+            }
+            
         }
 
-        public string GetIP()
+        public string ServerURL
         {
-            return this.ip;
+            get
+            {
+                return this.server_url;
+            }
+            
         }
+        public int ClientPort
+        {
+            get
+            {
+                return this.client_port;
+            }
+        }
+
+        public string ClientIP
+        {
+            get
+            {
+                return this.client_ip;
+            }
+        }
+
         public List<MeetingView> GetMeetingViews()
         {
             lock (this)
             {
-                return this.meetingViews;
+                return this.meeting_views;
             }   
         }
 
-        private void SetPort(int port)
+        private void SetClientPort(int client_port)
         {
-            this.port = port;
+            this.client_port = client_port;
         }
 
-        private void SetMeetingViews(List<MeetingView> meetingViews)
+        private void SetMeetingViews(List<MeetingView> meeting_views)
         {
             lock (this)
             {
-                this.meetingViews = meetingViews;
+                this.meeting_views = meeting_views;
             }
         }      
     }

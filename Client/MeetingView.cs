@@ -4,38 +4,43 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MSDAD
+namespace MSDAD.Client
 {
-    namespace Client
+    public class MeetingView
     {
-        public class MeetingView
+        private string meeting_state, meeting_topic;
+        private int meeting_version;
+            
+            
+        public MeetingView(string meeting_topic, int meeting_version, string meeting_state)
         {
-            private string state, topic;
-            private int version;
-            
-            
-            public MeetingView(string topic, int version, string state)
+            this.meeting_topic = meeting_topic;
+            this.meeting_version = meeting_version;
+            this.meeting_state = meeting_state;
+        }
+
+        public string MeetingTopic
+        {
+            get
             {
-                this.topic = topic;
-                this.version = version;
-                this.state = state;
+                return this.meeting_topic;
             }
+        }          
 
-            public string GetTopic()
+        public int MeetingVersion
+        {
+            get
             {
-                return this.topic;
-            }          
-
-            public int GetVersion()
-            {
-                return this.version;
+                return this.meeting_version;
             }
+        }
 
-            public string GetState()
+        public string MeetingState
+        {
+            get
             {
-                return this.state;
+                return this.meeting_state;
             }
         }
     }
-    
 }

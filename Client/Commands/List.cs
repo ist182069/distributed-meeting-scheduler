@@ -10,25 +10,25 @@ namespace MSDAD.Client.Commands
 {
     class List : Command
     {
-        public List(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
+        public List(ref ClientLibrary client_library) : base(ref client_library)
         {
 
         }
         public override object Execute()
         {
-            List<MeetingView> meetingViews = this.clientLibrary.GetMeetingViews();
-            Dictionary<string,string> meetingQuery = new Dictionary<string,string>();
+            List<MeetingView> meeting_views = this.client_library.GetMeetingViews();
+            Dictionary<string,string> meeting_query = new Dictionary<string,string>();
 
-            foreach (MeetingView mV in meetingViews)
+            foreach (MeetingView mV in meeting_views)
             {
-                meetingQuery.Add(mV.GetTopic(), mV.GetState());
+                meeting_query.Add(mV.MeetingTopic, mV.MeetingState);
             }
 
-            this.server.List(meetingQuery, this.user);
+            this.remote_server.List(meeting_query, this.client_identifier);
 
-            foreach (MeetingView mV in meetingViews)
+            foreach (MeetingView mV in meeting_views)
             {
-                Console.WriteLine("Topic:"+mV.GetTopic() + " State:" + mV.GetState() + "\nVersion:" + mV.GetVersion() + "\n");
+                Console.WriteLine("Topic:"+mV.MeetingTopic + " State:" + mV.MeetingState + "\nVersion:" + mV.MeetingVersion + "\n");
             }
 
             return null;

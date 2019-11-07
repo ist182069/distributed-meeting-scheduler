@@ -13,32 +13,32 @@ namespace MSDAD.Client.Commands.CLI
 {
     class Create : Command
     {
-        public Create(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
+        public Create(ref ClientLibrary client_library) : base(ref client_library)
         {
         }
         public override object Execute()
         {                                  
-            int minAttendees, num_slots, num_invitees;
-            string client_string, invitee_address, room, topic;
-            MeetingView meetingView;
+            int min_attendees, num_slots, num_invitees;
+            string invitee_address, slot, meeting_topic;
+            MeetingView meeting_view;
 
             List<string> invitees = new List<string>();
 
             Console.WriteLine("Insert the following parameters");
             Console.WriteLine("Meeting topic: ");
-            topic = Console.ReadLine();
+            meeting_topic = Console.ReadLine();
 
             Console.WriteLine("Minimum Attendees: ");
             try
             {
-                minAttendees = Int32.Parse(Console.ReadLine());
+                min_attendees = Int32.Parse(Console.ReadLine());
             }
             catch(FormatException e)
             {
                 throw new ClientLocalException(ErrorCodes.INVALID_MIN_ATTENDES);
             }
 
-            if (minAttendees < 1)
+            if (min_attendees < 1)
             {
                 throw new ClientLocalException(ErrorCodes.INVALID_MIN_ATTENDES);
             }
@@ -78,20 +78,20 @@ namespace MSDAD.Client.Commands.CLI
             List<string> slots = new List<string>();
             for (int i = 0; i<num_slots; i++)
             {
-                room = Console.ReadLine();
+                slot = Console.ReadLine();
 
-                if (slots.Contains(room))
+                if (slots.Contains(slot))
                 {
                     throw new ClientLocalException(ErrorCodes.DUPLICATED_SLOT);
                 }
-                slots.Add(room);
+                slots.Add(slot);
             }
            
             if (num_invitees==0)
             {
-                this.server.Create(topic, minAttendees, slots, null, this.user);
-                meetingView = new MeetingView(topic, 1, "OPEN");
-                this.clientLibrary.AddMeetingView(meetingView);
+                this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier);
+                meeting_view = new MeetingView(meeting_topic, 1, "OPEN");
+                this.client_library.AddMeetingView(meeting_view);
             }
             else
             {
@@ -106,15 +106,15 @@ namespace MSDAD.Client.Commands.CLI
                         throw new ClientLocalException(ErrorCodes.DUPLICATED_INVITEE);
                     }
 
-                    if(invitee_address == this.user)
+                    if(invitee_address == this.client_identifier)
                     {
-                        meetingView = new MeetingView(topic, 1, "OPEN");
-                        this.clientLibrary.AddMeetingView(meetingView);
+                        meeting_view = new MeetingView(meeting_topic, 1, "OPEN");
+                        this.client_library.AddMeetingView(meeting_view);
                     }
                     invitees.Add(invitee_address);
                 }
 
-                this.server.Create(topic, minAttendees, slots, invitees, this.user);
+                this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier);
             }
                     
             return null;

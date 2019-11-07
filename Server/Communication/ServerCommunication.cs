@@ -14,45 +14,45 @@ namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
-        int port;
-        string ip, server_identifier;
+        int server_port;
+        string server_ip, server_identifier;
 
-        ServerLibrary serverLibrary;
-        RemoteServer remoteServer;
+        ServerLibrary server_library;
+        RemoteServer remote_server;
         TcpChannel channel;
 
-        private Dictionary<string, string> clientAddresses = new Dictionary<string, string>();
+        private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
 
-        public ServerCommunication(ServerLibrary server_library, string server_identifier, string ip, int port)
+        public ServerCommunication(ServerLibrary server_library, string server_identifier, string server_ip, int server_port)
         {
-            this.serverLibrary = server_library;
+            this.server_library = server_library;
             this.server_identifier = server_identifier;
-            this.port = port;
-            this.ip = ip;
+            this.server_port = server_port;
+            this.server_ip = server_ip;
         }
 
         public void Start()
         {
-            channel = new TcpChannel(this.port);
+            channel = new TcpChannel(this.server_port);
             ChannelServices.RegisterChannel(channel, true);
 
-            this.remoteServer = new RemoteServer(this);
-            RemotingServices.Marshal(this.remoteServer, server_identifier, typeof(RemoteServer));
+            this.remote_server = new RemoteServer(this);
+            RemotingServices.Marshal(this.remote_server, server_identifier, typeof(RemoteServer));
 
             LocationAndRoomInit(); // isto vai mudar quando fizermos o AddRoom do PuppetMaster
         }
 
-        public void Create(string topic, int minAttendees, List<string> venues, List<string> invitees, string user)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
         {
-            this.serverLibrary.Create(topic, minAttendees, venues, invitees, user);                
+            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);                
             if(invitees == null)
             {
-                foreach (KeyValuePair<string, string> address_iter in this.clientAddresses)
+                foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
                 {
-                    if (address_iter.Key != user)
+                    if (address_iter.Key != client_identifier)
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
-                        client.SendMeeting(topic, 1, "OPEN");
+                        client.SendMeeting(meeting_topic, 1, "OPEN");
                     }
                 }
 
@@ -62,11 +62,11 @@ namespace MSDAD.Server.Communication
 
                 foreach (string invitee_iter in invitees)
                 {
-                    if(invitee_iter != user && clientAddresses.ContainsKey(invitee_iter))
+                    if(invitee_iter != client_identifier && client_addresses.ContainsKey(invitee_iter))
                     {
-                        Console.WriteLine("tcp://" + clientAddresses[invitee_iter]);
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + clientAddresses[invitee_iter]);
-                        client.SendMeeting(topic, 1, "OPEN");
+                        Console.WriteLine("tcp://" + client_addresses[invitee_iter]);
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_addresses[invitee_iter]);
+                        client.SendMeeting(meeting_topic, 1, "OPEN");
 
                     } else
                     {
@@ -76,53 +76,53 @@ namespace MSDAD.Server.Communication
                 }
             }
 
-            Console.WriteLine("\r\nNew event: " + topic);
+            Console.WriteLine("\r\nNew event: " + meeting_topic);
             Console.Write("Please run a command to be run on the server: ");
         }
-        public void List(Dictionary<string, string> meetingQuery, string user)
+        public void List(Dictionary<string, string> meeting_query, string client_identifier)
         {
-            List<Meeting> eventList = this.serverLibrary.GetEventList();
+            List<Meeting> event_list = this.server_library.GetEventList();
 
-            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + this.clientAddresses[user]);
+            ClientInterface remote_client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + this.client_addresses[client_identifier]);
 
-            foreach (Meeting meeting in eventList)
+            foreach (Meeting meeting in event_list)
             {
-                if (!meetingQuery.ContainsKey(meeting.Topic) && meeting.GetInvitees() == null)
+                if (!meeting_query.ContainsKey(meeting.Topic) && meeting.GetInvitees() == null)
                 {
-                    client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
+                    remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State);
                 }
-                else if (meetingQuery.ContainsKey(meeting.Topic) && !meeting.GetState().Equals(meetingQuery[meeting.Topic]))
+                else if (meeting_query.ContainsKey(meeting.Topic) && !meeting.State.Equals(meeting_query[meeting.Topic]))
                 {
-                    string state = meeting.GetState();
-                    if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(user));
+                    string state = meeting.State;
+                    if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier));
                     {
-                        string aux = state + "\nClient Confirmed at " + meeting.GetFinalSlot();
-                        client.SendMeeting(meeting.Topic, meeting.GetVersion(), aux);
+                        string aux = state + "\nClient Confirmed at " + meeting.FinalSlot;
+                        remote_client.SendMeeting(meeting.Topic, meeting.Version, aux);
                     }
-                    if (!meeting.ClientConfirmed(user))
+                    if (!meeting.ClientConfirmed(client_identifier))
                     {
-                        client.SendMeeting(meeting.Topic, meeting.GetVersion(), meeting.GetState());
+                        remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State);
                     }
                 }
             } 
         }
 
-        public void Join(string topic, List<string> slots, string user)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier)
         {
-            this.serverLibrary.Join(topic, slots, user);
+            this.server_library.Join(meeting_topic, slots, client_identifier);
         }
 
-        public void Close(String topic, string user)
+        public void Close(String meeting_topic, string client_identifier)
         {
-            this.serverLibrary.Close(topic, user);
+            this.server_library.Close(meeting_topic, client_identifier);
         }
 
 
-        public void BroadcastPing(string message, string user)
+        public void BroadcastPing(string message, string client_identifier)
         {
-            foreach (KeyValuePair<string, string> address_iter in this.clientAddresses)
+            foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
             {
-                if (address_iter.Key != user)
+                if (address_iter.Key != client_identifier)
                 {
                     ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
                     client.Ping(message);
@@ -133,53 +133,52 @@ namespace MSDAD.Server.Communication
 
         public Dictionary<string, string> GetClientAddresses()
         {
-            return this.clientAddresses;
+            return this.client_addresses;
         }
 
-        public string GetClientAddress(string user)
+        public string GetClientAddress(string client_identifier)
         {
-            return this.clientAddresses[user];
+            return this.client_addresses[client_identifier];
         }
 
-        public void AddClientAddress(string user, string ip, int port)
+        public void AddClientAddress(string client_identifier, string client_ip, int client_port)
         {
-            string client_address, client_identifier;
+            string client_address;
 
-            client_address = ServerUtils.AssembleAddress(ip, port);
+            client_address = ServerUtils.AssembleAddress(client_ip, client_port);
 
-            if (!clientAddresses.ContainsKey(user) && ServerUtils.ValidateAddress(client_address))
+            if (!client_addresses.ContainsKey(client_identifier) && ServerUtils.ValidateAddress(client_address))
             {
                 lock (this)
                 {
-                    client_identifier = client_address + "/" + user;
-                    clientAddresses.Add(user, client_identifier);
+                    client_addresses.Add(client_identifier, client_address + "/" + client_identifier);
                 }
             }
         }
 
         public void LocationAndRoomInit()
         {
-            Location Lisboa = new Location("Lisboa");
-            Lisboa.Add(new Room("LisboaA", 10));
-            Lisboa.Add(new Room("LisboaB", 20));                
-            Location Coimbra = new Location("Coimbra");
-            Coimbra.Add(new Room("CoimbraA", 5));
-            Coimbra.Add(new Room("CoimbraB", 10));
-            Location Guarda = new Location("Guarda");
-            Guarda.Add(new Room("GuardaA", 4));
-            Guarda.Add(new Room("GuardaB", 10));
-            Location Porto = new Location("Porto");
-            Porto.Add(new Room("PortoA", 4));
-            Porto.Add(new Room("PortoB", 6));
-            Location Braga = new Location("Braga");
-            Braga.Add(new Room("BragaA", 10));
-            Braga.Add(new Room("BragaB", 20));
+            Location lisboa = new Location("Lisboa");
+            lisboa.Add(new Room("LisboaA", 10));
+            lisboa.Add(new Room("LisboaB", 20));                
+            Location coimbra = new Location("Coimbra");
+            coimbra.Add(new Room("CoimbraA", 5));
+            coimbra.Add(new Room("CoimbraB", 10));
+            Location guarda = new Location("Guarda");
+            guarda.Add(new Room("GuardaA", 4));
+            guarda.Add(new Room("GuardaB", 10));
+            Location porto = new Location("Porto");
+            porto.Add(new Room("PortoA", 4));
+            porto.Add(new Room("PortoB", 6));
+            Location braga = new Location("Braga");
+            braga.Add(new Room("BragaA", 10));
+            braga.Add(new Room("BragaB", 20));
 
-            this.serverLibrary.AddLocation(Lisboa);
-            this.serverLibrary.AddLocation(Coimbra);
-            this.serverLibrary.AddLocation(Guarda);
-            this.serverLibrary.AddLocation(Porto);
-            this.serverLibrary.AddLocation(Braga);
+            this.server_library.AddLocation(lisboa);
+            this.server_library.AddLocation(coimbra);
+            this.server_library.AddLocation(guarda);
+            this.server_library.AddLocation(porto);
+            this.server_library.AddLocation(braga);
         }
 
     }

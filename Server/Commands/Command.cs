@@ -10,24 +10,23 @@ namespace MSDAD.Server.Commands
             
     abstract class Command
     {
-        public int port;
-        public string ip, client_address, server_identifier, server_url;
-        public ServerLibrary serverLibrary;
-        public ServerInterface server;
+        public int server_port;
+        public string server_ip, server_address, server_identifier;
+        public ServerLibrary server_library;
 
-        public Command(ref ServerLibrary serverLibrary)
+        public Command(ref ServerLibrary server_library)
         {
-            this.serverLibrary = serverLibrary;
+            this.server_library = server_library;
 
             Init();
         }
 
         void Init()
         {
-            this.server_identifier = this.serverLibrary.GetServerIdentifier();
-            this.port = this.serverLibrary.GetServerPort();
-            this.ip = this.serverLibrary.GetServerIP();
-            this.client_address = ServerUtils.AssembleAddress(ip, port);
+            this.server_identifier = this.server_library.ServerIdentifier;
+            this.server_port = this.server_library.ServerPort;
+            this.server_ip = this.server_library.ServerIP;
+            this.server_address = ServerUtils.AssembleAddress(server_ip, server_port);
         }
         public abstract object Execute();
     }

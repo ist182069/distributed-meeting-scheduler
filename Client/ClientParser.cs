@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using MSDAD.Client.Commands;
-using MSDAD.Client.Commands.Parser;
 using MSDAD.Library;
 using MSDAD.Client.Commands.CLI;
 
@@ -26,8 +25,7 @@ namespace MSDAD.Client
         int port_int = 0;
         string client_url, script_name, server_url, user_identifier, ip_string, port_string;
         
-        ClientLibrary clientLibrary;
-        Command command;
+        ClientLibrary client_library;
 
         public ClientParser(string script_name)
         {
@@ -50,8 +48,8 @@ namespace MSDAD.Client
             Console.Write("Type the server identifier to whom you want to connect: ");
             this.server_url = Console.ReadLine();
 
-            this.clientLibrary = new ClientLibrary(user_identifier, server_url, ip_string, port_int);
-            new Initialize(ref this.clientLibrary);
+            this.client_library = new ClientLibrary(user_identifier, server_url, ip_string, port_int);
+            new Initialize(ref this.client_library);
 
             this.script_name = script_name;
         }
@@ -80,9 +78,9 @@ namespace MSDAD.Client
             Console.WriteLine(this.ip_string);
             Console.WriteLine(port);
             Console.WriteLine(script_name);
-            this.clientLibrary = new ClientLibrary(client_identifier, this.server_url, this.ip_string, port);
+            this.client_library = new ClientLibrary(client_identifier, this.server_url, this.ip_string, port);
 
-            new Initialize(ref this.clientLibrary);
+            new Initialize(ref this.client_library);
 
             this.script_name = script_name;
         }
@@ -125,19 +123,19 @@ namespace MSDAD.Client
                     switch (input)
                     {
                         case PING_COMMAND:
-                            new Ping(ref clientLibrary).Execute();
+                            new Ping(ref client_library).Execute();
                             break;
                         case CREATE:
-                            new Commands.CLI.Create(ref clientLibrary).Execute();
+                            new Commands.CLI.Create(ref client_library).Execute();
                             break;
                         case LIST:
-                            new List(ref clientLibrary).Execute();
+                            new List(ref client_library).Execute();
                             break;
                         case JOIN:
-                            new Commands.CLI.Join(ref clientLibrary).Execute();
+                            new Commands.CLI.Join(ref client_library).Execute();
                             break;
                         case CLOSE:
-                            new Commands.CLI.Close(ref clientLibrary).Execute();
+                            new Commands.CLI.Close(ref client_library).Execute();
                             break;
                         case EXIT:
                             Console.WriteLine("Bye!");
@@ -191,16 +189,16 @@ namespace MSDAD.Client
             switch(words[0])
             {
                 case CREATE:
-                    new Commands.Parser.Create(ref this.clientLibrary, words).Execute();
+                    new Commands.Parser.Create(ref this.client_library, words).Execute();
                     break;
                 case LIST:
-                    new List(ref this.clientLibrary).Execute();
+                    new List(ref this.client_library).Execute();
                     break;
                 case JOIN:
-                    new Commands.Parser.Join(ref this.clientLibrary, words).Execute();
+                    new Commands.Parser.Join(ref this.client_library, words).Execute();
                     break;
                 case CLOSE:
-                    new Commands.Parser.Close(ref this.clientLibrary, words).Execute();
+                    new Commands.Parser.Close(ref this.client_library, words).Execute();
                     break;
                 default:
                     Console.WriteLine(ErrorCodes.INVALID_COMMAND);

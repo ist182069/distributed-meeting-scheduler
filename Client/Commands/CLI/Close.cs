@@ -10,20 +10,20 @@ namespace MSDAD.Client.Commands.CLI
 {
     class Close : Command
     {
-        public Close(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
+        public Close(ref ClientLibrary client_library) : base(ref client_library)
         {
 
         }
         public override object Execute()
         {
-            string topic;
+            string meeting_topic;
 
             Console.WriteLine("Write meeting topic:");
-            topic = Console.ReadLine();
+            meeting_topic = Console.ReadLine();
 
 
-            this.server.Close(topic, this.user);
-            Console.WriteLine("Successfully scheduled " + topic);
+            this.remote_server.Close(meeting_topic, this.client_identifier);
+            Console.WriteLine("Successfully scheduled " + meeting_topic);
 
             return null;
         }

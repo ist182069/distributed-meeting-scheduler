@@ -9,7 +9,7 @@ namespace MSDAD.Client.Commands
 {
     class Initialize : Command
     {
-        public Initialize(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
+        public Initialize(ref ClientLibrary client_library) : base(ref client_library)
         {
 
         }

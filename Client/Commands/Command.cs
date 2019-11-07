@@ -11,27 +11,27 @@ namespace MSDAD.Client.Commands
             
     abstract class Command
     {
-        public int port;
-        public string ip, client_address, user, server_url;
-        public ClientLibrary clientLibrary;
-        public ServerInterface server;
+        public int client_port;
+        public string client_ip, client_address, client_identifier, server_url;
+        public ClientLibrary client_library;
+        public ServerInterface remote_server;
 
-        public Command(ref ClientLibrary clientLibrary)
+        public Command(ref ClientLibrary client_library)
         {
-            this.clientLibrary = clientLibrary;
+            this.client_library = client_library;
 
             Init();
         }
 
         void Init()
         {
-            this.user = this.clientLibrary.GetUser();
-            this.server_url = this.clientLibrary.GetServerUrl();
-            this.port = this.clientLibrary.GetPort();
-            this.ip = this.clientLibrary.GetIP();
-            this.client_address = ClientUtils.AssembleAddress(ip, port);
-            this.server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
-            this.server.Hello(this.user, this.ip, this.port);
+            this.client_identifier = this.client_library.ClientIdentifier;
+            this.server_url = this.client_library.ServerURL;
+            this.client_port = this.client_library.ClientPort;
+            this.client_ip = this.client_library.ClientIP;
+            this.client_address = ClientUtils.AssembleAddress(client_ip, client_port);
+            this.remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
+            this.remote_server.Hello(this.client_identifier, this.client_ip, this.client_port);
         }
         public abstract object Execute();
     }

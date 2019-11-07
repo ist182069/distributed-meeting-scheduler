@@ -8,3 +8,13 @@ C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Client\obj\
 C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Client\obj\Debug\Client.csproj.CopyComplete
 C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Client\obj\Debug\Client.exe
 C:\Users\José Eduardo\Documents\Projecto DAD\Projecto-DAD-2018-2019\Client\obj\Debug\Client.pdb
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\obj\Debug\Client.csprojAssemblyReference.cache
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\obj\Debug\Client.exe
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\obj\Debug\Client.pdb
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\bin\Debug\Client.exe.config
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\bin\Debug\Client.exe
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\bin\Debug\Client.pdb
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\bin\Debug\Library.dll
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\bin\Debug\Library.pdb
+C:\Users\dmmnj\Desktop\IST\estudos\DAD\projeto\Projecto-DAD-2018-2019\Client\obj\Debug\Client.csproj.CopyComplete

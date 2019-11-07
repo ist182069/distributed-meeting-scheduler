@@ -8,15 +8,15 @@ namespace MSDAD.Server
         {
             if (args.Length == 0)
             {
-                ServerCLI serverCLI;
-                serverCLI = new ServerCLI();
-                serverCLI.Display();
+                ServerCLI server_CLI;
+                server_CLI = new ServerCLI();
+                server_CLI.Display();
             }
             else if (args.Length == 1)
             {
-                ServerParser serverParser;
-                serverParser = new ServerParser(args[0]);
-                serverParser.Execute();
+                ServerParser server_parser;
+                server_parser = new ServerParser(args[0]);
+                server_parser.Execute();
             }
                 
         }

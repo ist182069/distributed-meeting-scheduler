@@ -14,29 +14,27 @@ namespace MSDAD.Client.Comunication
 {        
     class ClientCommunication
     {
-        int port;
-        string ip, client_identifier;
+        int client_port;
+        string client_ip, client_identifier;
 
-        ClientLibrary clientLibrary;
-        RemoteClient client;
+        ClientLibrary client_library;
+        RemoteClient remote_client;
         TcpChannel channel;
-            
-        List<MeetingView> meetingViews = new List<MeetingView>();
 
-        public ClientCommunication(ClientLibrary clientLibrary, string client_identifier, string ip, int port)
+        public ClientCommunication(ClientLibrary client_library, string client_identifier, string client_ip, int client_port)
         {
             this.client_identifier = client_identifier;
-            this.port = port;
-            this.ip = ip;
-            this.clientLibrary = clientLibrary;
+            this.client_port = client_port;
+            this.client_ip = client_ip;
+            this.client_library = client_library;
         }
         public void Start()
         {
-            channel = new TcpChannel(this.port);
+            channel = new TcpChannel(this.client_port);
             ChannelServices.RegisterChannel(channel, true);
 
-            this.client = new RemoteClient(this);
-            RemotingServices.Marshal(this.client, client_identifier, typeof(RemoteClient));
+            this.remote_client = new RemoteClient(this);
+            RemotingServices.Marshal(this.remote_client, client_identifier, typeof(RemoteClient));
         }
   
         public void AddMeetingView(string topic, int version, string state)
@@ -45,7 +43,7 @@ namespace MSDAD.Client.Comunication
 
             meetingView = new MeetingView(topic, version, state);
 
-            this.clientLibrary.AddMeetingView(meetingView);
+            this.client_library.AddMeetingView(meetingView);
         }    
     }
 }

@@ -9,7 +9,7 @@ namespace MSDAD.Server.Commands
 {
     class Initialize : Command
     {
-        public Initialize(ref ServerLibrary serverLibrary) : base(ref serverLibrary)
+        public Initialize(ref ServerLibrary server_library) : base(ref server_library)
         {
 
         }

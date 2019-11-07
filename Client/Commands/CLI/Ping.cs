@@ -9,7 +9,7 @@ namespace MSDAD.Client.Commands.CLI
 {
     class Ping : Command
     {
-        public Ping(ref ClientLibrary clientLibrary) : base(ref clientLibrary)
+        public Ping(ref ClientLibrary client_library) : base(ref client_library)
         {
 
         }
@@ -19,7 +19,7 @@ namespace MSDAD.Client.Commands.CLI
 
             message = "ping";
 
-            this.server.Ping(message, this.user);
+            this.remote_server.Ping(message, this.client_identifier);
 
             return null;
         }

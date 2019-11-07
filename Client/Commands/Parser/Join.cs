@@ -13,7 +13,7 @@ namespace MSDAD.Client.Commands.Parser
     {
         string[] words;
 
-        public Join(ref ClientLibrary clientLibrary, string[] words) : base(ref clientLibrary)
+        public Join(ref ClientLibrary client_library, string[] words) : base(ref client_library)
         {
             this.words = words;
         }
@@ -22,11 +22,11 @@ namespace MSDAD.Client.Commands.Parser
         {
 
             int num_slots;
-            string room, topic;
+            string room, meeting_topic;
 
             List<string> slots = new List<string>();
 
-            topic = this.words[1];
+            meeting_topic = this.words[1];
             
             try
             {
@@ -55,7 +55,7 @@ namespace MSDAD.Client.Commands.Parser
                 slots.Add(room);
             }
 
-            this.server.Join(topic, slots, this.user);
+            this.remote_server.Join(meeting_topic, slots, this.client_identifier);
 
             return null;
         }

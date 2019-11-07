@@ -19,11 +19,11 @@ namespace MSDAD.Client.Commands.CLI
         public override object Execute()
         {
             int num_slots;
-            string room, topic;
+            string slot, meeting_topic;
             List<string> slots;
 
             Console.WriteLine("Write meeting topic:");
-            topic = Console.ReadLine();
+            meeting_topic = Console.ReadLine();
             
             Console.WriteLine("Number of slots: ");
             try
@@ -44,18 +44,18 @@ namespace MSDAD.Client.Commands.CLI
             slots = new List<string>();
             for (int i = 0; i<num_slots; i++)
             {
-                room = Console.ReadLine();
+                slot = Console.ReadLine();
 
-                if (slots.Contains(room))
+                if (slots.Contains(slot))
                 {
                     throw new ClientLocalException(ErrorCodes.DUPLICATED_SLOT);
                 }
 
-                slots.Add(room);
+                slots.Add(slot);
             }
 
-            this.server.Join(topic, slots, this.user);
-            Console.WriteLine("Registered in " + topic);
+            this.remote_server.Join(meeting_topic, slots, this.client_identifier);
+            Console.WriteLine("Registered in " + meeting_topic);
 
             return null;
         }

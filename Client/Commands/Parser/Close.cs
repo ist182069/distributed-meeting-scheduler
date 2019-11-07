@@ -10,7 +10,7 @@ namespace MSDAD.Client.Commands.Parser
     {
         string[] words;
 
-        public Close(ref ClientLibrary clientLibrary, string[] words) : base(ref clientLibrary)
+        public Close(ref ClientLibrary client_library, string[] words) : base(ref client_library)
         {
             this.words = words;
         }
@@ -21,7 +21,7 @@ namespace MSDAD.Client.Commands.Parser
 
             topic = this.words[1];
 
-            this.server.Close(topic, this.user);
+            this.remote_server.Close(topic, this.client_identifier);
 
             return null;
         }

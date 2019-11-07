@@ -13,7 +13,7 @@ namespace MSDAD.Client.Commands.Parser
     {
         string[] words;
 
-        public Create(ref ClientLibrary clientLibrary, string[] words) : base(ref clientLibrary)
+        public Create(ref ClientLibrary client_library, string[] words) : base(ref client_library)
         {
             this.words = words;
         }
@@ -22,12 +22,12 @@ namespace MSDAD.Client.Commands.Parser
         {
 
             int min_attendees, num_slots, num_invitees;
-            string invitee_address, room, topic;
+            string invitee_address, room, meeting_topic;
 
-            MeetingView meetingView;
+            MeetingView meeting_view;
             List<string> slots = new List<string>(), invitees;
 
-            topic = this.words[1];
+            meeting_topic = this.words[1];
 
             try
             {
@@ -84,9 +84,9 @@ namespace MSDAD.Client.Commands.Parser
 
             if(num_invitees==0)
             {
-                this.server.Create(topic, min_attendees, slots, null, this.user);
-                meetingView = new MeetingView(topic, 1, "OPEN");
-                this.clientLibrary.AddMeetingView(meetingView);
+                this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier);
+                meeting_view = new MeetingView(meeting_topic, 1, "OPEN");
+                this.client_library.AddMeetingView(meeting_view);
             }
             else
             {
@@ -102,13 +102,13 @@ namespace MSDAD.Client.Commands.Parser
 
                     if (invitee_address == this.client_address)
                     {
-                        meetingView = new MeetingView(topic, 1, "OPEN");
-                        this.clientLibrary.AddMeetingView(meetingView);
+                        meeting_view = new MeetingView(meeting_topic, 1, "OPEN");
+                        this.client_library.AddMeetingView(meeting_view);
                     }
 
                     invitees.Add(invitee_address);
 
-                    this.server.Create(topic, min_attendees, slots, invitees, this.user);
+                    this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier);
                 }
             }
                 
