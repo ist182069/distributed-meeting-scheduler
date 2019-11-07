@@ -25,7 +25,7 @@ namespace MSDAD
             {
                 ClientLibrary clientLibrary;               
                 int port_int;
-                string input, user_identifier, ip_string, port_string, server_identifier;
+                string input, user_identifier, ip_string, port_string, server_url;
 
                 ip_string = ClientUtils.GetLocalIPAddress();
                 Console.Write("Pick a client port: ");
@@ -37,10 +37,10 @@ namespace MSDAD
                 user_identifier = Console.ReadLine();
 
                 Console.Write("Type the server identifier to whom you want to connect: ");
-                server_identifier = Console.ReadLine();
+                server_url = Console.ReadLine();
 
                 Console.WriteLine("Your current Meeting Scheduler IP and port combination is: \"" + ip_string + ":" + port_string + "/" + user_identifier);
-                clientLibrary = new ClientLibrary(user_identifier, server_identifier, ip_string, port_int);
+                clientLibrary = new ClientLibrary(user_identifier, server_url, ip_string, port_int);
                 // Serve apenas para inicializar, caso contrario temos de esperar por um comando para registar no servidor
                 new Initialize(ref clientLibrary);
 

@@ -1,4 +1,6 @@
-﻿namespace MSDAD.Server
+﻿using System;
+
+namespace MSDAD.Server
 {
     class ServerMain
     {

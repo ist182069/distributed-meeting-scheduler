@@ -1,0 +1,1 @@
+- Para processar o PCS dar é necessário fazer rebuild aos outros módulos do programa como o Client e o Server.

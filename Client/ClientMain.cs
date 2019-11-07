@@ -1,4 +1,5 @@
-﻿using MSDAD.Client.Exceptions;
+﻿using System;
+using MSDAD.Client.Exceptions;
 
 namespace MSDAD
 {
@@ -7,7 +8,7 @@ namespace MSDAD
         class ClientMain
         {            
             static void Main(string[] args)
-            {                
+            {            
                 if(args.Length==0)
                 {
                     ClientCLI clientUI;
@@ -19,10 +20,16 @@ namespace MSDAD
                     ClientParser clientParser;
                     clientParser = new ClientParser(args[0]);
                     clientParser.Parse();
-                }                    
+                }        
+                else if(args.Length==3)
+                {
+                    ClientParser clientParser;
+                    clientParser = new ClientParser(args[0], args[1], args[2]);
+                    clientParser.Parse();
+                }
                 else
                 {
-                    throw new ClientLocalException("Error! You cannot insert more than one argument in this program.");
+                    throw new ClientLocalException("Error! Invalid number of arguments...");
                 }
             }
         }

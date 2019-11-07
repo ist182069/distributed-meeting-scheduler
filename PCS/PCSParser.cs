@@ -17,6 +17,7 @@ namespace MSDAD.PCS
     {
         private const string ADD_ROOM = "AddRoom";
 
+        private const string CLIENT = "Client";
         private const string PCS = "PCS";
         private const string SERVER = "Server";
 
@@ -78,9 +79,12 @@ namespace MSDAD.PCS
                 case ADD_ROOM:
                     new AddRoom(ref this.pcsLibrary).Execute();
                     break;
+                case CLIENT:
+                    new Client(ref this.pcsLibrary).Execute();
+                    break;
                 case SERVER:
                     new Server(ref this.pcsLibrary).Execute();
-                    break;
+                    break;                
                 default:
                     Console.WriteLine("Error! The command you have inserted is not a valid one...");
                     break;

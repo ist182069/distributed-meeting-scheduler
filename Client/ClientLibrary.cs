@@ -24,6 +24,7 @@ namespace MSDAD.Client
             this.server = server;
             this.ip = ip;
             this.port = port;
+
             this.communications = new ClientCommunications(this, user, ip,  port); ;
 
             Console.Write("Starting client remoting service... ");
@@ -50,7 +51,7 @@ namespace MSDAD.Client
         {
             return this.user;
         }
-        public string GetServerId()
+        public string GetServerUrl()
         {
             return this.server;
         }

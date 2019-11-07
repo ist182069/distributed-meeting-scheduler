@@ -26,13 +26,18 @@ namespace MSDAD.PCS.Commands
 
             server_identifier = words[1];
             server_url = words[2];
-
-            base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, server_url);
+            // usar os restantes campos que nao percebo para que sao words[3], words[4], words[5]
 
             server_path = PCSUtils.AssemblePath(SERVER) + "\\" + SERVER_EXE;
 
-            Process.Start(server_path, "teste");
-            // usar os restantes campos que nao percebo para que sao words[3], words[4], words[5]
+            Process server_process = new Process();
+            server_process.StartInfo.FileName = server_path;
+            // TODO passar um XML ou whatever para criar as localizacoes
+            server_process.StartInfo.Arguments = server_url;
+            server_process.Start();            
+
+            base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, server_process);
+            
             return null;
         }
     }

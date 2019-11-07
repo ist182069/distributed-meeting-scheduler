@@ -21,15 +21,60 @@ namespace MSDAD.Client
         const string JOIN = "join";
         const string CLOSE = "close";
 
-        string script_name;
-
+        int port_int;
+        string client_url, script_name, server_url, user_identifier, ip_string, port_string;
+        
         ClientLibrary clientLibrary;
         Command command;
 
         public ClientParser(string script_name)
         {
-            // TODO portos pre definidos que na verdade sao escolhidos pelo puppet master
-            this.clientLibrary = new ClientLibrary("client1", "server1", ClientUtils.GetLocalIPAddress(), 1488);
+            
+
+            this.ip_string = ClientUtils.GetLocalIPAddress();
+            Console.Write("Pick a client port: ");
+
+            this.port_string = Console.ReadLine();
+            this.port_int = Int32.Parse(port_string);
+            // TODO adicionar excepcao aqui
+
+            Console.Write("Pick a user identifier: ");
+            this.user_identifier = Console.ReadLine();
+
+            Console.Write("Type the server identifier to whom you want to connect: ");
+            this.server_url = Console.ReadLine();
+
+            this.clientLibrary = new ClientLibrary(user_identifier, server_url, ip_string, port_int);
+            new Initialize(ref this.clientLibrary);
+
+            this.script_name = script_name;
+        }
+
+        public ClientParser(string client_url, string server_url, string script_name)
+        {
+            int port;
+            string client_identifier, port_string;
+            string[] split_url, split_ip;
+
+            split_url = client_url.Split('/');
+            split_ip = split_url[2].Split(':');
+            
+            this.ip_string = split_ip[0];            
+            port_string = split_ip[1];
+
+            port = Int32.Parse(port_string);
+
+            client_identifier = split_url[3];
+
+            this.client_url = client_url;
+            this.server_url = server_url;
+
+            Console.WriteLine(client_identifier);
+            Console.WriteLine(this.server_url);
+            Console.WriteLine(this.ip_string);
+            Console.WriteLine(port);
+            this.clientLibrary = new ClientLibrary(client_identifier, this.server_url, this.ip_string, port);
+
             new Initialize(ref this.clientLibrary);
 
             this.script_name = script_name;
@@ -38,7 +83,7 @@ namespace MSDAD.Client
         {            
             string script_path;
 
-            script_path = this.AssembleScript();            
+            script_path = this.AssembleScript();
 
             if (this.ScriptExists(script_path))
             {
@@ -79,7 +124,7 @@ namespace MSDAD.Client
         {
             string current_path;
 
-            current_path = ClientUtils.AssembleCurrentPath() + "\\" + "Scripts" + "\\" + this.script_name;            
+            current_path = ClientUtils.AssembleCurrentPath() + "Scripts" + "\\" + this.script_name;            
 
             return current_path;
         }
