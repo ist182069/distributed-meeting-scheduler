@@ -11,9 +11,9 @@ namespace MSDAD
             {            
                 if(args.Length==0)
                 {
-                    ClientCLI clientUI;
-                    clientUI = new ClientCLI();
-                    clientUI.Display();
+                    ClientParser clientParser;
+                    clientParser = new ClientParser(null);
+                    clientParser.Parse();
                 }
                 else if(args.Length==1)
                 {

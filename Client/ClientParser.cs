@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using MSDAD.Client.Commands;
 using MSDAD.Client.Commands.Parser;
+using MSDAD.Library;
+using MSDAD.Client.Commands.CLI;
 
 namespace MSDAD.Client
 {
@@ -29,8 +31,6 @@ namespace MSDAD.Client
 
         public ClientParser(string script_name)
         {
-            
-
             this.ip_string = ClientUtils.GetLocalIPAddress();
             Console.Write("Pick a client port: ");
 
@@ -88,7 +88,7 @@ namespace MSDAD.Client
 
             Console.WriteLine(script_path);
 
-            if (this.ScriptExists(script_path))
+            if (script_path != null && this.ScriptExists(script_path))
             {
                 int counter = 0;
                 string line;
@@ -102,12 +102,51 @@ namespace MSDAD.Client
                 file.Close();
 
             }
-            else
+            else if(script_path != null)
             {
                 throw new ClientLocalException(ErrorCodes.NONEXISTENT_SCRIPT);
             }
 
-            while (true) ;
+            string input;
+
+            while (true)
+            {
+                Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
+                input = Console.ReadLine();
+
+                try
+                {
+                    switch (input)
+                    {
+                        case PING_COMMAND:
+                            new Ping(ref clientLibrary).Execute();
+                            break;
+                        case CREATE:
+                            new Commands.CLI.Create(ref clientLibrary).Execute();
+                            break;
+                        case LIST:
+                            new List(ref clientLibrary).Execute();
+                            break;
+                        case JOIN:
+                            new Commands.CLI.Join(ref clientLibrary).Execute();
+                            break;
+                        case CLOSE:
+                            new Commands.CLI.Close(ref clientLibrary).Execute();
+                            break;
+                        case EXIT:
+                            Console.WriteLine("Bye!");
+                            return;
+                        default:
+                            Console.WriteLine(ErrorCodes.INVALID_COMMAND);
+                            break;
+                    }
+                }
+                catch (Exception exception) when (exception is ClientLocalException || exception is ServerCoreException)
+                {
+                    Console.WriteLine(exception.Message);
+                }
+
+            }
         }
 
         private bool ScriptExists(string script_path)
@@ -127,10 +166,17 @@ namespace MSDAD.Client
         private string AssembleScript()
         {
             string current_path;
+            
+            if(this.script_name == null)
+            {
+                return null;
+            }
+            else
+            {
+                current_path = ClientUtils.AssembleCurrentPath() + "\\" + "Scripts" + "\\" + this.script_name;
 
-            current_path = ClientUtils.AssembleCurrentPath() + "\\" + "Scripts" + "\\" + this.script_name;            
-
-            return current_path;
+                return current_path;
+            }
         }
         private void ParseLine(string text_line)
         {
@@ -139,16 +185,16 @@ namespace MSDAD.Client
             switch(words[0])
             {
                 case CREATE:
-                    new Create(ref this.clientLibrary, words).Execute();
+                    new Commands.Parser.Create(ref this.clientLibrary, words).Execute();
                     break;
                 case LIST:
                     new List(ref this.clientLibrary).Execute();
                     break;
                 case JOIN:
-                    new Join(ref this.clientLibrary, words).Execute();
+                    new Commands.Parser.Join(ref this.clientLibrary, words).Execute();
                     break;
                 case CLOSE:
-                    new Close(ref this.clientLibrary, words).Execute();
+                    new Commands.Parser.Close(ref this.clientLibrary, words).Execute();
                     break;
                 default:
                     Console.WriteLine(ErrorCodes.INVALID_COMMAND);

@@ -58,7 +58,6 @@
     <Compile Include="MeetingView.cs" />
     <Compile Include="Commands\CLI\Create.cs" />
     <Compile Include="Commands\Command.cs" />
-    <Compile Include="ClientCLI.cs" />
     <Compile Include="Communication\ClientCommunications.cs" />
     <Compile Include="Communication\RemoteClient.cs" />
     <Compile Include="ClientMain.cs" />
