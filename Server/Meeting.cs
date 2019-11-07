@@ -114,24 +114,16 @@ namespace MSDAD.Server
         }
         private void AddClientToVenues(List<Tuple<Location, DateTime>> slots, string client_address)
         {
-            bool client_not_added_flag = true;
-
             foreach (Tuple<Location, DateTime> tuple in slots)
             {
                 if (this.venuesClientMapping.ContainsKey(tuple))
                 {                           
                     this.venuesClientMapping[tuple].Add(client_address);
-                    client_not_added_flag = false;
                 }
                 else
                 {
-                    throw new ServerCoreException(ErrorCodes.ONE_INVALID_SLOT);
+                    throw new ServerCoreException(ErrorCodes.INVALID_SLOT);
                 }
-            }
-            
-            if (client_not_added_flag)
-            {
-                throw new ServerCoreException(ErrorCodes.ALL_INVALID_SLOTS);
             }
         }
         
