@@ -29,7 +29,6 @@ namespace MSDAD.Client
 
             Console.Write("Starting client remoting service... ");
             client_communication.Start();
-            Console.WriteLine("Success!");  
         }
 
         public void AddMeetingView(MeetingView meeting_view)
@@ -44,6 +43,14 @@ namespace MSDAD.Client
                 }
 
                 this.meeting_views.Add(meeting_view);
+            }
+        }
+
+        public ClientCommunication ClientCommunication
+        {
+            get
+            {
+                return this.client_communication;
             }
         }
 

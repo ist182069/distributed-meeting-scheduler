@@ -147,11 +147,18 @@ namespace MSDAD.Server.Communication
 
             client_address = ServerUtils.AssembleAddress(client_ip, client_port);
 
-            if (!client_addresses.ContainsKey(client_identifier) && ServerUtils.ValidateAddress(client_address))
+            if (ServerUtils.ValidateAddress(client_address))
             {
                 lock (this)
                 {
-                    client_addresses.Add(client_identifier, client_address + "/" + client_identifier);
+                    try
+                    {
+                        client_addresses.Add(client_identifier, client_address + "/" + client_identifier);
+                    }
+                    catch (ArgumentException)
+                    {
+                        throw new ServerCoreException(ErrorCodes.USER_WITH_SAME_ID);
+                    }
                 }
             }
         }

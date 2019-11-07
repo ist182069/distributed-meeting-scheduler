@@ -16,5 +16,6 @@ namespace MSDAD.Client
         internal static String INVALID_N_SLOTS = "Number of slots input should be an positive integer (>1).";
         internal static String INVALID_N_INVITEES = "Number of invitees input should be an positive integer (>0).";
         internal static String INVALID_PORT_FORMAT = "Invalid port format.";
+        internal static String ALREADY_USED_PORT = "That port is already taken.";
     }
 }

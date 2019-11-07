@@ -1,4 +1,4 @@
-- se dois clientes chamados Joao entram no servidor, ambos são tratados como o mesmo Joao. REPLICAR ERRO: criar 1 servidor, criar dois clientes com o mesmo client_identifier, juntar a uma meeting com um, juntar à mesma meeting com o outro e receber "You're already signed to that meeting".
+(FIXED) - se dois clientes chamados Joao entram no servidor, ambos são tratados como o mesmo Joao. REPLICAR ERRO: criar 1 servidor, criar dois clientes com o mesmo client_identifier, juntar a uma meeting com um, juntar à mesma meeting com o outro e receber "You're already signed to that meeting".
 SOLUÇÕES PROPOSTAS: 1) procurar evitar que isto aconteça mas deixar que dois clientes tenham o mesmo nome. 2) barrar a criação de um segundo cliente com o mesmo nome
 
-- se todas as slots estiverem erradas a exceção mandada não deve ser "One or more...." REPLICAR ERRO: criar 1 servidor, criar um cliente, juntar a uma meeting sem dar uma slot correta (só dar slots erradas) (FIXED)
+(FIXED) - se todas as slots estiverem erradas a exceção mandada não deve ser "One or more...." REPLICAR ERRO: criar 1 servidor, criar um cliente, juntar a uma meeting sem dar uma slot correta (só dar slots erradas) 

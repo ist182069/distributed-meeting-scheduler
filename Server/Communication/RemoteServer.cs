@@ -47,9 +47,9 @@ namespace MSDAD.Server.Communication
             throw new NotImplementedException();
         }
 
-        public void Hello(string user, string ip, int port)
+        public void Hello(string client_identifier, string client_ip, int client_port)
         {
-            server_communication.AddClientAddress(user, ip, port);
+            server_communication.AddClientAddress(client_identifier, client_ip, client_port);
         }
     }
 }

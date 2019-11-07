@@ -10,19 +10,24 @@ namespace MSDAD.Server
         {
             ServerLibrary server_library;
             int server_port = 0;
-            string command, server_identifier, server_ip, server_port_string;
+            string command, server_identifier, server_ip, server_port_string = "";
 
             server_ip = ServerUtils.GetLocalIPAddress();
-            Console.Write("Pick a server port: ");
-            server_port_string = Console.ReadLine();
 
-            try
+            bool server_port_is_correct = false;
+            while (!server_port_is_correct)
             {
-                server_port = Int32.Parse(server_port_string);
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
+                try
+                {
+                    Console.Write("Pick a server port: ");
+                    server_port_string = Console.ReadLine();
+                    server_port = Int32.Parse(server_port_string);
+                    server_port_is_correct = true;
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
+                }
             }
 
             Console.Write("Type the server identifier: ");

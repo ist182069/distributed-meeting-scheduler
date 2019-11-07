@@ -9,6 +9,7 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Text;
 using System.Threading.Tasks;
+using MSDAD.Client.Exceptions;
 
 namespace MSDAD.Client.Comunication
 {        
@@ -30,11 +31,23 @@ namespace MSDAD.Client.Comunication
         }
         public void Start()
         {
-            channel = new TcpChannel(this.client_port);
-            ChannelServices.RegisterChannel(channel, true);
+            try
+            {
+                channel = new TcpChannel(this.client_port);
+                ChannelServices.RegisterChannel(channel, true);
+            }
+            catch (SocketException e)
+            {
+                throw new ClientLocalException(ErrorCodes.ALREADY_USED_PORT);
+            }
 
             this.remote_client = new RemoteClient(this);
             RemotingServices.Marshal(this.remote_client, client_identifier, typeof(RemoteClient));
+        }
+
+        public void Destroy()
+        {
+            ChannelServices.UnregisterChannel(this.channel);
         }
   
         public void AddMeetingView(string topic, int version, string state)

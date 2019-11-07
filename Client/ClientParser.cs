@@ -30,27 +30,55 @@ namespace MSDAD.Client
         public ClientParser(string script_name)
         {
             this.client_ip = ClientUtils.GetLocalIPAddress();
-            Console.Write("Pick a client port: ");
-
-            this.client_port_string = Console.ReadLine();
-
-            try
+            bool client_port_isnt_taken = false;
+            while (!client_port_isnt_taken)
             {
-                this.client_port = Int32.Parse(client_port_string);
-            } catch (FormatException)
-            {
-                Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
+                try
+                {
+                    bool client_port_is_correct = false;
+                    while (!client_port_is_correct)
+                    {
+                        try
+                        {
+                            Console.Write("Pick a client port: ");
+                            this.client_port_string = Console.ReadLine();
+                            this.client_port = Int32.Parse(client_port_string);
+                            client_port_is_correct = true;
+                        }
+                        catch (FormatException)
+                        {
+                            Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
+                        }
+                    }
+
+                    bool client_identifier_is_correct = false;
+                    while (!client_identifier_is_correct)
+                    {
+                        try
+                        {
+                            Console.Write("Pick a user identifier: ");
+                            this.client_identifier = Console.ReadLine();
+
+                            Console.Write("Type the server identifier to whom you want to connect: ");
+                            this.server_url = Console.ReadLine();
+
+                            this.client_library = new ClientLibrary(client_identifier, server_url, client_ip, client_port);
+                            new Initialize(ref this.client_library);
+                            client_identifier_is_correct = true;
+                            Console.WriteLine("Success!");
+                        }
+                        catch (ServerCoreException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                    }
+                    client_port_isnt_taken = true;
+                }
+                catch (ClientLocalException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
-
-            Console.Write("Pick a user identifier: ");
-            this.client_identifier = Console.ReadLine();
-
-            Console.Write("Type the server identifier to whom you want to connect: ");
-            this.server_url = Console.ReadLine();
-
-            this.client_library = new ClientLibrary(client_identifier, server_url, client_ip, client_port);
-            new Initialize(ref this.client_library);
-
             this.script_name = script_name;
         }
 

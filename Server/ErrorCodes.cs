@@ -18,6 +18,7 @@ namespace MSDAD.Server
         internal static String NOT_A_LOCATION = "One or more of your given locations isn't in the system.";
         internal static String NOT_AN_INVITEE = "One or more of your invitees isn't in the system.";
         internal static String INVALID_PORT_FORMAT = "Invalid port format.";
+        internal static String USER_WITH_SAME_ID = "That identifier is already taken.";
     }
 
 }
