@@ -14,7 +14,7 @@ namespace MSDAD.Client
     {
         int port;
         string ip, user, server;
-        ClientCommunications communications;
+        ClientCommunication communications;
 
         private List<MeetingView> meetingViews = new List<MeetingView>();
 
@@ -25,7 +25,7 @@ namespace MSDAD.Client
             this.ip = ip;
             this.port = port;
 
-            this.communications = new ClientCommunications(this, user, ip,  port); ;
+            this.communications = new ClientCommunication(this, user, ip,  port); ;
 
             Console.Write("Starting client remoting service... ");
             communications.Start();

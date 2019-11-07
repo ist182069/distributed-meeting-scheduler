@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MSDAD.Client.Comunication
 {        
-    class ClientCommunications
+    class ClientCommunication
     {
         int port;
         string ip, client_identifier;
@@ -23,7 +23,7 @@ namespace MSDAD.Client.Comunication
             
         List<MeetingView> meetingViews = new List<MeetingView>();
 
-        public ClientCommunications(ClientLibrary clientLibrary, string client_identifier, string ip, int port)
+        public ClientCommunication(ClientLibrary clientLibrary, string client_identifier, string ip, int port)
         {
             this.client_identifier = client_identifier;
             this.port = port;

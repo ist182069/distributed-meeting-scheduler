@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MSDAD.Server
+namespace MSDAD.Server.Communication
 {
     class RemoteServer : MarshalByRefObject, ServerInterface
     {

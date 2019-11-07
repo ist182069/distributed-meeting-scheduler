@@ -12,9 +12,9 @@ namespace MSDAD
     namespace Client.Comunication {
         class RemoteClient : MarshalByRefObject, ClientInterface
         {
-            ClientCommunications communications; 
+            ClientCommunication communications; 
 
-            public RemoteClient(ClientCommunications communications)
+            public RemoteClient(ClientCommunication communications)
             {
                 this.communications = communications;
             }

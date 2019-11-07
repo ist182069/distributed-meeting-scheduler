@@ -10,7 +10,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MSDAD.Server
+namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
