@@ -16,7 +16,8 @@ namespace MSDAD.Server
         internal static String ALL_INVALID_SLOTS = "None of your slots match the proposed for that meeting.";
         internal static String NOT_COORDINATOR = "You're not the coordinator of that meeting.";
         internal static String NONEXISTENT_MEETING = "That meeting doesn't exist.";
-        internal static String NOT_A_LOCATION = "One or more of your given locations isn't valid.";
+        internal static String NOT_A_LOCATION = "One or more of your given locations isn't in the system.";
+        internal static String NOT_AN_INVITEE = "One or more of your invitees isn't in the system.";
     }
 
 }

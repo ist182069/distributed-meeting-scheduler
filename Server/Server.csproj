@@ -44,6 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\Initialize.cs" />
+    <Compile Include="ServerLibrary.cs" />
     <Compile Include="ServerParser.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="ServerUtils.cs" />

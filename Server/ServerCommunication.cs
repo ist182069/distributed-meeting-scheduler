@@ -17,14 +17,15 @@ namespace MSDAD.Server
         int port;
         string ip, server_identifier;
 
-        Dictionary<string, string> clientAddresses = new Dictionary<string, string>();
-        List<Meeting> eventList = new List<Meeting>();
+        ServerLibrary serverLibrary;
         RemoteServer remoteServer;
         TcpChannel channel;
-        List<Location> knownLocations = new List<Location>();
 
-        public ServerCommunication(string server_identifier, string ip, int port)
+        private Dictionary<string, string> clientAddresses = new Dictionary<string, string>();
+
+        public ServerCommunication(ServerLibrary server_library, string server_identifier, string ip, int port)
         {
+            this.serverLibrary = server_library;
             this.server_identifier = server_identifier;
             this.port = port;
             this.ip = ip;
@@ -38,22 +39,12 @@ namespace MSDAD.Server
             this.remoteServer = new RemoteServer(this);
             RemotingServices.Marshal(this.remoteServer, server_identifier, typeof(RemoteServer));
 
-            LocationAndRoomInit(); // isto vai mudar quando fizermos o PuppetMaster
+            LocationAndRoomInit(); // isto vai mudar quando fizermos o AddRoom do PuppetMaster
         }
 
         public void Create(string topic, int minAttendees, List<string> venues, List<string> invitees, string user)
         {
-            string client_address; 
-            Meeting m;
-            List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(venues);
-
-            lock (this)
-            {
-                m = new Meeting(topic, minAttendees, parsedSlots, invitees, user);
-                eventList.Add(m);
-            }
-
-                
+            this.serverLibrary.Create(topic, minAttendees, venues, invitees, user);                
             if(invitees == null)
             {
                 foreach (KeyValuePair<string, string> address_iter in this.clientAddresses)
@@ -71,28 +62,27 @@ namespace MSDAD.Server
 
                 foreach (string invitee_iter in invitees)
                 {
-                    if(invitee_iter != user && this.clientAddresses.ContainsKey(invitee_iter))
+                    if(invitee_iter != user && clientAddresses.ContainsKey(invitee_iter))
                     {
-                        Console.WriteLine("tcp://" + this.clientAddresses[invitee_iter]);
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + this.clientAddresses[invitee_iter]);
+                        Console.WriteLine("tcp://" + clientAddresses[invitee_iter]);
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + clientAddresses[invitee_iter]);
                         client.SendMeeting(topic, 1, "OPEN");
 
                     } else
                     {
-                        // TODO throw remote exception
+                        throw new ServerCoreException(ErrorCodes.NOT_AN_INVITEE);
                     }
                             
                 }
             }
-
-
-            // TODO excepcao caso tentemos adicionar uma data repetida (da para viciar o sistema desta forma)
 
             Console.WriteLine("\r\nNew event: " + topic);
             Console.Write("Please run a command to be run on the server: ");
         }
         public void List(Dictionary<string, string> meetingQuery, string user)
         {
+            List<Meeting> eventList = this.serverLibrary.GetEventList();
+
             ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + this.clientAddresses[user]);
 
             foreach (Meeting meeting in eventList)
@@ -119,52 +109,15 @@ namespace MSDAD.Server
 
         public void Join(string topic, List<string> slots, string user)
         {
-            Meeting meeting = null;
-            try
-            {
-                List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
-                meeting = GetMeeting(topic);
-                meeting.Apply(parsedSlots, user);
-            }
-            catch (ServerCoreException sce)
-            {
-                throw sce;
-            }
+            this.serverLibrary.Join(topic, slots, user);
         }
 
         public void Close(String topic, string user)
         {
-            GetMeeting(topic).Schedule(user);
-            Console.Write("Please run a command to be run on the server: ");
+            this.serverLibrary.Close(topic, user);
         }
 
-        private Meeting GetMeeting(string topic)
-        {
-            foreach(Meeting m in this.eventList)
-            {
-                if (m.Topic == topic)
-                {
-                    return m;
-                }
-            }
-            throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);
-        }
 
-        public void AddClientAddress(string user, string ip, int port)
-        {
-            string client_address, client_identifier;
-
-            client_address = ServerUtils.AssembleClientAddress(ip, port);
-
-            if(!clientAddresses.ContainsKey(user) && ServerUtils.ValidateAddress(client_address))
-            {
-                lock (this)
-                {
-                    client_identifier = client_address + "/" + user;
-                    clientAddresses.Add(user, client_identifier);
-                }
-            }   
-        }
         public void BroadcastPing(string message, string user)
         {
             foreach (KeyValuePair<string, string> address_iter in this.clientAddresses)
@@ -178,35 +131,30 @@ namespace MSDAD.Server
             }             
         }
 
-        public Tuple<Location, DateTime> ParseSlot(String slot)
+        public Dictionary<string, string> GetClientAddresses()
         {
-            Location location = null;
-            String[] data = slot.Split(',');
-            DateTime date = DateTime.Parse(data[1]);
-
-            foreach (Location l in knownLocations)
-            {
-                if (l.Name == data[0])
-                {
-                    location = l;
-                }
-            }
-            if (location == null)
-            {
-                throw new ServerCoreException(ErrorCodes.NOT_A_LOCATION);
-            }
-
-            return new Tuple<Location, DateTime>(location, date);
+            return this.clientAddresses;
         }
 
-        public List<Tuple<Location, DateTime>> ListOfParsedSlots(List<string> slots)
+        public string GetClientAddress(string user)
         {
-            List<Tuple<Location, DateTime>> parsedSlots = new List<Tuple<Location, DateTime>>();
-            foreach (string s in slots)
+            return this.clientAddresses[user];
+        }
+
+        public void AddClientAddress(string user, string ip, int port)
+        {
+            string client_address, client_identifier;
+
+            client_address = ServerUtils.AssembleAddress(ip, port);
+
+            if (!clientAddresses.ContainsKey(user) && ServerUtils.ValidateAddress(client_address))
             {
-                parsedSlots.Add(ParseSlot(s));
+                lock (this)
+                {
+                    client_identifier = client_address + "/" + user;
+                    clientAddresses.Add(user, client_identifier);
+                }
             }
-            return parsedSlots;
         }
 
         public void LocationAndRoomInit()
@@ -227,11 +175,11 @@ namespace MSDAD.Server
             Braga.Add(new Room("BragaA", 10));
             Braga.Add(new Room("BragaB", 20));
 
-            knownLocations.Add(Lisboa);
-            knownLocations.Add(Coimbra);
-            knownLocations.Add(Guarda);
-            knownLocations.Add(Porto);
-            knownLocations.Add(Braga);
+            this.serverLibrary.AddLocation(Lisboa);
+            this.serverLibrary.AddLocation(Coimbra);
+            this.serverLibrary.AddLocation(Guarda);
+            this.serverLibrary.AddLocation(Porto);
+            this.serverLibrary.AddLocation(Braga);
         }
 
     }

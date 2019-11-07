@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Server.Commands;
+using System;
 
 namespace MSDAD.Server
 {
@@ -7,9 +8,9 @@ namespace MSDAD.Server
         public const string EXIT = "exit";
         public void Display()
         {
+            ServerLibrary serverLibrary;
             int port_int;
             string command, server_identifier, ip_string, port_string;
-            ServerCommunication serverCommunication;
 
             ip_string = ServerUtils.GetLocalIPAddress();
             Console.Write("Pick a server port: ");
@@ -20,12 +21,12 @@ namespace MSDAD.Server
             Console.Write("Type the server identifier: ");
             server_identifier = Console.ReadLine();
 
-            serverCommunication = new ServerCommunication(server_identifier, ip_string, 11000);
+            serverLibrary = new ServerLibrary(server_identifier, ip_string, port_int);
             // 11000 para ser substituido pelo port_string quando o MASTER OF PUPPETS estiver feito!
+            // Serve apenas para inicializar, caso contrario temos de esperar por um comando para registar no servidor
+            new Initialize(ref serverLibrary);
 
-            serverCommunication.Start();
-
-            Console.WriteLine("the server has been successfully started!");
+            Console.WriteLine("the server has been successfully started: tcp://" + ip_string + ":" + port_string + "/" + server_identifier);
 
             while (true)
             {
