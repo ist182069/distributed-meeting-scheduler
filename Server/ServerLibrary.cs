@@ -94,7 +94,7 @@ namespace MSDAD.Server
             GetMeeting(meeting_topic).Schedule(client_identifier);
             Console.Write("Please run a command to be run on the server: ");
         }
-        
+
         public string ServerIdentifier
         {
             get{
