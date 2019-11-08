@@ -104,11 +104,6 @@ namespace MSDAD.Client
             this.client_url = client_url;
             this.server_url = server_url;
 
-            Console.WriteLine(client_identifier);
-            Console.WriteLine(this.server_url);
-            Console.WriteLine(this.client_ip);
-            Console.WriteLine(port);
-            Console.WriteLine(script_name);
             this.client_library = new ClientLibrary(client_identifier, this.server_url, this.client_ip, port);
 
             new Initialize(ref this.client_library).Execute();

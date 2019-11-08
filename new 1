@@ -1,3 +1,8 @@
+AddRoom Lisboa 10 room1
+AddRoom Lisboa 20 room2
+Server s1 tcp://localhost:3000/server1 0 100 200
+
+AddRoom Lisboa 10 room1
 Server s1 tcp://192.168.1.165:3000/server1 0 100 200
 Client c1 tcp://192.168.1.165:4000/client1 tcp://192.168.1.165:3000/server1 teste
 
@@ -15,3 +20,5 @@ Conices:
 - verrificar se consolas estao ligadas caso estejam nao liga
 
 - Utils tudo na Lib
+
+- Adicionar Localizacoes a mao

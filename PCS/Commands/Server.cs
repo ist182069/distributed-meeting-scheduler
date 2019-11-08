@@ -1,17 +1,17 @@
-﻿using System;
+﻿using MSDAD.PCS.XML;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace MSDAD.PCS.Commands
 {
     class Server : Command
-    {
-        private const string SERVER = "Server";
-        private const string SERVER_EXE = "Server.exe";
-
+    {        
         string[] words; 
 
         public Server(ref PCSLibrary pcsLibrary) : base(ref pcsLibrary)
@@ -20,7 +20,7 @@ namespace MSDAD.PCS.Commands
         }
         public override object Execute()
         {
-            string server_identifier, server_url, server_path;
+            string file_name, file_path, server_identifier, server_url, server_path;
             //nao percebo para que servem estes
             int tolerated_faults, min_delay_ms, max_delay_ms;
 
@@ -39,8 +39,22 @@ namespace MSDAD.PCS.Commands
             server_process.StartInfo.Arguments = server_url;
             server_process.Start();            
 
-            base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, server_process);
             
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(LocationXML));
+            file_name = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+            file_name += ".msdad";
+
+            file_path = PCSUtils.AssembleCurrentPath(SERVER_SCRIPTS) + "\\" + file_name;
+
+            TextWriter textWriter = new StreamWriter(file_path);
+
+            foreach(LocationXML locationXML in base.pcsLibrary.GetLocationDictionary().Values)
+            {
+                xmlSerializer.Serialize(textWriter, locationXML);
+            }
+
+            base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, server_process);
+
             return null;
         }
     }

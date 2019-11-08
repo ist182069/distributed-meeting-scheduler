@@ -1,8 +1,12 @@
-﻿using System;
+﻿using MSDAD.PCS.XML;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace MSDAD.PCS.Commands
 {
@@ -17,14 +21,12 @@ namespace MSDAD.PCS.Commands
         {
             int room_capacity;
             string location_name, room_name;
-            Tuple<string, int, string> tuple;
 
             location_name = words[1];
             room_capacity = Int32.Parse(words[2]);
             room_name = words[3];
-            
-            tuple = new Tuple<string, int, string>(location_name, room_capacity, room_name);
-            base.pcsLibrary.AddTuple(tuple);
+
+            base.pcsLibrary.AddLocationXML(location_name, room_capacity, room_name);                       
 
             return null;
         }

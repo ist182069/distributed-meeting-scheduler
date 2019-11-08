@@ -1,7 +1,9 @@
 ﻿using MSDAD.Library;
+using MSDAD.Server.XML;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.Remoting;
@@ -9,13 +11,14 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
         int server_port;
-        string server_ip, server_identifier;
+        string server_ip, server_identifier;        
 
         ServerLibrary server_library;
         RemoteServer remote_server;
@@ -169,6 +172,35 @@ namespace MSDAD.Server.Communication
 
         public void LocationAndRoomInit()
         {
+            string directory_path, file_name;
+            string[] directory_files;
+            TextReader tr;
+            Location location;
+            LocationXML locationXML;
+
+            directory_path = ServerUtils.AssembleCurrentPath() + "\\" + "Locations" + "\\";
+            directory_files = Directory.GetFiles(directory_path);
+            
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(LocationXML));
+
+            lock (this)
+            {
+                for (int i = 0; i < directory_files.Length; i++)
+                {
+                    file_name = directory_files[i];
+                    tr = new StreamReader(file_name);
+
+                    locationXML = (LocationXML)xmlSerializer.Deserialize(tr);
+
+                    location = new Location(locationXML.Name);                    
+
+                    foreach(RoomXML roomXML in locationXML.RoomViews)
+                    {
+                        location.Add(new Room(roomXML.Name, roomXML.Capacity));
+                    }
+                }
+            }
+            /*
             Location lisboa = new Location("Lisboa");
             lisboa.Add(new Room("LisboaA", 10));
             lisboa.Add(new Room("LisboaB", 20));                
@@ -190,6 +222,7 @@ namespace MSDAD.Server.Communication
             this.server_library.AddLocation(guarda);
             this.server_library.AddLocation(porto);
             this.server_library.AddLocation(braga);
+            */
         }
 
     }

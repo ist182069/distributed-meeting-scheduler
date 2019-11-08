@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Commands\Client.cs" />
     <Compile Include="Commands\Server.cs" />
+    <Compile Include="Exceptions\PCSException.cs" />
     <Compile Include="PCSLibrary.cs" />
     <Compile Include="Commands\AddRoom.cs" />
     <Compile Include="Commands\Command.cs" />
@@ -54,6 +55,8 @@
     <Compile Include="PCSParser.cs" />
     <Compile Include="PCSMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XML\LocationXML.cs" />
+    <Compile Include="XML\RoomXML.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

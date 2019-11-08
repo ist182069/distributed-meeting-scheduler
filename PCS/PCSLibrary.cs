@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MSDAD.PCS.Exceptions;
+using MSDAD.PCS.XML;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,26 +13,16 @@ namespace MSDAD.PCS
     {
         string[] words;
 
-        List<Tuple<string, int, string>> tuples;
+        Dictionary<string, LocationXML> locationDictionary; 
         Dictionary<string, Process> serverDictionary;
         Dictionary<string, Process> clientDictionary;
 
         public PCSLibrary()
         {
-            this.tuples = new List<Tuple<string, int, string>>();
+            this.locationDictionary = new Dictionary<string, LocationXML>();
             this.serverDictionary = new Dictionary<string, Process>();
             this.clientDictionary = new Dictionary<string, Process>();
-        }
-
-        public List<Tuple<string, int, string>> GetTuples()
-        {
-            return this.tuples;
-        }
-
-        public void AddTuple(Tuple<string, int, string> tuple)
-        {
-            this.tuples.Add(tuple);
-        }
+        }      
 
         public string[] GetWords()
         {
@@ -40,6 +32,49 @@ namespace MSDAD.PCS
         public void SetWords(string[] words)
         {
             this.words = words;
+        }
+
+        public Dictionary<string, LocationXML> GetLocationDictionary()
+        {
+            return this.locationDictionary;
+        }
+
+        public void AddLocationXML(string location_name, int room_capacity, string room_name)
+        {
+           
+
+            if(this.locationDictionary.ContainsKey(location_name))
+            {
+                LocationXML locationXML = this.locationDictionary[location_name];
+
+                RoomXML roomXML = new RoomXML();
+                roomXML.Name = room_name;
+                roomXML.Capacity = room_capacity;
+
+                if (!locationXML.RoomViews.Contains(roomXML))
+                {
+                    locationXML.RoomViews.Add(roomXML);
+                    this.locationDictionary[location_name] = locationXML;
+                }
+                else
+                {
+                    throw new PCSException("Error: You cannot insert the same room for location \"" + location_name + "\" more than once!");
+                }
+                
+            }
+            else
+            {
+                LocationXML locationXML = new LocationXML();
+                locationXML.Name = location_name;
+
+                RoomXML roomXML = new RoomXML();
+                roomXML.Name = room_name;
+                roomXML.Capacity = room_capacity;
+
+                locationXML.RoomViews.Add(roomXML);
+
+                this.locationDictionary.Add(location_name, locationXML);
+            }            
         }
 
         public Dictionary<string, Process> GetServerDictionary()

@@ -8,10 +8,7 @@ using System.Threading.Tasks;
 namespace MSDAD.PCS.Commands
 {
     class Client : Command
-    {
-        private const string CLIENT = "Client";
-        private const string CLIENT_EXE = "Client.exe";
-
+    {        
         string[] words;
 
         public Client(ref PCSLibrary pcsLibrary) : base(ref pcsLibrary)

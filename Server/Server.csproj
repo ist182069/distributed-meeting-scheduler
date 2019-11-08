@@ -58,6 +58,8 @@
     <Compile Include="Communication\RemoteServer.cs" />
     <Compile Include="ServerMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XML\LocationXML.cs" />
+    <Compile Include="XML\RoomXML.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -67,6 +69,9 @@
       <Project>{bcae47a0-5c9b-4c14-b55b-e978995c4599}</Project>
       <Name>Library</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Locations\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
