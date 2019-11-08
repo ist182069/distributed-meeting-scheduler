@@ -5,7 +5,8 @@ Server s1 tcp://localhost:3000/server1 0 100 200
 Server s1 tcp://192.168.1.165:8081/server1 0 100 200
 Server s2 tcp://192.168.1.165:8082/server2 0 100 200
 Server s3 tcp://192.168.1.165:8083/server3 0 100 200
-Client c1 tcp://192.168.1.165:7071/client1 tcp://192.168.1.165:8081/server1 teste
+Client c1 tcp://192.168.1.165:7071/client1 tcp://192.168.1.165:8081/server1 teste_1
+Client c1 tcp://192.168.1.165:7072/client2 tcp://192.168.1.165:8081/server1 teste_2
 
 
 Conices:

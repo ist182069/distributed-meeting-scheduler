@@ -182,6 +182,7 @@ namespace MSDAD.Server.Communication
             this.server_library.Close(meeting_topic, client_identifier);
             this.CloseReplicas(meeting_topic, client_identifier, hops);
             Console.WriteLine("Close sucessfully done!");
+            this.server_library.List();
         }
 
         private void CloseReplicas(String meeting_topic, string client_identifier, int hops)

@@ -58,6 +58,37 @@ namespace MSDAD.Server
             }
         }
 
+        public void List()
+        {
+            int min_ateendes, version;
+            string coordinator, final_slot, state, topic;
+            List<string> going_clients;
+
+            foreach(Meeting meeting in this.event_list)
+            {
+                topic = meeting.Topic;
+                coordinator = meeting.Coordinator;
+                state = meeting.State;
+                min_ateendes = meeting.MinAttendees;
+                version = meeting.Version;
+                final_slot = meeting.FinalSlot;
+                going_clients = meeting.GetGoingClients();
+
+                Console.WriteLine("Meeting: " + topic);
+                Console.WriteLine("  - Coordinator: " + coordinator);
+                Console.WriteLine("  - State: " + state);
+                Console.WriteLine("  - Version: " + version);
+                Console.WriteLine("  - Minimum Attendees: " + min_ateendes);
+                Console.WriteLine("  - Going Clients: ");                
+                foreach(string g in going_clients)
+                {
+                    Console.WriteLine("    - : " + g);
+                }                
+                Console.WriteLine("  - Final slot: " + final_slot);
+
+            }
+        }
+
         public void Close(String meeting_topic, string client_identifier)
         {
             GetMeeting(meeting_topic).Schedule(client_identifier);
