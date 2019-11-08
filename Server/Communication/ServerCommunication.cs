@@ -203,7 +203,7 @@ namespace MSDAD.Server.Communication
                     File.Delete(file_name);
                 }
             }
-            /*
+            
             Location lisboa = new Location("Lisboa");
             lisboa.Add(new Room("LisboaA", 10));
             lisboa.Add(new Room("LisboaB", 20));                
@@ -225,7 +225,6 @@ namespace MSDAD.Server.Communication
             this.server_library.AddLocation(guarda);
             this.server_library.AddLocation(porto);
             this.server_library.AddLocation(braga);
-            */
         }
 
     }

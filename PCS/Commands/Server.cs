@@ -60,6 +60,7 @@ namespace MSDAD.PCS.Commands
                 file_path = server_locations_path + "\\" + file_name;
                 textWriter = new StreamWriter(file_path);
                 xmlSerializer.Serialize(textWriter, locationXML);
+                textWriter.Close();
             }
         }
     }
