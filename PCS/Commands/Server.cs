@@ -31,7 +31,7 @@ namespace MSDAD.PCS.Commands
             max_delay_ms = Int32.Parse(words[5]);
             // usar os restantes campos que nao percebo para que sao words[3], words[4], words[5]
 
-            server_path = PCSUtils.AssemblePath(SERVER) + "\\" + SERVER_EXE;
+            server_path = PCSUtils.AssembleCurrentPath(SERVER) + "\\" + SERVER_EXE;
 
             Process server_process = new Process();
             server_process.StartInfo.FileName = server_path;

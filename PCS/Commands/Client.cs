@@ -27,7 +27,7 @@ namespace MSDAD.PCS.Commands
             server_url = words[3];
             client_script_path = words[4];
 
-            client_path = PCSUtils.AssemblePath(CLIENT) + "\\" + CLIENT_EXE;
+            client_path = PCSUtils.AssembleCurrentPath(CLIENT) + "\\" + CLIENT_EXE;
 
             arguments = client_url + " " + server_url + " " + client_script_path;
 
