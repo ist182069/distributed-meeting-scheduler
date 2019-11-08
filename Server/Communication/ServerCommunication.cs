@@ -178,6 +178,7 @@ namespace MSDAD.Server.Communication
             Location location;
             LocationXML locationXML;
 
+
             directory_path = ServerUtils.AssembleCurrentPath() + "\\" + "Locations" + "\\";
             directory_files = Directory.GetFiles(directory_path);
             
@@ -198,6 +199,8 @@ namespace MSDAD.Server.Communication
                     {
                         location.Add(new Room(roomXML.Name, roomXML.Capacity));
                     }
+                    tr.Close();
+                    File.Delete(file_name);
                 }
             }
             /*

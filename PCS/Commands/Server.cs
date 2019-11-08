@@ -20,7 +20,7 @@ namespace MSDAD.PCS.Commands
         }
         public override object Execute()
         {
-            string file_name, file_path, server_identifier, server_url, server_path;
+            string server_identifier, server_url, server_path;
             //nao percebo para que servem estes
             int tolerated_faults, min_delay_ms, max_delay_ms;
 
@@ -31,31 +31,36 @@ namespace MSDAD.PCS.Commands
             max_delay_ms = Int32.Parse(words[5]);
             // usar os restantes campos que nao percebo para que sao words[3], words[4], words[5]
 
+            this.WriteLocationsXML();
+
             server_path = PCSUtils.AssembleCurrentPath(SERVER) + "\\" + SERVER_EXE;
 
             Process server_process = new Process();
             server_process.StartInfo.FileName = server_path;
             // TODO passar um XML ou whatever para criar as localizacoes
             server_process.StartInfo.Arguments = server_url;
-            server_process.Start();            
-
-            
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(LocationXML));
-            file_name = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            file_name += ".msdad";
-
-            file_path = PCSUtils.AssembleCurrentPath(SERVER_SCRIPTS) + "\\" + file_name;
-
-            TextWriter textWriter = new StreamWriter(file_path);
-
-            foreach(LocationXML locationXML in base.pcsLibrary.GetLocationDictionary().Values)
-            {
-                xmlSerializer.Serialize(textWriter, locationXML);
-            }
+            server_process.Start();
 
             base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, server_process);
 
             return null;
+        }
+
+        private void WriteLocationsXML()
+        {
+            string file_name, file_path, server_locations_path;
+            TextWriter textWriter;
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(LocationXML));
+            server_locations_path = PCSUtils.AssembleCurrentPath(SERVER_SCRIPTS);
+
+            foreach (LocationXML locationXML in base.pcsLibrary.GetLocationDictionary().Values)
+            {
+                file_name = locationXML.Name + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                file_name += ".msdad";
+                file_path = server_locations_path + "\\" + file_name;
+                textWriter = new StreamWriter(file_path);
+                xmlSerializer.Serialize(textWriter, locationXML);
+            }
         }
     }
 }
