@@ -111,7 +111,7 @@ namespace MSDAD.Client
             Console.WriteLine(script_name);
             this.client_library = new ClientLibrary(client_identifier, this.server_url, this.client_ip, port);
 
-            new Initialize(ref this.client_library);
+            new Initialize(ref this.client_library).Execute();
 
             this.script_name = script_name;
         }
