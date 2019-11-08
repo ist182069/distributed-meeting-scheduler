@@ -26,7 +26,7 @@ namespace MSDAD.Server
             server_identifier = ServerUtils.GetIdFromUrl(this.server_url);
 
             Console.Write("Starting up server... ");
-            serverLibrary = new ServerLibrary(server_identifier, ip_string, 11000);
+            serverLibrary = new ServerLibrary(server_identifier, ip_string, port_int);
             new Initialize(ref serverLibrary);
             Console.WriteLine("Success!");
 
