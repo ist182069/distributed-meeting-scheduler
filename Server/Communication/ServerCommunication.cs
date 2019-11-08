@@ -25,6 +25,7 @@ namespace MSDAD.Server.Communication
         TcpChannel channel;
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
+        private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address        
 
         public ServerCommunication(ServerLibrary server_library)
         {
@@ -32,6 +33,11 @@ namespace MSDAD.Server.Communication
             this.server_identifier = server_library.ServerIdentifier;
             this.server_port = server_library.ServerPort;
             this.server_ip = server_library.ServerIP;
+
+            // TODO fazer inicializacao como deve ser
+            server_addresses.Add("server1", "localhost:8081/server1");
+            server_addresses.Add("server2", "localhost:8082/server2");
+            server_addresses.Add("server3", "localhost:8083/server3");
         }
 
         public void Start()
@@ -45,10 +51,17 @@ namespace MSDAD.Server.Communication
             LocationAndRoomInit(); // isto vai mudar quando fizermos o AddRoom do PuppetMaster
         }
 
-        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, int hops)
         {
-            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);                
-            if(invitees == null)
+            this.CreateClient(meeting_topic, min_attendees, slots, invitees, client_identifier);            
+            this.CreateReplicas(meeting_topic, min_attendees, slots, invitees, client_identifier, hops);
+            Console.WriteLine("Create sucessfully done!");
+        }
+
+        private void CreateClient(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
+        {
+            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+            if (invitees == null)
             {
                 foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
                 {
@@ -71,7 +84,8 @@ namespace MSDAD.Server.Communication
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_addresses[invitee_iter]);
                         client.SendMeeting(meeting_topic, 1, "OPEN");
 
-                    } else if (invitee_iter == client_identifier)
+                    }
+                    else if (invitee_iter == client_identifier)
                     {
                         continue;
                     }
@@ -79,12 +93,33 @@ namespace MSDAD.Server.Communication
                     {
                         throw new ServerCoreException(ErrorCodes.NOT_AN_INVITEE);
                     }
-                            
+
                 }
             }
 
             Console.WriteLine("\r\nNew event: " + meeting_topic);
             Console.Write("Please run a command to be run on the server: ");
+        }
+        private void CreateReplicas(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, int hops)
+        {
+            string replica_identifier;
+
+            if(hops==0)
+            {
+                hops++;
+                foreach (string addresses_iter in this.server_addresses.Keys)
+                {
+                    replica_identifier = addresses_iter;
+
+                    if (replica_identifier != this.server_identifier)
+                    {
+                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://" + this.server_addresses[replica_identifier]);
+                        remote_server.Create(meeting_topic, min_attendees, slots, invitees, client_identifier, hops);
+                    }
+
+                }
+            }
+                
         }
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
         {
@@ -111,19 +146,76 @@ namespace MSDAD.Server.Communication
                         remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State);
                     }
                 }
-            } 
+            }
+
+            Console.WriteLine("List sucessfully done!");
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, int hops)
         {
             this.server_library.Join(meeting_topic, slots, client_identifier);
+            this.JoinReplicas(meeting_topic, slots, client_identifier, hops);
+            Console.WriteLine("Join sucessfully done!");
         }
+        private void JoinReplicas(string meeting_topic, List<string> slots, string client_identifier, int hops)
+        {
+            string replica_identifier;
 
-        public void Close(String meeting_topic, string client_identifier)
+            if (hops == 0)
+            {
+                hops++;
+                foreach (string addresses_iter in this.server_addresses.Keys)
+                {
+                    replica_identifier = addresses_iter;
+
+                    if (replica_identifier != this.server_identifier)
+                    {
+                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://" + this.server_addresses[replica_identifier]);
+                        remote_server.Join(meeting_topic, slots, client_identifier, hops);
+                    }
+
+                }
+            }
+        }
+        public void Close(String meeting_topic, string client_identifier, int hops)
         {
             this.server_library.Close(meeting_topic, client_identifier);
+            this.CloseReplicas(meeting_topic, client_identifier, hops);
+            Console.WriteLine("Close sucessfully done!");
         }
 
+        private void CloseReplicas(String meeting_topic, string client_identifier, int hops)
+        {
+            string replica_identifier;
+
+            if (hops == 0)
+            {
+                hops++;
+                foreach (string addresses_iter in this.server_addresses.Keys)
+                {
+                    replica_identifier = addresses_iter;
+
+                    if (replica_identifier != this.server_identifier)
+                    {
+                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), "tcp://" + this.server_addresses[replica_identifier]);
+                        remote_server.Close(meeting_topic, client_identifier, hops);
+                    }
+
+                }
+            }
+            else if (hops == 1)
+            {
+
+            }
+            else if (hops == 2)
+            {
+
+            }
+            else
+            {
+                throw new ServerCoreException("This is not supposed to happen in this simple implementation where no reliable broadcast has been implemented yet and thus there are no re-broadcasted messages...");
+            }
+        }
 
         public void BroadcastPing(string message, string client_identifier)
         {

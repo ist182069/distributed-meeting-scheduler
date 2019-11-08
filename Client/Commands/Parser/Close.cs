@@ -21,7 +21,7 @@ namespace MSDAD.Client.Commands.Parser
 
             topic = this.words[1];
 
-            this.remote_server.Close(topic, this.client_identifier);
+            this.remote_server.Close(topic, this.client_identifier, 0);
 
             return null;
         }

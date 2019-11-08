@@ -29,7 +29,7 @@ namespace MSDAD.Server
             Console.Write("Starting server remoting service... ");
             server_communication.Start();
             Console.WriteLine("Success!");
-        }
+        }    
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
         {

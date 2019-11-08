@@ -14,9 +14,9 @@ namespace MSDAD.Server.Communication
             this.server_communication = server_communication;
         }
 
-        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, int hops)
         {
-            this.server_communication.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+            this.server_communication.Create(meeting_topic, min_attendees, slots, invitees, client_identifier, hops);
         }
 
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
@@ -24,14 +24,14 @@ namespace MSDAD.Server.Communication
             this.server_communication.List(meeting_query, client_identifier);                
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, int hops)
         {
-            this.server_communication.Join(meeting_topic, slots, client_identifier);
+            this.server_communication.Join(meeting_topic, slots, client_identifier, hops);
         }
 
-        public void Close(string meeting_topic, string client_identifier)
+        public void Close(string meeting_topic, string client_identifier, int hops)
         {
-            this.server_communication.Close(meeting_topic, client_identifier);
+            this.server_communication.Close(meeting_topic, client_identifier, hops);
         }
 
         public void Ping(string message, string user)

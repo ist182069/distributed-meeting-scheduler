@@ -1,5 +1,4 @@
-﻿using System;
-using MSDAD.Client.Exceptions;
+﻿using MSDAD.Client.Exceptions;
 
 namespace MSDAD
 {
