@@ -23,7 +23,7 @@ namespace MSDAD
             void List(Dictionary<string, string> meeting_query, string client_identifier);
             void Join(string meeting_topic, List<string> slots, string client_identifier, int hops);
             void Close(string meeting_topic, string client_identifier, int hops);
-            void Wait(int milliseconds);
+            void Wait(int milliseconds);           
         }
 
         public interface PCSInterface

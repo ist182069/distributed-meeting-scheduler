@@ -1,1 +1,59 @@
-- Para processar o PCS dar é necessário fazer rebuild aos outros módulos do programa como o Client e o Server.
+-
+- Centralized Version
+-
+-- Instructions
+--
+--- Open the project "MSDAD.sln"
+--- Start the PCS module
+--- Start the PuppetMaster module
+--- You can insert any script you want in the PuppetMaster's text box and send it to either the client or the server
+--- An example of a PuppetMaster script to run would be the following:
+---- Server s1 tcp://localhost:8081/server1 0 100 200
+---- Client c1 tcp://localhost:7071/client1 tcp://localhost:8081/server1 teste_0
+--- Here the client runs a script where it will create a meeting, join it and close it. Simple stuff really
+--- There is still some debugging to do since we have not run testing modules in our code yet. So expect some bugs to pop.
+--
+-
+- Replicated Version
+-
+--
+-- Instructions
+--
+--- Open the project "MSDAD.sln"
+--- Start the PCS module
+--- Start the PuppetMaster module
+--- You can insert any script you want in the PuppetMaster's text box and send it to either the client or the server
+--- An example of a PuppetMaster script to run would be the following:
+---- Server s1 tcp://localhost:8081/server1 0 100 200
+---- Server s2 tcp://localhost:8082/server2 0 100 200
+---- Server s3 tcp://localhost:8083/server3 0 100 200
+---- Client c1 tcp://localhost:7071/client1 tcp://localhost:8081/server1 teste_0
+--- On this script the client creates a meeting for himself, joins it and closes it. It is a simple interaction to show our simple replication protocol working.
+--- Restart the client and server architecture
+--- Another example of a script to run would be the following:
+---- Server s1 tcp://localhost:8081/server1 0 100 200
+---- Server s2 tcp://localhost:8082/server2 0 100 200
+---- Server s3 tcp://localhost:8083/server3 0 100 200
+---- Client c1 tcp://localhost:7071/client1 tcp://localhost:8081/server1 teste_1
+--- On this script client1 creates a meeting and joins it. 
+--- Afterwards you should run the following script
+---- Client c2 tcp://localhost:7072/client2 tcp://localhost:8082/server2 teste_2
+--- Here client2 joins the same meeting. The state is propagated accross the servers. You can then close the meeting on client1 and it will be closed across servers
+--- Bear in my that if you run:
+---- Client c1 tcp://localhost:7071/client1 tcp://localhost:8081/server1 teste_1
+---- Client c2 tcp://localhost:7072/client2 tcp://localhost/server2 teste_2
+--- One after the other the project will bug out. We are still debugging the replicated version and running one after throws some exceptions
+--
+-- Assumptions
+---
+--- Right now the replicas are hardcoded to be exactly 3. Their IP and Port combination 
+---- server1: localhost:8081 
+---- server2: localhost:8082
+---- server3: localhost:8083 
+--- Their URLs are thus the following:
+---- tcp://localhost:8081/server1
+---- tcp://localhost:8082/server2
+---- tcp://localhost:8083/server3
+--- Currently you have to insert these URLs otherwise the testing will fail
+--
+- 

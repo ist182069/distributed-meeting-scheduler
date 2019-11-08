@@ -203,19 +203,7 @@ namespace MSDAD.Server.Communication
                     }
 
                 }
-            }
-            else if (hops == 1)
-            {
-
-            }
-            else if (hops == 2)
-            {
-
-            }
-            else
-            {
-                throw new ServerCoreException("This is not supposed to happen in this simple implementation where no reliable broadcast has been implemented yet and thus there are no re-broadcasted messages...");
-            }
+            }           
         }
 
         public void BroadcastPing(string message, string client_identifier)
