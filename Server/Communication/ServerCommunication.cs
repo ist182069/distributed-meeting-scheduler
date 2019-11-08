@@ -62,13 +62,17 @@ namespace MSDAD.Server.Communication
 
                 foreach (string invitee_iter in invitees)
                 {
-                    if(invitee_iter != client_identifier && client_addresses.ContainsKey(invitee_iter))
+                    if (invitee_iter != client_identifier && client_addresses.ContainsKey(invitee_iter))
                     {
                         Console.WriteLine("tcp://" + client_addresses[invitee_iter]);
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_addresses[invitee_iter]);
                         client.SendMeeting(meeting_topic, 1, "OPEN");
 
-                    } else
+                    } else if (invitee_iter == client_identifier)
+                    {
+                        continue;
+                    }
+                    else
                     {
                         throw new ServerCoreException(ErrorCodes.NOT_AN_INVITEE);
                     }

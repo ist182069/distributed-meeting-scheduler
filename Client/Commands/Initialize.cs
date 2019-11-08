@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,11 +12,19 @@ namespace MSDAD.Client.Commands
     {
         public Initialize(ref ClientLibrary client_library) : base(ref client_library)
         {
-
         }
         public override object Execute()
-        {           
-            return null;
+        {            
+            try
+            {
+                this.remote_server.Hello(this.client_identifier, this.client_ip, this.client_port);
+                return null;
+            }
+            catch (ServerCoreException e)
+            {
+                client_library.ClientCommunication.Destroy();
+                throw e;
+            }
         }
     }
 }

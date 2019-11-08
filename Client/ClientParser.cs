@@ -63,9 +63,11 @@ namespace MSDAD.Client
                             this.server_url = Console.ReadLine();
 
                             this.client_library = new ClientLibrary(client_identifier, server_url, client_ip, client_port);
-                            new Initialize(ref this.client_library);
-                            client_identifier_is_correct = true;
+                            new Initialize(ref this.client_library).Execute();
+
                             Console.WriteLine("Success!");
+
+                            client_identifier_is_correct = true;                            
                         }
                         catch (ServerCoreException e)
                         {
@@ -79,6 +81,7 @@ namespace MSDAD.Client
                     Console.WriteLine(e.Message);
                 }
             }
+
             this.script_name = script_name;
         }
 

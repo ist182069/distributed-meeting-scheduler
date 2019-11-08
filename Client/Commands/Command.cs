@@ -23,7 +23,7 @@ namespace MSDAD.Client.Commands
             Init();
         }
 
-        void Init()
+        public void Init()
         {
             this.client_identifier = this.client_library.ClientIdentifier;
             this.server_url = this.client_library.ServerURL;
@@ -31,16 +31,6 @@ namespace MSDAD.Client.Commands
             this.client_ip = this.client_library.ClientIP;
             this.client_address = ClientUtils.AssembleAddress(client_ip, client_port);
             this.remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
-
-            try { 
-                this.remote_server.Hello(this.client_identifier, this.client_ip, this.client_port);
-            }
-            catch (ServerCoreException e)
-            {
-                client_library.ClientCommunication.Destroy();
-                throw e;
-            }
-
         }
         public abstract object Execute();
     }
