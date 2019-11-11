@@ -90,7 +90,7 @@ namespace MSDAD.Client.Commands.CLI
             if (num_invitees==0)
             {
                 this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier);
-                meeting_view = new MeetingView(meeting_topic, 1, "OPEN");
+                meeting_view = new MeetingView(meeting_topic, 1, "OPEN", null);
                 this.client_library.AddMeetingView(meeting_view);
             }
             else
@@ -108,7 +108,7 @@ namespace MSDAD.Client.Commands.CLI
 
                     if(invitee_address == this.client_identifier)
                     {
-                        meeting_view = new MeetingView(meeting_topic, 1, "OPEN");
+                        meeting_view = new MeetingView(meeting_topic, 1, "OPEN", null);
                         this.client_library.AddMeetingView(meeting_view);
                     }
                     invitees.Add(invitee_address);

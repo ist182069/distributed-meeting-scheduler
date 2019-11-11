@@ -50,11 +50,11 @@ namespace MSDAD.Client.Comunication
             ChannelServices.UnregisterChannel(this.channel);
         }
   
-        public void AddMeetingView(string topic, int version, string state)
+        public void AddMeetingView(string topic, int version, string state, string extraInfo)
         {
             MeetingView meetingView;
 
-            meetingView = new MeetingView(topic, version, state);
+            meetingView = new MeetingView(topic, version, state, extraInfo);
 
             this.client_library.AddMeetingView(meetingView);
         }    

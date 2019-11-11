@@ -55,31 +55,8 @@ namespace MSDAD.Server.Communication
                     if (address_iter.Key != client_identifier)
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
-                        client.SendMeeting(meeting_topic, 1, "OPEN");
+                        client.SendMeeting(meeting_topic, 1, "OPEN", null);
                     }
-                }
-
-            }
-            else
-            {
-
-                foreach (string invitee_iter in invitees)
-                {
-                    if (invitee_iter != client_identifier && client_addresses.ContainsKey(invitee_iter))
-                    {
-                        Console.WriteLine("tcp://" + client_addresses[invitee_iter]);
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_addresses[invitee_iter]);
-                        client.SendMeeting(meeting_topic, 1, "OPEN");
-
-                    } else if (invitee_iter == client_identifier)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        throw new ServerCoreException(ErrorCodes.NOT_AN_INVITEE);
-                    }
-                            
                 }
             }
 
@@ -96,19 +73,43 @@ namespace MSDAD.Server.Communication
             {
                 if (!meeting_query.ContainsKey(meeting.Topic) && meeting.GetInvitees() == null)
                 {
-                    remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State);
+                    string state = meeting.State;
+                    if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier))
+                    {
+                        string extraInfo = "Client Confirmed at " + meeting.FinalSlot;
+                        remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, extraInfo);
+                    }
+                    else
+                    {
+                        remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, null);
+                    }
+                }
+                else if (!meeting_query.ContainsKey(meeting.Topic) && meeting.GetInvitees() != null)
+                {
+                    if(meeting.GetInvitees().Contains(client_identifier)){
+                        string state = meeting.State;
+                        if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier))
+                        {
+                            string extraInfo = "Client Confirmed at " + meeting.FinalSlot;
+                            remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, extraInfo);
+                        }
+                        else
+                        {
+                            remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, null);
+                        }
+                    }
                 }
                 else if (meeting_query.ContainsKey(meeting.Topic) && !meeting.State.Equals(meeting_query[meeting.Topic]))
                 {
                     string state = meeting.State;
-                    if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier));
+                    if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier))
                     {
-                        string aux = state + "\nClient Confirmed at " + meeting.FinalSlot;
-                        remote_client.SendMeeting(meeting.Topic, meeting.Version, aux);
+                        string extraInfo = "Client Confirmed at " + meeting.FinalSlot;
+                        remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, extraInfo);
                     }
-                    if (!meeting.ClientConfirmed(client_identifier))
+                    else
                     {
-                        remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State);
+                        remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, null);
                     }
                 }
             } 
@@ -205,8 +206,7 @@ namespace MSDAD.Server.Communication
             }
             
             Location lisboa = new Location("Lisboa");
-            lisboa.Add(new Room("LisboaA", 10));
-            lisboa.Add(new Room("LisboaB", 20));                
+            lisboa.Add(new Room("LisboaA", 2));               
             Location coimbra = new Location("Coimbra");
             coimbra.Add(new Room("CoimbraA", 5));
             coimbra.Add(new Room("CoimbraB", 10));

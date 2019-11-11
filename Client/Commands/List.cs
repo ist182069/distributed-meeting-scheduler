@@ -28,7 +28,12 @@ namespace MSDAD.Client.Commands
 
             foreach (MeetingView mV in meeting_views)
             {
-                Console.WriteLine("Topic:"+mV.MeetingTopic + " State:" + mV.MeetingState + "\nVersion:" + mV.MeetingVersion + "\n");
+                Console.WriteLine("Topic:"+mV.MeetingTopic + " State:" + mV.MeetingState + "\nVersion:" + mV.MeetingVersion);
+                if(mV.MeetingInfo != null)
+                {
+                    Console.WriteLine(mV.MeetingInfo);
+                }
+                Console.Write("\n");
             }
 
             return null;

@@ -276,7 +276,7 @@ namespace MSDAD.Server
             {
                 return false;
             }
-            return going_clients.Contains(client_address);
+            return this.going_clients.Contains(client_address);
         }
 
         public string FinalSlot

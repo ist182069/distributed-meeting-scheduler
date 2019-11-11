@@ -23,9 +23,9 @@ namespace MSDAD
                 Console.WriteLine("Received message: " + message);
             }
 
-            public void SendMeeting(string meeting_topic, int meeting_version, string meeting_state)
+            public void SendMeeting(string meeting_topic, int meeting_version, string meeting_state, string extraInfo)
             {
-                this.client_communication.AddMeetingView(meeting_topic, meeting_version, meeting_state);
+                this.client_communication.AddMeetingView(meeting_topic, meeting_version, meeting_state, extraInfo);
             }
         }
     }
