@@ -199,32 +199,12 @@ namespace MSDAD.Server.Communication
                     foreach(RoomXML roomXML in locationXML.RoomViews)
                     {
                         location.Add(new Room(roomXML.Name, roomXML.Capacity));
-                    }
+                    }                    
                     tr.Close();
+                    this.server_library.AddLocation(location);
                     File.Delete(file_name);
                 }
-            }
-            
-            Location lisboa = new Location("Lisboa");
-            lisboa.Add(new Room("LisboaA", 2));               
-            Location coimbra = new Location("Coimbra");
-            coimbra.Add(new Room("CoimbraA", 5));
-            coimbra.Add(new Room("CoimbraB", 10));
-            Location guarda = new Location("Guarda");
-            guarda.Add(new Room("GuardaA", 4));
-            guarda.Add(new Room("GuardaB", 10));
-            Location porto = new Location("Porto");
-            porto.Add(new Room("PortoA", 4));
-            porto.Add(new Room("PortoB", 6));
-            Location braga = new Location("Braga");
-            braga.Add(new Room("BragaA", 10));
-            braga.Add(new Room("BragaB", 20));
-
-            this.server_library.AddLocation(lisboa);
-            this.server_library.AddLocation(coimbra);
-            this.server_library.AddLocation(guarda);
-            this.server_library.AddLocation(porto);
-            this.server_library.AddLocation(braga);
+            }                        
         }
 
     }

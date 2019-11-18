@@ -106,7 +106,7 @@ namespace MSDAD.Server
 
         public void AddLocation(Location location)
         {
-            this.known_locations.Add(location);
+            this.known_locations.Add(location);                
         }
 
         public List<Meeting> GetEventList()
