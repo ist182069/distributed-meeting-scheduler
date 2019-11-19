@@ -92,7 +92,7 @@ namespace MSDAD.Library
             return ip;
         }
 
-        public static string GetIdFromUrl(string url)
+        public static string GetRemotingIdFromUrl(string url)
         {
             string id;
             string[] split_url;

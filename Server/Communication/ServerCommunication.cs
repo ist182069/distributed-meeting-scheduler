@@ -18,7 +18,7 @@ namespace MSDAD.Server.Communication
     class ServerCommunication
     {
         int server_port;
-        string server_ip, server_identifier;        
+        string server_ip, server_identifier, server_remoting;        
 
         ServerLibrary server_library;
         RemoteServer remote_server;
@@ -32,6 +32,7 @@ namespace MSDAD.Server.Communication
             this.server_identifier = server_library.ServerIdentifier;
             this.server_port = server_library.ServerPort;
             this.server_ip = server_library.ServerIP;
+            this.server_remoting = server_remoting;
         }
 
         public void Start()
@@ -40,7 +41,7 @@ namespace MSDAD.Server.Communication
             ChannelServices.RegisterChannel(channel, true);
 
             this.remote_server = new RemoteServer(this);
-            RemotingServices.Marshal(this.remote_server, server_identifier, typeof(RemoteServer));
+            RemotingServices.Marshal(this.remote_server, server_remoting, typeof(RemoteServer));
 
             LocationAndRoomInit(); // isto vai mudar quando fizermos o AddRoom do PuppetMaster
         }

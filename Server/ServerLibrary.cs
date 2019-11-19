@@ -12,17 +12,18 @@ namespace MSDAD.Server
     class ServerLibrary
     {
         int server_port;
-        string server_ip, server_identifier;
+        string server_ip, server_identifier, server_remoting;
         ServerCommunication server_communication;
 
         private List<Meeting> event_list = new List<Meeting>();
         private List<Location> known_locations = new List<Location>();
 
-        public ServerLibrary(string server_identifier, string server_ip, int server_port)
+        public ServerLibrary(string server_identifier, string server_remoting, string server_ip, int server_port)
         {
             this.server_identifier = server_identifier;
             this.server_ip = server_ip;
             this.server_port = server_port;
+            this.server_remoting = server_remoting;
 
             this.server_communication = new ServerCommunication(this); ;
 
