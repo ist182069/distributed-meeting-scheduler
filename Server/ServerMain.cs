@@ -7,17 +7,17 @@ namespace MSDAD.Server
     {
         static void Main(string[] args)
         {
+            ServerParser serverParser;
+
             if (args.Length == 0)
-            {
-                ServerCLI server_CLI;
-                server_CLI = new ServerCLI();
-                server_CLI.Display();
+            {                
+                serverParser = new ServerParser();
+                serverParser.Execute();
             }
             else if (args.Length == 1)
             {
-                ServerParser server_parser;
-                server_parser = new ServerParser(args[0]);
-                server_parser.Execute();
+                serverParser = new ServerParser(args[0]);
+                serverParser.Execute();
             }
                 
         }
