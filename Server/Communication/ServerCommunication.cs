@@ -150,7 +150,7 @@ namespace MSDAD.Server.Communication
             return this.client_addresses[client_identifier];
         }
 
-        public void AddClientAddress(string client_identifier, string client_ip, int client_port)
+        public void AddClientAddress(string client_identifier, string client_remoting, string client_ip, int client_port)
         {
             string client_address;
 
@@ -162,7 +162,7 @@ namespace MSDAD.Server.Communication
                 {
                     try
                     {
-                        client_addresses.Add(client_identifier, client_address + "/" + client_identifier);
+                        client_addresses.Add(client_identifier, client_address + "/" + client_remoting);
                     }
                     catch (ArgumentException)
                     {
