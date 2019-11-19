@@ -106,7 +106,31 @@ namespace MSDAD.Server
 
         public void AddLocation(Location location)
         {
-            this.known_locations.Add(location);                
+            //agora tem um check que adiciona um quarto a localizacao se ela ja existir
+            Location existingLocation = null;
+            List<Room> rooms;
+                          
+            foreach(Location l in this.known_locations)
+            {
+                if(l.Name.Equals(location.Name))
+                {
+                    existingLocation = l;           
+                }
+            }
+
+            if(existingLocation!=null)
+            {
+                rooms = location.GetList();
+
+                foreach(Room room in rooms)
+                {
+                    existingLocation.Add(room);
+                }
+            }
+            else
+            {
+                this.known_locations.Add(location);
+            }
         }
 
         public List<Meeting> GetEventList()

@@ -23,6 +23,7 @@ namespace MSDAD.Server
             ServerLibrary server_library;
             int server_port = 0;
             string command, server_identifier, server_ip, server_port_string = "";
+            string[] split_command;
 
             server_ip = ServerUtils.GetLocalIPAddress();
 
@@ -69,10 +70,13 @@ namespace MSDAD.Server
                 Console.Write("Please run a command to be run on the server: ");
                 command = Console.ReadLine();
 
-                switch (command)
+                split_command = command.Split(' ');
+
+                switch (split_command[0])
                 {
                     case ADD_ROOM:
-
+                        new AddRoom(ref server_library, split_command).Execute();
+                        break;
                     case EXIT:
                         Console.Write("Bye!");
                         return;
