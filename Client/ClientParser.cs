@@ -22,15 +22,34 @@ namespace MSDAD.Client
         const string CLOSE = "close";
 
         int client_port = 0;
-        string client_url, script_name, server_url, client_identifier, client_ip, client_port_string;
-        string[] words;
+        string client_arguments, client_url, script_name, server_url, client_identifier, client_ip, client_remoting;
+        string[] client_arguments_split, words;
         
         ClientLibrary client_library;
 
-        public ClientParser(string script_name)
+        public ClientParser()
         {
             this.client_ip = ClientUtils.GetLocalIPAddress();
-            bool client_port_isnt_taken = false;
+            //bool client_port_isnt_taken = false;
+
+            Console.Write("Type the server parameters within the following format \"c1 tcp://localhost:4001/client1 tcp://localhost:3001/server1 cs1\": ");
+
+            client_arguments = Console.ReadLine();
+            client_arguments_split = client_arguments.Split(' ');
+            
+            this.client_identifier = client_arguments_split[0];
+            this.client_url = client_arguments_split[1];
+            this.server_url = client_arguments_split[2];
+
+            this.client_ip = ClientUtils.GetIPFromUrl(this.client_url);
+            this.client_port = ClientUtils.GetPortFromUrl(this.client_url);
+            this.client_remoting = ClientUtils.GetRemotingIdFromUrl(this.client_url);
+
+            this.client_library = new ClientLibrary(this.client_identifier, this.client_remoting, this.server_url, this.client_ip, this.client_port);
+            new Initialize(ref this.client_library).Execute();
+            this.script_name = words[3];
+
+            /*
             while (!client_port_isnt_taken)
             {
                 try
@@ -81,19 +100,17 @@ namespace MSDAD.Client
                     Console.WriteLine(e.Message);
                 }
             }
-
-            this.script_name = script_name;
+            */
         }
 
         public ClientParser(string client_identifier, string client_url, string server_url, string script_name)
         {
-            int port;
-
             this.server_url = server_url;
             this.client_ip = ClientUtils.GetIPFromUrl(client_url);
-            port = ClientUtils.GetPortFromUrl(client_url);            
+            this.client_remoting = ClientUtils.GetRemotingIdFromUrl(client_url);
+            this.client_port = ClientUtils.GetPortFromUrl(client_url);            
 
-            this.client_library = new ClientLibrary(client_identifier, this.server_url, this.client_ip, port);
+            this.client_library = new ClientLibrary(client_identifier, this.client_remoting, server_url, this.client_ip, this.client_port);
             new Initialize(ref this.client_library).Execute();
             this.script_name = script_name;
         }
@@ -186,7 +203,7 @@ namespace MSDAD.Client
         {
             string current_path;
             
-            if(this.script_name == null)
+            if(this.script_name.Equals("0"))
             {
                 return null;
             }

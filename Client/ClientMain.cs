@@ -12,15 +12,9 @@ namespace MSDAD
                 if(args.Length==0)
                 {
                     ClientParser client_parser;
-                    client_parser = new ClientParser(null);
+                    client_parser = new ClientParser();
                     client_parser.Parse();
-                }
-                else if(args.Length==1)
-                {
-                    ClientParser client_parser;
-                    client_parser = new ClientParser(args[0]);
-                    client_parser.Parse();
-                }        
+                }     
                 else if(args.Length==4)
                 {
                     string client_identifier, client_url, client_script, server_url;

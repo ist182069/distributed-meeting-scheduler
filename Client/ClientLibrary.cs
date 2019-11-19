@@ -12,17 +12,18 @@ namespace MSDAD.Client
     class ClientLibrary
     {
         int client_port;
-        string client_ip, client_identifier, server_url;
+        string client_ip, client_identifier, client_remoting, server_url;
         ClientCommunication client_communication;
 
         private List<MeetingView> meeting_views = new List<MeetingView>();
 
-        public ClientLibrary(string client_identifier, string server_url, string client_ip, int client_port)
+        public ClientLibrary(string client_identifier, string client_remoting, string server_url, string client_ip, int client_port)
         {
             this.client_identifier = client_identifier;
             this.server_url = server_url;
             this.client_ip = client_ip;
             this.client_port = client_port;
+            this.client_remoting = client_remoting;
 
             this.client_communication = new ClientCommunication(this);
 
@@ -83,6 +84,14 @@ namespace MSDAD.Client
             get
             {
                 return this.client_ip;
+            }
+        }
+
+        public string ClientRemoting
+        {
+            get
+            {
+                return this.client_remoting;
             }
         }
 

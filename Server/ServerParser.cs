@@ -35,18 +35,31 @@ namespace MSDAD.Server
                 split_command = server_arguments.Split(' ');
 
                 this.server_identifier = split_command[0];
-                this.server_url = split_command[1];                                          
+                this.server_url = split_command[1];
+
+                /*
+                while (!server_port_is_correct)
+                {
+                    try
+                    {
+                        Console.Write("Pick a server port: ");
+                        server_port_string = Console.ReadLine();
+                        server_port = Int32.Parse(server_port_string);
+                        server_port_is_correct = true;
+                    }
+                    catch (FormatException)
+                    {
+                        Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
+                    }
+                }
+
+                Console.Write("Type the server identifier: ");
+                server_identifier = Console.ReadLine();
+
+                */
             }
 
-            try
-            {
-                server_port = ServerUtils.GetPortFromUrl(this.server_url);
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
-            }
-            
+            server_port = ServerUtils.GetPortFromUrl(this.server_url);            
             server_ip = ServerUtils.GetIPFromUrl(this.server_url);
             server_remoting = ServerUtils.GetRemotingIdFromUrl(this.server_url);
 

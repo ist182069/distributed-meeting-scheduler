@@ -16,7 +16,7 @@ namespace MSDAD.Client.Comunication
     class ClientCommunication
     {
         int client_port;
-        string client_ip, client_identifier;
+        string client_ip, client_identifier, client_remoting;
 
         ClientLibrary client_library;
         RemoteClient remote_client;
@@ -28,6 +28,7 @@ namespace MSDAD.Client.Comunication
             this.client_identifier = client_library.ClientIdentifier;
             this.client_port = client_library.ClientPort;
             this.client_ip = client_library.ClientIP;
+            this.client_remoting = client_library.ClientRemoting;
         }
         public void Start()
         {
@@ -42,7 +43,7 @@ namespace MSDAD.Client.Comunication
             }
 
             this.remote_client = new RemoteClient(this);
-            RemotingServices.Marshal(this.remote_client, client_identifier, typeof(RemoteClient));
+            RemotingServices.Marshal(this.remote_client, client_remoting, typeof(RemoteClient));
         }
 
         public void Destroy()
