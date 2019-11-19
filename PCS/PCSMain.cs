@@ -10,7 +10,6 @@
             pcs_parser = new PCSParser();
             pcs_parser.Start(DEFAULT_PORT);
             pcs_parser.WaitForCommands();
-
             while (true) ;
         }       
     }

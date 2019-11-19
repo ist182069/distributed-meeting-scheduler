@@ -38,6 +38,7 @@ namespace MSDAD.PCS
             ChannelServices.RegisterChannel(channel, true);
             this.remotePCS = new RemotePCS(this);
             RemotingServices.Marshal(this.remotePCS, PCS, typeof(RemotePCS));
+            PCSUtils.DeleteLocations();
             Console.WriteLine("Success!");
         }
 

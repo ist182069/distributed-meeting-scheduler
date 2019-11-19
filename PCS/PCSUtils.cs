@@ -2,6 +2,7 @@
 using MSDAD.PCS.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,7 +35,6 @@ namespace MSDAD.PCS
             return path;
         }
 
-
         private static string Path(string option)
         {
             string server_path;
@@ -54,6 +54,21 @@ namespace MSDAD.PCS
             {
                 throw new PCSException("Error: \"" + option + "\" does not exist...");
             }            
+        }
+
+        public static void DeleteLocations()
+        {
+            string directory_path, file_path;
+            string[] directory_files;
+
+            directory_path = Path(SERVER_SCRIPTS) + "\\";
+            directory_files = Directory.GetFiles(directory_path);
+
+            for(int i = 0; i < directory_files.Length; i++)
+            {
+                file_path = directory_files[i];
+                File.Delete(file_path);
+            }
         }
     }
 }
