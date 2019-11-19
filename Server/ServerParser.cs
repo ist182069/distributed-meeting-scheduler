@@ -5,6 +5,7 @@ namespace MSDAD.Server
 {
     class ServerParser
     {
+        public const string ADD_ROOM = "AddRoom";
         public const string EXIT = "exit";
 
         private string server_url;
@@ -70,6 +71,8 @@ namespace MSDAD.Server
 
                 switch (command)
                 {
+                    case ADD_ROOM:
+
                     case EXIT:
                         Console.Write("Bye!");
                         return;

@@ -202,7 +202,6 @@ namespace MSDAD.Server.Communication
                     }                    
                     tr.Close();
                     this.server_library.AddLocation(location);
-                    File.Delete(file_name);
                 }
             }                        
         }
