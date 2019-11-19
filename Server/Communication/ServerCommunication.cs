@@ -32,7 +32,7 @@ namespace MSDAD.Server.Communication
             this.server_identifier = server_library.ServerIdentifier;
             this.server_port = server_library.ServerPort;
             this.server_ip = server_library.ServerIP;
-            this.server_remoting = server_remoting;
+            this.server_remoting = server_library.ServerRemoting;
         }
 
         public void Start()

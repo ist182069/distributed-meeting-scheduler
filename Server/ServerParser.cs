@@ -53,9 +53,9 @@ namespace MSDAD.Server
             // Serve apenas para inicializar, caso contrario temos de esperar por um comando para registar no servidor
 
             Console.Write("Starting up server... ");
-            server_library = new ServerLibrary(server_identifier, server_remoting, server_ip, server_port);
+            server_library = new ServerLibrary(this.server_identifier, server_remoting, server_ip, server_port);
             new Initialize(ref server_library);
-            Console.WriteLine("the server has been successfully started: tcp://" + server_ip + ":" + server_port + "/" + server_identifier);
+            Console.WriteLine("the server has been successfully started: tcp://" + server_ip + ":" + server_port + "/" + server_remoting);
 
             while (true)
             {

@@ -80,6 +80,14 @@ namespace MSDAD.Server
             }
         }
 
+        public string ServerRemoting
+        {
+            get
+            {
+                return server_remoting;
+            }
+        }
+
         public int ServerPort
         {
             get
