@@ -17,7 +17,7 @@ namespace MSDAD.Client.Commands
         {            
             try
             {
-                this.remote_server.Hello(this.client_identifier, this.client_ip, this.client_port);
+                this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
                 return null;
             }
             catch (ServerCoreException e)

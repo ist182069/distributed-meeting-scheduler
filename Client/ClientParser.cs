@@ -32,7 +32,7 @@ namespace MSDAD.Client
             this.client_ip = ClientUtils.GetLocalIPAddress();
             //bool client_port_isnt_taken = false;
 
-            Console.Write("Type the server parameters within the following format \"c1 tcp://localhost:4001/client1 tcp://localhost:3001/server1 cs1\": ");
+            Console.Write("Type the client parameters within the following format \"c1 tcp://localhost:4001/client1 tcp://localhost:3001/server1 cs1\": ");
 
             client_arguments = Console.ReadLine();
             client_arguments_split = client_arguments.Split(' ');
@@ -47,7 +47,7 @@ namespace MSDAD.Client
 
             this.client_library = new ClientLibrary(this.client_identifier, this.client_remoting, this.server_url, this.client_ip, this.client_port);
             new Initialize(ref this.client_library).Execute();
-            this.script_name = words[3];
+            this.script_name = client_arguments_split[3];
 
             /*
             while (!client_port_isnt_taken)
