@@ -85,29 +85,16 @@ namespace MSDAD.Client
             this.script_name = script_name;
         }
 
-        public ClientParser(string client_url, string server_url, string script_name)
+        public ClientParser(string client_identifier, string client_url, string server_url, string script_name)
         {
             int port;
-            string client_identifier, port_string;
-            string[] split_url, split_ip;
 
-            split_url = client_url.Split('/');
-            split_ip = split_url[2].Split(':');
-            
-            this.client_ip = split_ip[0];            
-            port_string = split_ip[1];
-
-            port = Int32.Parse(port_string);
-
-            client_identifier = split_url[3];
-
-            this.client_url = client_url;
             this.server_url = server_url;
+            this.client_ip = ClientUtils.GetIPFromUrl(client_url);
+            port = ClientUtils.GetPortFromUrl(client_url);            
 
             this.client_library = new ClientLibrary(client_identifier, this.server_url, this.client_ip, port);
-
             new Initialize(ref this.client_library).Execute();
-
             this.script_name = script_name;
         }
         public void Parse()

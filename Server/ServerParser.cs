@@ -8,14 +8,16 @@ namespace MSDAD.Server
         public const string ADD_ROOM = "AddRoom";
         public const string EXIT = "exit";
 
+        private string server_id;
         private string server_url;
 
         public ServerParser()
         {
             server_url = null;
         }
-        public ServerParser(string server_url)
+        public ServerParser(string server_id, string server_url)
         {
+            this.server_id = server_id;
             this.server_url = server_url;
         }
         public void Execute()
@@ -62,7 +64,7 @@ namespace MSDAD.Server
             Console.Write("Starting up server... ");
             server_library = new ServerLibrary(server_identifier, server_ip, server_port);
             new Initialize(ref server_library);
-            Console.WriteLine("the server has been successfully started: tcp://" + server_ip + ":" + server_port_string + "/" + server_identifier);
+            Console.WriteLine("the server has been successfully started: tcp://" + server_ip + ":" + server_port + "/" + server_identifier);
 
             while (true)
             {

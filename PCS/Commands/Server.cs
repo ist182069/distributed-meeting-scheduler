@@ -20,7 +20,7 @@ namespace MSDAD.PCS.Commands
         }
         public override object Execute()
         {
-            string server_identifier, server_url, server_path;
+            string server_arguments, server_identifier, server_url, server_path;
             //nao percebo para que servem estes
             int tolerated_faults, min_delay_ms, max_delay_ms;
 
@@ -38,7 +38,8 @@ namespace MSDAD.PCS.Commands
             Process server_process = new Process();
             server_process.StartInfo.FileName = server_path;
             // TODO passar um XML ou whatever para criar as localizacoes
-            server_process.StartInfo.Arguments = server_url;
+            server_arguments = server_identifier + " " + server_url;
+            server_process.StartInfo.Arguments = server_arguments;
             server_process.Start();
 
             base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, server_process);

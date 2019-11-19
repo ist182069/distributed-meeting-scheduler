@@ -17,7 +17,7 @@ namespace MSDAD.PCS.Commands
         }
         public override object Execute()
         {
-            string arguments, client_identifier, client_url, client_path, client_script_path, server_url;
+            string client_arguments, client_identifier, client_url, client_path, client_script_path, server_url;
 
             client_identifier = words[1];
             client_url = words[2];
@@ -26,11 +26,11 @@ namespace MSDAD.PCS.Commands
 
             client_path = PCSUtils.AssembleCurrentPath(CLIENT) + "\\" + CLIENT_EXE;
 
-            arguments = client_url + " " + server_url + " " + client_script_path;
+            client_arguments = client_identifier + " " +client_url + " " + server_url + " " + client_script_path;
 
             Process client_process = new Process();
             client_process.StartInfo.FileName = client_path;
-            client_process.StartInfo.Arguments = arguments;
+            client_process.StartInfo.Arguments = client_arguments;
             client_process.Start();
 
             base.pcsLibrary.AddKeyValueToClientDictionary(client_identifier, client_process);

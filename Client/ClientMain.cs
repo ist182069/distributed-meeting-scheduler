@@ -21,10 +21,17 @@ namespace MSDAD
                     client_parser = new ClientParser(args[0]);
                     client_parser.Parse();
                 }        
-                else if(args.Length==3)
+                else if(args.Length==4)
                 {
+                    string client_identifier, client_url, client_script, server_url;
+
+                    client_identifier = args[0];
+                    client_url = args[1];
+                    server_url = args[2];
+                    client_script = args[3];
+
                     ClientParser client_parser;
-                    client_parser = new ClientParser(args[0], args[1], args[2]);
+                    client_parser = new ClientParser(client_identifier, client_url, server_url, client_script);
                     client_parser.Parse();
                 }
                 else
