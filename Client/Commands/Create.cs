@@ -1,5 +1,4 @@
 ﻿using MSDAD.Client.Commands;
-using MSDAD.Client.Commands.Parser;
 using MSDAD.Client.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MSDAD.Client.Commands.Parser
+namespace MSDAD.Client.Commands
 {
     class Create : Command
     {

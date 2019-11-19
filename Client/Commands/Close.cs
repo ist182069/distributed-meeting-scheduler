@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MSDAD.Client.Commands.Parser
+namespace MSDAD.Client.Commands
 {
     class Close : Command
     {

@@ -1,6 +1,5 @@
 ﻿using MSDAD.Client.Commands;
 using MSDAD.Client.Comunication;
-using MSDAD.Client.Commands.CLI;
 using System;
 using System.Collections.Generic;
 using System.Linq;

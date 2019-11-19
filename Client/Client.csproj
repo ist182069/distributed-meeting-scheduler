@@ -44,25 +44,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\Parser\Close.cs" />
-    <Compile Include="Commands\Parser\Join.cs" />
+    <Compile Include="Commands\Close.cs" />
+    <Compile Include="Commands\Join.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Exceptions\ClientLocalException.cs" />
     <Compile Include="ClientUtils.cs" />
     <Compile Include="ClientLibrary.cs" />
     <Compile Include="Commands\Initialize.cs" />
-    <Compile Include="Commands\CLI\Close.cs" />
-    <Compile Include="Commands\CLI\Ping.cs" />
-    <Compile Include="Commands\CLI\Join.cs" />
+    <Compile Include="Commands\Ping.cs" />
     <Compile Include="Commands\List.cs" />
     <Compile Include="MeetingView.cs" />
-    <Compile Include="Commands\CLI\Create.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Communication\ClientCommunications.cs" />
     <Compile Include="Communication\RemoteClient.cs" />
     <Compile Include="ClientMain.cs" />
     <Compile Include="ClientParser.cs" />
-    <Compile Include="Commands\Parser\Create.cs" />
+    <Compile Include="Commands\Create.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

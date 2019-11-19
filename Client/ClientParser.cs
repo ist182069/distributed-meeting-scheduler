@@ -1,5 +1,4 @@
 ﻿using MSDAD.Client.Exceptions;
-using MSDAD.Client.Commands.Parser;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MSDAD.Client.Commands;
 using MSDAD.Library;
-using MSDAD.Client.Commands.CLI;
 
 namespace MSDAD.Client
 {
@@ -25,6 +23,7 @@ namespace MSDAD.Client
 
         int client_port = 0;
         string client_url, script_name, server_url, client_identifier, client_ip, client_port_string;
+        string[] words;
         
         ClientLibrary client_library;
 
@@ -145,24 +144,26 @@ namespace MSDAD.Client
                 Console.Write("Insert the command you want to run on the Meeting Scheduler: ");
                 input = Console.ReadLine();
 
+                words = input.Split(' ');
+
                 try
                 {
-                    switch (input)
+                    switch (words[0])
                     {
                         case PING_COMMAND:
                             new Ping(ref client_library).Execute();
                             break;
                         case CREATE:
-                            new Commands.CLI.Create(ref client_library).Execute();
+                            new Create(ref client_library, words).Execute();
                             break;
                         case LIST:
                             new List(ref client_library).Execute();
                             break;
                         case JOIN:
-                            new Commands.CLI.Join(ref client_library).Execute();
+                            new Join(ref client_library, words).Execute();
                             break;
                         case CLOSE:
-                            new Commands.CLI.Close(ref client_library).Execute();
+                            new Close(ref client_library, words).Execute();
                             break;
                         case EXIT:
                             Console.WriteLine("Bye!");
@@ -216,16 +217,16 @@ namespace MSDAD.Client
             switch(words[0])
             {
                 case CREATE:
-                    new Commands.Parser.Create(ref this.client_library, words).Execute();
+                    new Create(ref this.client_library, words).Execute();
                     break;
                 case LIST:
                     new List(ref this.client_library).Execute();
                     break;
                 case JOIN:
-                    new Commands.Parser.Join(ref this.client_library, words).Execute();
+                    new Join(ref this.client_library, words).Execute();
                     break;
                 case CLOSE:
-                    new Commands.Parser.Close(ref this.client_library, words).Execute();
+                    new Close(ref this.client_library, words).Execute();
                     break;
                 case WAIT:
                     System.Threading.Thread.Sleep(Int32.Parse(words[1]));
