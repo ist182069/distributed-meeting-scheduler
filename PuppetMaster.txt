@@ -1,4 +1,8 @@
-AddRoom Lisboa 10 room1
+AddRoom Lisboa 2 room1
 AddRoom Porto 20 room2
 Server s1 tcp://localhost:3000/server1 0 100 200
-Client c1 tcp://localhost:4000/client1 tcp://localhost:3000/server1 Client1.txt
+Client c1 tcp://localhost:4001/client1 tcp://localhost:3000/server1 c1.txt
+Wait 3000
+Client c3 tcp://localhost:4003/client3 tcp://localhost:3000/server1 botLisboa.txt
+Client c4 tcp://localhost:4004/client4 tcp://localhost:3000/server1 botLisboa.txt
+Client c5 tcp://localhost:4005/client5 tcp://localhost:3000/server1 botLisboa.txt

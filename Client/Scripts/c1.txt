@@ -1,0 +1,1 @@
+create myTopic1 2 1 2 Lisboa,2020-01-02 client3 client4 

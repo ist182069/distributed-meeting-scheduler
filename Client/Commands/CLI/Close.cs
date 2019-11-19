@@ -22,7 +22,7 @@ namespace MSDAD.Client.Commands.CLI
             meeting_topic = Console.ReadLine();
 
 
-            this.remote_server.Close(meeting_topic, this.client_identifier, 0);
+            this.remote_server.Close(meeting_topic, this.client_identifier);
             Console.WriteLine("Successfully scheduled " + meeting_topic);
 
             return null;

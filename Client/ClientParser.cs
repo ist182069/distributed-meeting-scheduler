@@ -15,6 +15,7 @@ namespace MSDAD.Client
 {
     class ClientParser
     {
+        const string WAIT = "wait";
         const string PING_COMMAND = "ping";
         const string CREATE = "create";
         const string EXIT = "exit";
@@ -225,6 +226,9 @@ namespace MSDAD.Client
                     break;
                 case CLOSE:
                     new Commands.Parser.Close(ref this.client_library, words).Execute();
+                    break;
+                case WAIT:
+                    System.Threading.Thread.Sleep(Int32.Parse(words[1]));
                     break;
                 default:
                     Console.WriteLine(ErrorCodes.INVALID_COMMAND);

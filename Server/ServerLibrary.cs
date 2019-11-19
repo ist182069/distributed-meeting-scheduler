@@ -29,7 +29,7 @@ namespace MSDAD.Server
             Console.Write("Starting server remoting service... ");
             server_communication.Start();
             Console.WriteLine("Success!");
-        }    
+        }
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
         {
@@ -58,43 +58,12 @@ namespace MSDAD.Server
             }
         }
 
-        public void List()
-        {
-            int min_ateendes, version;
-            string coordinator, final_slot, state, topic;
-            List<string> going_clients;
-
-            foreach(Meeting meeting in this.event_list)
-            {
-                topic = meeting.Topic;
-                coordinator = meeting.Coordinator;
-                state = meeting.State;
-                min_ateendes = meeting.MinAttendees;
-                version = meeting.Version;
-                final_slot = meeting.FinalSlot;
-                going_clients = meeting.GetGoingClients();
-
-                Console.WriteLine("Meeting: " + topic);
-                Console.WriteLine("  - Coordinator: " + coordinator);
-                Console.WriteLine("  - State: " + state);
-                Console.WriteLine("  - Version: " + version);
-                Console.WriteLine("  - Minimum Attendees: " + min_ateendes);
-                Console.WriteLine("  - Going Clients: ");                
-                foreach(string g in going_clients)
-                {
-                    Console.WriteLine("    - : " + g);
-                }                
-                Console.WriteLine("  - Final slot: " + final_slot);
-
-            }
-        }
-
         public void Close(String meeting_topic, string client_identifier)
         {
             GetMeeting(meeting_topic).Schedule(client_identifier);
             Console.Write("Please run a command to be run on the server: ");
         }
-
+        
         public string ServerIdentifier
         {
             get{
@@ -137,7 +106,7 @@ namespace MSDAD.Server
 
         public void AddLocation(Location location)
         {
-            this.known_locations.Add(location);
+            this.known_locations.Add(location);                
         }
 
         public List<Meeting> GetEventList()

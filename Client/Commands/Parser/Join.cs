@@ -55,7 +55,7 @@ namespace MSDAD.Client.Commands.Parser
                 slots.Add(room);
             }
 
-            this.remote_server.Join(meeting_topic, slots, this.client_identifier, 0);
+            this.remote_server.Join(meeting_topic, slots, this.client_identifier);
 
             return null;
         }

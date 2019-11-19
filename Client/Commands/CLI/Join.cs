@@ -54,7 +54,7 @@ namespace MSDAD.Client.Commands.CLI
                 slots.Add(slot);
             }
 
-            this.remote_server.Join(meeting_topic, slots, this.client_identifier, 0);
+            this.remote_server.Join(meeting_topic, slots, this.client_identifier);
             Console.WriteLine("Registered in " + meeting_topic);
 
             return null;

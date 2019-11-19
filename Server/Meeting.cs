@@ -269,19 +269,16 @@ namespace MSDAD.Server
         {
             return this.invitees;
         }
-        public List<string> GetGoingClients()
-        {
-            return this.going_clients;
-            
-        }
+        
         public bool ClientConfirmed(string client_address)
         {
             if(going_clients==null)
             {
                 return false;
             }
-            return going_clients.Contains(client_address);
-        }        
+            return this.going_clients.Contains(client_address);
+        }
+
         public string FinalSlot
         {
             get
