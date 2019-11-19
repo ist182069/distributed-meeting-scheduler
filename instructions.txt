@@ -1,1 +1,4 @@
-- Para processar o PCS dar é necessário fazer rebuild aos outros módulos do programa como o Client e o Server.
+﻿- Para processar o PCS dar é necessário fazer rebuild aos outros módulos do programa como o Client e o Server.
+
+Assumpções:
+- Os Rooms são adicionados por ordem de tamanho
