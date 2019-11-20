@@ -26,7 +26,8 @@ namespace MSDAD.PCS.Commands
             foreach (Tuple<string, Process> urlProcessTuple in client_dictionary.Values)
             {
                 client_url = urlProcessTuple.Item1;
-                remote_client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), client_url);                
+                remote_client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), client_url);
+                remote_client.Status();
             }
 
             foreach (Tuple<string, Process> urlProcessTuple in server_dictionary.Values)
