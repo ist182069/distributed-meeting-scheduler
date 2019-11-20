@@ -16,11 +16,12 @@ namespace MSDAD.PCS
     class PCSParser
     {
         private const string ADD_ROOM = "AddRoom";
-
+        private const string CRASH = "Crash";
         private const string WAIT = "Wait";
         private const string CLIENT = "Client";
         private const string PCS = "PCS";
         private const string SERVER = "Server";
+
 
         TcpChannel channel;
 
@@ -86,6 +87,9 @@ namespace MSDAD.PCS
                     break;
                 case SERVER:
                     new Server(ref this.pcsLibrary).Execute();
+                    break;
+                case CRASH:
+                    new Crash(ref this.pcsLibrary).Execute();
                     break;
                 case WAIT:
                     System.Threading.Thread.Sleep(Int32.Parse(words[1]));

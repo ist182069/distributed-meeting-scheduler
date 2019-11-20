@@ -69,11 +69,14 @@ namespace MSDAD.Server.Commands
                 Console.WriteLine("Coordinator: " + meeting.Coordinator);
                 invitees = meeting.GetInvitees();
 
-                foreach (string invitee in invitees)
+                if(invitees!=null)
                 {
-                    Console.WriteLine("  Invitees:");
-                    Console.WriteLine("  " + invitee);
-                }
+                    foreach (string invitee in invitees)
+                    {
+                        Console.WriteLine("  Invitees:");
+                        Console.WriteLine("  " + invitee);
+                    }
+                }                    
 
                 Console.WriteLine("Final Slot: " + meeting.FinalSlot);
             }
