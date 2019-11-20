@@ -21,6 +21,7 @@ namespace MSDAD.PCS
         private const string CLIENT = "Client";
         private const string PCS = "PCS";
         private const string SERVER = "Server";
+        private const string FREEZE = "Freeze";
 
 
         TcpChannel channel;
@@ -90,6 +91,9 @@ namespace MSDAD.PCS
                     break;
                 case CRASH:
                     new Crash(ref this.pcsLibrary).Execute();
+                    break;
+                case FREEZE:
+                    new Freeze(ref this.pcsLibrary).Execute();
                     break;
                 case WAIT:
                     System.Threading.Thread.Sleep(Int32.Parse(words[1]));

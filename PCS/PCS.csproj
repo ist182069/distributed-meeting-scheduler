@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Freeze.cs" />
     <Compile Include="Commands\Crash.cs" />
     <Compile Include="Commands\Client.cs" />
     <Compile Include="Commands\Server.cs" />
