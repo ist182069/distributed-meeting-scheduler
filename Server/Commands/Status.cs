@@ -23,7 +23,6 @@ namespace MSDAD.Server.Commands
             List<Room> rooms;
             List<DateTime> reserved_dates;
             
-
             Dictionary<string, string> client_dictionary;
 
             locations = server_library.GetKnownLocations();

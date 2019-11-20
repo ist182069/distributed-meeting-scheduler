@@ -59,5 +59,10 @@ namespace MSDAD.Client.Comunication
 
             this.client_library.AddMeetingView(meetingView);
         }    
+
+        public void Status()
+        {
+            Console.WriteLine("TODO");
+        }
     }
 }

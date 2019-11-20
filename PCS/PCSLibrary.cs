@@ -14,14 +14,14 @@ namespace MSDAD.PCS
         string[] words;
 
         Dictionary<string, LocationXML> locationDictionary; 
-        Dictionary<string, Process> serverDictionary;
-        Dictionary<string, Process> clientDictionary;
+        Dictionary<string, Tuple<string, Process>> serverDictionary;
+        Dictionary<string, Tuple<string, Process>> clientDictionary;
 
         public PCSLibrary()
         {
             this.locationDictionary = new Dictionary<string, LocationXML>();
-            this.serverDictionary = new Dictionary<string, Process>();
-            this.clientDictionary = new Dictionary<string, Process>();
+            this.serverDictionary = new Dictionary<string, Tuple<string, Process>>();
+            this.clientDictionary = new Dictionary<string, Tuple<string, Process>>();
         }      
 
         public string[] GetWords()
@@ -77,24 +77,24 @@ namespace MSDAD.PCS
             }            
         }
 
-        public Dictionary<string, Process> GetServerDictionary()
+        public Dictionary<string, Tuple<string, Process>> GetServerDictionary()
         {
             return this.serverDictionary;
         }
 
-        public void AddKeyValueToServerDictionary(string server_identifier, Process server_process)
+        public void AddKeyValueToServerDictionary(string server_identifier, Tuple<string, Process> urlProcessTuple)
         {
-            this.serverDictionary.Add(server_identifier, server_process);
+            this.serverDictionary.Add(server_identifier, urlProcessTuple);
         }
 
-        public Dictionary<string, Process> GetClientDictionary()
+        public Dictionary<string, Tuple<string, Process>> GetClientDictionary()
         {
             return this.clientDictionary;
         }
 
-        public void AddKeyValueToClientDictionary(string client_identifier, Process client_process)
+        public void AddKeyValueToClientDictionary(string client_identifier, Tuple<string, Process> urlProcessTuple)
         {
-            this.clientDictionary.Add(client_identifier, client_process);
+            this.clientDictionary.Add(client_identifier, urlProcessTuple);
         }
     }
 }

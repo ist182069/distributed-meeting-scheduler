@@ -19,7 +19,7 @@ namespace MSDAD.PCS.Commands
         {
             string server_identifier;
             Process serverProcess;
-            Dictionary<string, Process> server_dictionary;
+            Dictionary<string, Tuple<string, Process>> server_dictionary;
 
             server_identifier = words[1];
 
@@ -27,7 +27,7 @@ namespace MSDAD.PCS.Commands
 
             if(server_dictionary.ContainsKey(server_identifier))
             {
-                serverProcess = server_dictionary[server_identifier];
+                serverProcess = server_dictionary[server_identifier].Item2;
                 serverProcess.Kill();
                 server_dictionary.Remove(server_identifier);
             }            

@@ -51,5 +51,10 @@ namespace MSDAD.Server.Communication
         {
             server_communication.AddClientAddress(client_identifier, client_remoting, client_ip, client_port);
         }
+
+        public void Status()
+        {
+            server_communication.Status();
+        }
     }
 }

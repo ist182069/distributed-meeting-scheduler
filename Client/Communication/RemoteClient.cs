@@ -27,6 +27,11 @@ namespace MSDAD
             {
                 this.client_communication.AddMeetingView(meeting_topic, meeting_version, meeting_state, extraInfo);
             }
+
+            public void Status()
+            {
+                this.client_communication.Status();
+            }
         }
     }
     

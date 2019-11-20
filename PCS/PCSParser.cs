@@ -23,7 +23,8 @@ namespace MSDAD.PCS
         private const string SERVER = "Server";
         private const string FREEZE = "Freeze";
         private const string UNFREEZE = "Unfreeze";
-        
+        private const string STATUS = "Status";
+
         TcpChannel channel;
 
         RemotePCS remotePCS;
@@ -97,6 +98,9 @@ namespace MSDAD.PCS
                     break;
                 case UNFREEZE:
                     new Unfreeze(ref this.pcsLibrary).Execute();
+                    break;
+                case STATUS:
+                    new Status(ref this.pcsLibrary).Execute();
                     break;
                 case WAIT:
                     System.Threading.Thread.Sleep(Int32.Parse(words[1]));

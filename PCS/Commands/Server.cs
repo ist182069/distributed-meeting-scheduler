@@ -23,6 +23,7 @@ namespace MSDAD.PCS.Commands
             string server_arguments, server_identifier, server_url, server_path;
             //nao percebo para que servem estes
             int tolerated_faults, min_delay_ms, max_delay_ms;
+            Tuple<string, Process> urlProcessTuple;
 
             server_identifier = words[1];
             server_url = words[2];
@@ -41,8 +42,8 @@ namespace MSDAD.PCS.Commands
             server_arguments = server_identifier + " " + server_url;
             server_process.StartInfo.Arguments = server_arguments;
             server_process.Start();
-
-            base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, server_process);
+            
+            base.pcsLibrary.AddKeyValueToServerDictionary(server_identifier, new Tuple<string, Process>(server_url, server_process));
 
             return null;
         }

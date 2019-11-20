@@ -13,6 +13,8 @@ namespace MSDAD
             void Ping(string message);
 
             void SendMeeting(string meeting_topic, int meeting_version, string meeting_state, string extraInfo);
+
+            void Status();
         }
 
         public interface ServerInterface
@@ -24,6 +26,8 @@ namespace MSDAD
             void Join(string meeting_topic, List<string> slots, string client_identifier);
             void Close(string meeting_topic, string client_identifier);
             void Wait(int milliseconds);
+
+            void Status();
         }
 
         public interface PCSInterface

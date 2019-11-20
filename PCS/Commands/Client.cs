@@ -33,7 +33,7 @@ namespace MSDAD.PCS.Commands
             client_process.StartInfo.Arguments = client_arguments;
             client_process.Start();
 
-            base.pcsLibrary.AddKeyValueToClientDictionary(client_identifier, client_process);
+            base.pcsLibrary.AddKeyValueToClientDictionary(client_identifier, new Tuple<string, Process>(client_url, client_process));
 
             return null;
         }
