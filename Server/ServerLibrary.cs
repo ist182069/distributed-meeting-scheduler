@@ -152,6 +152,11 @@ namespace MSDAD.Server
             return this.known_locations;
         }
 
+        public Dictionary<string, string> GetClients()
+        {
+            return this.server_communication.GetClientAddresses();
+        }
+
         public Tuple<Location, DateTime> ParseSlot(String slot)
         {
             Location location = null;

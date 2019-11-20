@@ -53,5 +53,10 @@ namespace MSDAD.Server
 
             return vacated;
         }
+
+        public List<DateTime> GetReservedDates()
+        {
+            return this.reservations;
+        }
     }
 }

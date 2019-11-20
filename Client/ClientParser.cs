@@ -216,6 +216,7 @@ namespace MSDAD.Client
         }
         private void ParseLine(string text_line)
         {
+            Console.WriteLine(text_line);
             string[] words = text_line.Split(' ');
 
             switch(words[0])

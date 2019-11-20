@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AddRoom.cs" />
+    <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\Initialize.cs" />
     <Compile Include="ServerLibrary.cs" />

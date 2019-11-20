@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MSDAD.Client.Commands
@@ -21,6 +22,7 @@ namespace MSDAD.Client.Commands
 
             foreach (MeetingView mV in meeting_views)
             {
+                Console.WriteLine(mV.MeetingTopic + " " + mV.MeetingState + " " + mV.MeetingInfo + " " + mV.MeetingVersion + " "); 
                 meeting_query.Add(mV.MeetingTopic, mV.MeetingState);
             }
 

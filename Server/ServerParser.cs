@@ -7,6 +7,7 @@ namespace MSDAD.Server
     {
         public const string ADD_ROOM = "AddRoom";
         public const string EXIT = "exit";
+        public const string STATUS = "Status";
 
         private string server_identifier;
         private string server_url;
@@ -82,10 +83,13 @@ namespace MSDAD.Server
                 {
                     case ADD_ROOM:
                         new AddRoom(ref server_library, split_command).Execute();
-                        break;
+                        break;                    
                     case EXIT:
                         Console.Write("Bye!");
                         return;
+                    case STATUS:
+                        new Status(ref server_library).Execute();
+                        break;
                     default:
                         Console.WriteLine("That command does not exist. You must insert another one");
                         break;

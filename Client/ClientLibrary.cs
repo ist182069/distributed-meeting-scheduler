@@ -38,8 +38,10 @@ namespace MSDAD.Client
                 foreach (MeetingView mV in meeting_views)
                 {
                     if (mV.MeetingTopic.Equals(meeting_view.MeetingTopic))
+                    {
                         meeting_views.Remove(mV);
-                    break;
+                        break;
+                    }
                 }
 
                 this.meeting_views.Add(meeting_view);
