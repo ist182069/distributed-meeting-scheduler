@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace MSDAD.PCS.Commands
 {
     class Client : Command
-    {        
+    {
         string[] words;
 
         public Client(ref PCSLibrary pcsLibrary) : base(ref pcsLibrary)
@@ -26,7 +26,7 @@ namespace MSDAD.PCS.Commands
 
             client_path = PCSUtils.AssembleCurrentPath(CLIENT) + "\\" + CLIENT_EXE;
 
-            client_arguments = client_identifier + " " +client_url + " " + server_url + " " + client_script_path;
+            client_arguments = client_identifier + " " + client_url + " " + server_url + " " + client_script_path;
 
             Process client_process = new Process();
             client_process.StartInfo.FileName = client_path;

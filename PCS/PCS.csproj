@@ -44,9 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Client.cs" />
     <Compile Include="Commands\Freeze.cs" />
     <Compile Include="Commands\Crash.cs" />
-    <Compile Include="Commands\Client.cs" />
+    <Compile Include="Commands\Unfreeze.cs" />
     <Compile Include="Commands\Server.cs" />
     <Compile Include="Exceptions\PCSException.cs" />
     <Compile Include="PCSLibrary.cs" />
