@@ -2,6 +2,7 @@
 using MSDAD.Server.XML;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,10 @@ namespace MSDAD.Server.Communication
         RemoteServer remote_server;
         TcpChannel channel;
 
+
+        // recebe as mensagens para cada meeting_topic
+        private ConcurrentDictionary<string, List<string>> receiving_create = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas
+        // topicos a criar que estao pendentes
         private List<string> pending_create = new List<string>();
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
@@ -67,55 +72,87 @@ namespace MSDAD.Server.Communication
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string replica_identifier)
         {
-            if(!pending_create.Contains(meeting_topic))
+            if(!this.receiving_create.ContainsKey(meeting_topic))
             {
-                pending_create.Add(meeting_topic);
-
-                int server_iter = 1;
-
-                foreach (string replica_url in this.server_addresses.Values)
+                List<string> received_messages = new List<string>();
+                received_messages.Add(this.server_identifier);
+                this.receiving_create.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
+            }
+            else
+            {
+                List<string> received_messages = this.receiving_create[meeting_topic];
+                
+                if(!received_messages.Contains(replica_identifier))
                 {
-                    Console.WriteLine("teste: " + server_iter);
-
-                    if (server_iter == n_replicas)
-                    {
-                        break;
-                    }
-
-                    if (!replica_url.Equals(this.server_url))
-                    {
-                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
-                        try
-                        {
-                            CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
-                            AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.OurRemoteAsyncCallBack);
-                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, replica_identifier, RemoteCallback, null);
-                        }
-                        catch (System.Net.Sockets.SocketException se)
-                        {
-                            Console.WriteLine(se.Message);
-                        }
-                    }
-
-                    server_iter++;
-                }
-
-                if (invitees == null)
-                {
-                    foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
-                    {
-                        if (address_iter.Key != client_identifier)
-                        {
-                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
-                            client.SendMeeting(meeting_topic, 1, "OPEN", null);
-                        }
-                    }
-                }
-
-                Console.WriteLine("\r\nNew event: " + meeting_topic);
-                Console.Write("Please run a command to be run on the server: ");
+                    received_messages.Add(replica_identifier);
+                    this.receiving_create[meeting_topic] = received_messages;
+                }                
             }
 
+            lock (pending_create)
+            {
+                if (!pending_create.Contains(meeting_topic))
+                {
+                    pending_create.Add(meeting_topic);
+
+                    int server_iter = 1;
+
+                    foreach (string replica_url in this.server_addresses.Values)
+                    {
+                        Console.WriteLine("teste: " + server_iter);
+
+                        if (server_iter == n_replicas)
+                        {
+                            break;
+                        }
+
+                        if (!replica_url.Equals(this.server_url))
+                        {
+                            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                            try
+                            {
+                                CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
+                                AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.OurRemoteAsyncCallBack);
+                                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, RemoteCallback, null);
+                            }
+                            catch (System.Net.Sockets.SocketException se)
+                            {
+                                Console.WriteLine(se.Message);
+                            }
+                        }
+
+                        server_iter++;
+                    }
+
+                    // TODO:  isto e bloqueante pode ficar bloqueado para sempre. Por Timer?
+                    while (true)
+                    {
+                        float current_messages = (float)this.receiving_create[meeting_topic].Count;
+
+                        Console.WriteLine(receiving_create[meeting_topic].Count);
+                        Console.WriteLine((float)n_replicas / 2);
+
+                        if (current_messages > (float)n_replicas / 2)
+                        {
+                            if (invitees == null)
+                            {
+                                foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
+                                {
+                                    if (address_iter.Key != client_identifier)
+                                    {
+                                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
+                                        client.SendMeeting(meeting_topic, 1, "OPEN", null);
+                                    }
+                                }
+                            }
+
+                            Console.WriteLine("\r\nNew event: " + meeting_topic);
+                            Console.Write("Please run a command to be run on the server: ");
+                            break;
+                        }
+                    }                    
+                }
+            }
         }
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
         {
