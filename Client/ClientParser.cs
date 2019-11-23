@@ -18,8 +18,9 @@ namespace MSDAD.Client
         const string CREATE = "create";
         const string EXIT = "exit";
         const string LIST = "list";
-        const string JOIN = "join";
+        const string JOIN = "join";        
         const string CLOSE = "close";
+        const string STATUS = "Status";
 
         int client_port = 0;
         string client_arguments, client_url, script_name, server_url, client_identifier, client_ip, client_remoting;
@@ -169,6 +170,9 @@ namespace MSDAD.Client
                         case CLOSE:
                             new Close(ref client_library, words).Execute();
                             break;
+                        case STATUS:
+                            new Status(ref this.client_library).Execute();
+                            break;
                         case EXIT:
                             Console.WriteLine("Bye!");
                             return;
@@ -235,6 +239,9 @@ namespace MSDAD.Client
                     break;
                 case WAIT:
                     System.Threading.Thread.Sleep(Int32.Parse(words[1]));
+                    break;
+                case STATUS:
+                    new Status(ref this.client_library).Execute();
                     break;
                 default:
                     Console.WriteLine(ErrorCodes.INVALID_COMMAND);

@@ -104,6 +104,15 @@ namespace MSDAD.Library
 
             return id;
         }
+
+        public static string AssembleRemotingURL(string ip, int port, string remoting_identifier)
+        {
+            string tcp_url;
+
+            tcp_url = "tcp://" + ip + ":" + port + "//" + remoting_identifier;
+
+            return tcp_url;
+        }
     }
 }
 

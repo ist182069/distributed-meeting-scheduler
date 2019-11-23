@@ -62,7 +62,29 @@ namespace MSDAD.Client.Comunication
 
         public void Status()
         {
-            Console.WriteLine("TODO");
+            int port;
+            string client_identifier, client_ip, client_url, client_remoting, server_url;
+            List<MeetingView> meetingViews;
+
+            client_identifier = this.client_library.ClientIdentifier;
+            client_ip = this.client_library.ClientIP;
+            port = this.client_library.ClientPort;
+            client_remoting = this.client_library.ClientRemoting;
+            client_url = ClientUtils.AssembleRemotingURL(client_ip, port, client_remoting);
+            server_url = this.client_library.ServerURL;
+            meetingViews = this.client_library.GetMeetingViews();
+
+            Console.WriteLine("client id: " + client_identifier);
+            Console.WriteLine("remoting url: " + client_url);
+            Console.WriteLine("server url: " + server_url);
+
+            foreach (MeetingView meetingView in meetingViews)
+            {
+                Console.WriteLine("Topic: " + meetingView.MeetingTopic);
+                Console.WriteLine("State: " + meetingView.MeetingState);
+                Console.WriteLine("Version: " + meetingView.MeetingVersion);
+                Console.WriteLine("Info: " + meetingView.MeetingInfo);
+            }
         }
     }
 }
