@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -17,15 +18,25 @@ namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
-        int server_port, tolerated_faults, min_delay, max_delay;
-        string server_ip, server_identifier, server_remoting;
+        int server_port, tolerated_faults, min_delay, max_delay, n_replicas;
+        string server_ip, server_url, server_identifier, server_remoting;
 
         ServerLibrary server_library;
         RemoteServer remote_server;
         TcpChannel channel;
 
+        private List<string> pending_create = new List<string>();
+
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
-        private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address
+        private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address        
+
+        public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
+
+        public static void OurRemoteAsyncCallBack(IAsyncResult ar)
+        {
+            CreateAsyncDelegate del = (CreateAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
 
         public ServerCommunication(ServerLibrary server_library)
         {
@@ -49,25 +60,62 @@ namespace MSDAD.Server.Communication
 
             LocationAndRoomInit();
             ServerURLInit();
+
+            this.server_url = ServerUtils.AssembleRemotingURL(this.server_ip, this.server_port, this.server_remoting);
+            n_replicas = (tolerated_faults * 2) + 1;
         }
 
-        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string replica_identifier)
         {
-            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
-            if (invitees == null)
+            if(!pending_create.Contains(meeting_topic))
             {
-                foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
+                pending_create.Add(meeting_topic);
+
+                int server_iter = 1;
+
+                foreach (string replica_url in this.server_addresses.Values)
                 {
-                    if (address_iter.Key != client_identifier)
+                    Console.WriteLine("teste: " + server_iter);
+
+                    if (server_iter == n_replicas)
                     {
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
-                        client.SendMeeting(meeting_topic, 1, "OPEN", null);
+                        break;
+                    }
+
+                    if (!replica_url.Equals(this.server_url))
+                    {
+                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                        try
+                        {
+                            CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
+                            AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.OurRemoteAsyncCallBack);
+                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, replica_identifier, RemoteCallback, null);
+                        }
+                        catch (System.Net.Sockets.SocketException se)
+                        {
+                            Console.WriteLine(se.Message);
+                        }
+                    }
+
+                    server_iter++;
+                }
+
+                if (invitees == null)
+                {
+                    foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
+                    {
+                        if (address_iter.Key != client_identifier)
+                        {
+                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
+                            client.SendMeeting(meeting_topic, 1, "OPEN", null);
+                        }
                     }
                 }
+
+                Console.WriteLine("\r\nNew event: " + meeting_topic);
+                Console.Write("Please run a command to be run on the server: ");
             }
 
-            Console.WriteLine("\r\nNew event: " + meeting_topic);
-            Console.Write("Please run a command to be run on the server: ");
         }
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
         {

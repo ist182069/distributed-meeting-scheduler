@@ -109,7 +109,7 @@ namespace MSDAD.Library
         {
             string tcp_url;
 
-            tcp_url = "tcp://" + ip + ":" + port + "//" + remoting_identifier;
+            tcp_url = "tcp://" + ip + ":" + port + "/" + remoting_identifier;
 
             return tcp_url;
         }

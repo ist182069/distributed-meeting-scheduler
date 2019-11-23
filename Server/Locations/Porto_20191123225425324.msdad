@@ -3,8 +3,8 @@
   <Name>Porto</Name>
   <RoomViews>
     <RoomXML>
-      <Name>room2</Name>
-      <Capacity>1</Capacity>
+      <Name>room1</Name>
+      <Capacity>2</Capacity>
     </RoomXML>
   </RoomViews>
 </LocationXML>
