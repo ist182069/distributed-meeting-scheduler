@@ -99,9 +99,7 @@ namespace MSDAD.Server.Communication
 
                     foreach (string replica_url in this.server_addresses.Values)
                     {
-                        Console.WriteLine("teste: " + server_iter);
-
-                        if (server_iter >= n_replicas)
+                        if (server_iter > n_replicas)
                         {
                             break;
                         }
@@ -127,10 +125,7 @@ namespace MSDAD.Server.Communication
                     // TODO:  isto e bloqueante pode ficar bloqueado para sempre. Por Timer?
                     while (true)
                     {
-                        float current_messages = (float)this.receiving_create[meeting_topic].Count;
-
-                        Console.WriteLine(receiving_create[meeting_topic].Count);
-                        Console.WriteLine((float)n_replicas / 2);
+                        float current_messages = (float)this.receiving_create[meeting_topic].Count;                        
 
                         if (current_messages > (float)n_replicas / 2)
                         {
