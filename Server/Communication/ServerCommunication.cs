@@ -17,8 +17,8 @@ namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
-        int server_port;
-        string server_ip, server_identifier, server_remoting;        
+        int server_port, tolerated_faults, min_delay, max_delay;
+        string server_ip, server_identifier, server_remoting;
 
         ServerLibrary server_library;
         RemoteServer remote_server;
@@ -33,6 +33,9 @@ namespace MSDAD.Server.Communication
             this.server_port = server_library.ServerPort;
             this.server_ip = server_library.ServerIP;
             this.server_remoting = server_library.ServerRemoting;
+            this.tolerated_faults = server_library.ToleratedFaults;
+            this.min_delay = server_library.MinDelay;
+            this.max_delay = server_library.MaxDelay;
         }
 
         public void Start()
@@ -48,8 +51,8 @@ namespace MSDAD.Server.Communication
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
         {
-            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);                
-            if(invitees == null)
+            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+            if (invitees == null)
             {
                 foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
                 {
@@ -87,7 +90,7 @@ namespace MSDAD.Server.Communication
                 }
                 else if (!meeting_query.ContainsKey(meeting.Topic) && meeting.GetInvitees() != null)
                 {
-                    if(meeting.GetInvitees().Contains(client_identifier)){
+                    if (meeting.GetInvitees().Contains(client_identifier)) {
                         string state = meeting.State;
                         if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier))
                         {
@@ -113,7 +116,7 @@ namespace MSDAD.Server.Communication
                         remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, null);
                     }
                 }
-            } 
+            }
         }
 
         public void Join(string meeting_topic, List<string> slots, string client_identifier)
@@ -136,8 +139,8 @@ namespace MSDAD.Server.Communication
                     ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
                     client.Ping(message);
                 }
-                    
-            }             
+
+            }
         }
 
         public Dictionary<string, string> GetClientAddresses()
@@ -183,7 +186,7 @@ namespace MSDAD.Server.Communication
 
             directory_path = ServerUtils.AssembleCurrentPath() + "\\" + "Locations" + "\\";
             directory_files = Directory.GetFiles(directory_path);
-            
+
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(LocationXML));
 
             lock (this)
@@ -195,16 +198,16 @@ namespace MSDAD.Server.Communication
 
                     locationXML = (LocationXML)xmlSerializer.Deserialize(tr);
 
-                    location = new Location(locationXML.Name);                    
+                    location = new Location(locationXML.Name);
 
-                    foreach(RoomXML roomXML in locationXML.RoomViews)
+                    foreach (RoomXML roomXML in locationXML.RoomViews)
                     {
                         location.Add(new Room(roomXML.Name, roomXML.Capacity));
-                    }                    
+                    }
                     tr.Close();
                     this.server_library.AddLocation(location);
                 }
-            }                        
+            }
         }
 
         public void Status()
@@ -275,6 +278,16 @@ namespace MSDAD.Server.Communication
 
                 Console.WriteLine("Final Slot: " + meeting.FinalSlot);
             }
+        }
+
+        public int Delay()
+        {
+            int delay;
+
+            Random r = new Random();
+            delay = r.Next(this.min_delay, max_delay);
+
+            return delay;
         }
 
     }

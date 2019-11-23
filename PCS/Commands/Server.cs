@@ -39,7 +39,7 @@ namespace MSDAD.PCS.Commands
             Process server_process = new Process();
             server_process.StartInfo.FileName = server_path;
             // TODO passar um XML ou whatever para criar as localizacoes
-            server_arguments = server_identifier + " " + server_url;
+            server_arguments = server_identifier + " " + server_url + " " + tolerated_faults + " " + min_delay_ms + " " + max_delay_ms;
             server_process.StartInfo.Arguments = server_arguments;
             server_process.Start();
             

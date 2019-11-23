@@ -14,14 +14,17 @@ namespace MSDAD.Server
                 serverParser = new ServerParser();
                 serverParser.Execute();
             }
-            else if (args.Length == 2)
+            else if (args.Length == 5)
             {
-                string server_identifier, server_url;
+                string server_identifier, server_url, tolerated_faults, min_delay, max_delay;
 
                 server_identifier = args[0];
                 server_url = args[1];
+                tolerated_faults = args[2];
+                min_delay = args[3];
+                max_delay = args[4];
 
-                serverParser = new ServerParser(server_identifier, server_url);
+                serverParser = new ServerParser(server_identifier, server_url, tolerated_faults, min_delay, max_delay);
                 serverParser.Execute();
             }
                 

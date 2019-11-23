@@ -11,16 +11,25 @@ namespace MSDAD.Server
 
         private string server_identifier;
         private string server_url;
-
+        private int tolerated_faults;
+        private int min_delay;
+        private int max_delay;
+        
         public ServerParser()
         {
-            server_identifier = null;
-            server_url = null;
+            this.server_identifier = null;
+            this.server_url = null;
+            this.tolerated_faults = 0;
+            this.min_delay = 0;
+            this.max_delay = 0;
         }
-        public ServerParser(string server_identifier, string server_url)
+        public ServerParser(string server_identifier, string server_url, string tolerated_faults, string min_delay, string max_delay)
         {
             this.server_identifier = server_identifier;
             this.server_url = server_url;
+            this.tolerated_faults = Int32.Parse(tolerated_faults);
+            this.min_delay = Int32.Parse(min_delay);
+            this.max_delay = Int32.Parse(max_delay);
         }
         public void Execute()
         {
@@ -37,27 +46,9 @@ namespace MSDAD.Server
 
                 this.server_identifier = split_command[0];
                 this.server_url = split_command[1];
-
-                /*
-                while (!server_port_is_correct)
-                {
-                    try
-                    {
-                        Console.Write("Pick a server port: ");
-                        server_port_string = Console.ReadLine();
-                        server_port = Int32.Parse(server_port_string);
-                        server_port_is_correct = true;
-                    }
-                    catch (FormatException)
-                    {
-                        Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
-                    }
-                }
-
-                Console.Write("Type the server identifier: ");
-                server_identifier = Console.ReadLine();
-
-                */
+                this.tolerated_faults = Int32.Parse(split_command[2]);
+                this.min_delay = Int32.Parse(split_command[3]);
+                this.max_delay = Int32.Parse(split_command[4]);              
             }
 
             server_port = ServerUtils.GetPortFromUrl(this.server_url);            
@@ -67,7 +58,7 @@ namespace MSDAD.Server
             // Serve apenas para inicializar, caso contrario temos de esperar por um comando para registar no servidor
 
             Console.Write("Starting up server... ");
-            server_library = new ServerLibrary(this.server_identifier, server_remoting, server_ip, server_port);
+            server_library = new ServerLibrary(this.server_identifier, server_remoting, server_ip, server_port, tolerated_faults, min_delay, max_delay);
             new Initialize(ref server_library);
             Console.WriteLine("the server has been successfully started: tcp://" + server_ip + ":" + server_port + "/" + server_remoting);
 

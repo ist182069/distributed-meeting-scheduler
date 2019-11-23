@@ -11,19 +11,22 @@ namespace MSDAD.Server
 {
     class ServerLibrary
     {
-        int server_port;
+        int server_port, tolerated_faults, min_delay, max_delay;
         string server_ip, server_identifier, server_remoting;
         ServerCommunication server_communication;
 
         private List<Meeting> event_list = new List<Meeting>();
         private List<Location> known_locations = new List<Location>();
 
-        public ServerLibrary(string server_identifier, string server_remoting, string server_ip, int server_port)
+        public ServerLibrary(string server_identifier, string server_remoting, string server_ip, int server_port, int tolerated_faults, int min_delay, int max_delay)
         {
             this.server_identifier = server_identifier;
             this.server_ip = server_ip;
             this.server_port = server_port;
             this.server_remoting = server_remoting;
+            this.tolerated_faults = tolerated_faults;
+            this.min_delay = min_delay;
+            this.max_delay = max_delay;
 
             this.server_communication = new ServerCommunication(this); ;
 
@@ -93,6 +96,29 @@ namespace MSDAD.Server
             get
             {
                 return server_port;
+            }
+        }
+
+        public int ToleratedFaults
+        {
+            get
+            {
+                return tolerated_faults;
+            }
+        }
+
+        public int MinDelay
+        {
+            get
+            {
+                return min_delay;
+            }
+        }
+        public int MaxDelay
+        {
+            get
+            {
+                return max_delay;
             }
         }
 
