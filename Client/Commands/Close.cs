@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MSDAD.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,8 +22,14 @@ namespace MSDAD.Client.Commands
 
             topic = this.words[1];
 
-            this.remote_server.Close(topic, this.client_identifier);
-
+            try
+            {
+                this.remote_server.Close(topic, this.client_identifier);
+            }
+            catch (ServerCoreException sce)
+            {
+                Console.WriteLine(sce.Message);
+            }
             return null;
         }
 

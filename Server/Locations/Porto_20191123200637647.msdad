@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LocationXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Name>Lisboa</Name>
+  <Name>Porto</Name>
   <RoomViews>
     <RoomXML>
-      <Name>room1</Name>
-      <Capacity>10</Capacity>
-    </RoomXML>
-    <RoomXML>
       <Name>room2</Name>
-      <Capacity>20</Capacity>
+      <Capacity>1</Capacity>
     </RoomXML>
   </RoomViews>
 </LocationXML>

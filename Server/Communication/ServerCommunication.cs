@@ -25,6 +25,7 @@ namespace MSDAD.Server.Communication
         TcpChannel channel;
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
+        private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address
 
         public ServerCommunication(ServerLibrary server_library)
         {
@@ -46,7 +47,8 @@ namespace MSDAD.Server.Communication
             this.remote_server = new RemoteServer(this);
             RemotingServices.Marshal(this.remote_server, server_remoting, typeof(RemoteServer));
 
-            LocationAndRoomInit(); // isto vai mudar quando fizermos o AddRoom do PuppetMaster
+            LocationAndRoomInit();
+            ServerURLInit();
         }
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
@@ -208,6 +210,26 @@ namespace MSDAD.Server.Communication
                     this.server_library.AddLocation(location);
                 }
             }
+        }
+
+        public void ServerURLInit()
+        {
+            string server_id, server_url;
+
+            for(int i = 1; i < 10; i++)
+            {
+                server_id = "s" + i;
+                server_url = "tcp://localhost:300" + i + "/server" + i;
+                this.server_addresses.Add(server_id, server_url);
+            }
+
+            for(int i = 10; i < 100; i++)
+            {
+                server_id = "s" + i;
+                server_url = "tcp://localhost:30" + i + "/server" + i;
+                this.server_addresses.Add(server_id, server_url);
+            }
+            
         }
 
         public void Status()

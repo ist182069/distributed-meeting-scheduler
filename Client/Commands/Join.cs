@@ -1,5 +1,6 @@
 ﻿using MSDAD.Client.Commands;
 using MSDAD.Client.Exceptions;
+using MSDAD.Library;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +55,16 @@ namespace MSDAD.Client.Commands
                 slots.Add(room);
             }
 
-            this.remote_server.Join(meeting_topic, slots, this.client_identifier);
+            try
+            {
+                this.remote_server.Join(meeting_topic, slots, this.client_identifier);
+
+            }
+            catch (ServerCoreException sce)
+            {
+                Console.WriteLine(sce.Message);
+            }
+            
 
             return null;
         }

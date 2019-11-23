@@ -1,4 +1,5 @@
 ﻿using MSDAD.Client.Comunication;
+using MSDAD.Library;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +27,14 @@ namespace MSDAD.Client.Commands
                 meeting_query.Add(mV.MeetingTopic, mV.MeetingState);
             }
 
-            this.remote_server.List(meeting_query, this.client_identifier);
-
+            try
+            {
+                this.remote_server.List(meeting_query, this.client_identifier);
+            } 
+            catch(ServerCoreException sce)
+            {
+                Console.WriteLine(sce.Message);
+            }
             foreach (MeetingView mV in meeting_views)
             {
                 Console.WriteLine("Topic:"+mV.MeetingTopic + " State:" + mV.MeetingState + "\nVersion:" + mV.MeetingVersion);

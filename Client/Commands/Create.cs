@@ -1,5 +1,6 @@
 ﻿using MSDAD.Client.Commands;
 using MSDAD.Client.Exceptions;
+using MSDAD.Library;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,14 @@ namespace MSDAD.Client.Commands
 
             if(num_invitees==0)
             {
-                this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier);
+                try
+                {
+                    this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier);
+                } catch(ServerCoreException sce)
+                {
+                    Console.WriteLine(sce.Message);
+                }
+                
                 meeting_view = new MeetingView(meeting_topic, 1, "OPEN", null);
                 this.client_library.AddMeetingView(meeting_view);
             }
@@ -108,7 +116,14 @@ namespace MSDAD.Client.Commands
                     invitees.Add(invitee_address);
                 }
 
-                this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier);
+                try
+                {
+                    this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier);
+                } catch(ServerCoreException sce)
+                {
+                    Console.WriteLine(sce.Message);
+                }
+                
             }
                 
             return null;

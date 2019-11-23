@@ -47,61 +47,17 @@ namespace MSDAD.Client
             this.client_remoting = ClientUtils.GetRemotingIdFromUrl(this.client_url);
 
             this.client_library = new ClientLibrary(this.client_identifier, this.client_remoting, this.server_url, this.client_ip, this.client_port);
-            new Initialize(ref this.client_library).Execute();
-            this.script_name = client_arguments_split[3];
 
-            /*
-            while (!client_port_isnt_taken)
+            try
             {
-                try
-                {
-                    bool client_port_is_correct = false;
-                    while (!client_port_is_correct)
-                    {
-                        try
-                        {
-                            Console.Write("Pick a client port: ");
-                            this.client_port_string = Console.ReadLine();
-                            this.client_port = Int32.Parse(client_port_string);
-                            client_port_is_correct = true;
-                        }
-                        catch (FormatException)
-                        {
-                            Console.WriteLine(ErrorCodes.INVALID_PORT_FORMAT);
-                        }
-                    }
-
-                    bool client_identifier_is_correct = false;
-                    while (!client_identifier_is_correct)
-                    {
-                        try
-                        {
-                            Console.Write("Pick a user identifier: ");
-                            this.client_identifier = Console.ReadLine();
-
-                            Console.Write("Type the server identifier to whom you want to connect: ");
-                            this.server_url = Console.ReadLine();
-
-                            this.client_library = new ClientLibrary(client_identifier, server_url, client_ip, client_port);
-                            new Initialize(ref this.client_library).Execute();
-
-                            Console.WriteLine("Success!");
-
-                            client_identifier_is_correct = true;                            
-                        }
-                        catch (ServerCoreException e)
-                        {
-                            Console.WriteLine(e.Message);
-                        }
-                    }
-                    client_port_isnt_taken = true;
-                }
-                catch (ClientLocalException e)
-                {
-                    Console.WriteLine(e.Message);
-                }
+                new Initialize(ref this.client_library).Execute();
             }
-            */
+            catch (ServerCoreException sce)
+            {
+                Console.WriteLine("Could not properly initialize the client! Aborting...");
+                Console.WriteLine(sce.StackTrace);
+            }
+            this.script_name = client_arguments_split[3];
         }
 
         public ClientParser(string client_identifier, string client_url, string server_url, string script_name)
@@ -112,7 +68,16 @@ namespace MSDAD.Client
             this.client_port = ClientUtils.GetPortFromUrl(client_url);            
 
             this.client_library = new ClientLibrary(client_identifier, this.client_remoting, server_url, this.client_ip, this.client_port);
-            new Initialize(ref this.client_library).Execute();
+            try
+            {
+                new Initialize(ref this.client_library).Execute();
+            }
+            catch (ServerCoreException sce)
+            {
+                Console.WriteLine("Could not properly initialize the client! Aborting...");
+                Console.WriteLine(sce.StackTrace);
+            }
+                
             this.script_name = script_name;
         }
         public void Parse()
