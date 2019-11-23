@@ -101,7 +101,7 @@ namespace MSDAD.Server.Communication
                     {
                         Console.WriteLine("teste: " + server_iter);
 
-                        if (server_iter == n_replicas)
+                        if (server_iter >= n_replicas)
                         {
                             break;
                         }
