@@ -12,6 +12,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -19,8 +20,9 @@ namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
+        bool leader = false;
         int server_port, tolerated_faults, min_delay, max_delay, n_replicas;
-        string server_ip, server_url, server_identifier, server_remoting;
+        string server_ip, server_url, server_identifier, server_remoting;        
 
         ServerLibrary server_library;
         RemoteServer remote_server;
@@ -68,6 +70,19 @@ namespace MSDAD.Server.Communication
 
             this.server_url = ServerUtils.AssembleRemotingURL(this.server_ip, this.server_port, this.server_remoting);
             n_replicas = (tolerated_faults * 2) + 1;
+
+            leader = AmILeader();
+
+            if(leader)
+            {
+                Thread leader_thread = new Thread(new ThreadStart(new LeaderThread().Run));
+                leader_thread.IsBackground = true;
+                leader_thread.Start();
+            }
+            else
+            {
+
+            }
         }
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string replica_identifier)
@@ -410,6 +425,21 @@ namespace MSDAD.Server.Communication
             delay = r.Next(this.min_delay, max_delay);
 
             return delay;
+        }
+
+        public bool AmILeader()
+        {
+            int server_standard_port = 3000;
+            bool result = false;
+
+            server_standard_port += this.n_replicas;
+
+            if(this.server_port == server_standard_port)
+            {
+                result = true;
+            }
+
+            return result;
         }
 
     }
