@@ -143,6 +143,11 @@ namespace MSDAD.Server.Communication
 
                             Console.WriteLine("\r\nNew event: " + meeting_topic);
                             Console.Write("Please run a command to be run on the server: ");
+
+                            // TODO: isto nao esta a remover nada
+                            List<string> remove_list = receiving_create[meeting_topic];
+                            receiving_create.TryRemove(meeting_topic, out remove_list);
+                            pending_create.Remove(meeting_topic);
                             break;
                         }
                     }                    
@@ -379,6 +384,21 @@ namespace MSDAD.Server.Communication
                 }
 
                 Console.WriteLine("Final Slot: " + meeting.FinalSlot);
+            }
+
+            foreach(string meeting_topic in pending_create)
+            {
+                Console.WriteLine("Pending topic: " + meeting_topic);                
+            }
+
+            foreach(KeyValuePair<string, List<string>> keyValuePair in this.receiving_create)
+            {
+                Console.WriteLine("Meeting topic: " + keyValuePair.Key);
+
+                foreach(string replica_url in keyValuePair.Value)
+                {
+                    Console.WriteLine("Replica URL: " + replica_url);
+                }
             }
         }
 
