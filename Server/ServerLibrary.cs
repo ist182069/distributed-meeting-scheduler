@@ -67,7 +67,123 @@ namespace MSDAD.Server
             GetMeeting(meeting_topic).Schedule(client_identifier);
             Console.Write("Please run a command to be run on the server: ");
         }
-        
+
+        public void Status()
+        {
+            string client_identifier;
+            string client_url;
+
+            List<string> going_clients;
+            List<string> invitees;
+
+            List<Room> rooms;
+            List<DateTime> reserved_dates;
+
+            Dictionary<string, string> client_dictionary;
+            Dictionary<Tuple<Location, DateTime>, List<string>> slots_clients_dictionary;
+
+            client_dictionary = this.GetClients();
+
+            foreach (Location location in this.known_locations)
+            {
+                Console.Write("Location: ");
+                Console.WriteLine(location.Name);
+
+                rooms = location.GetList();
+
+                foreach (Room room in rooms)
+                {
+                    Console.WriteLine("  Room: " + room.Identifier);
+                    Console.WriteLine("  Capacity: " + room.Capacity);
+                    Console.WriteLine("  Dates Reserved: ");
+                    reserved_dates = room.GetReservedDates();
+
+                    foreach (DateTime dateTime in reserved_dates)
+                    {
+                        Console.WriteLine("    " + dateTime.ToString("yyyy-MMMM-dd"));
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<string, string> client_pair in client_dictionary)
+            {
+                client_identifier = client_pair.Key;
+                client_url = client_pair.Value;
+                Console.Write("Client: ");
+                Console.WriteLine(client_identifier + " / " + client_url);
+            }
+
+            foreach (Meeting meeting in this.event_list)
+            {
+                Console.Write("Meeting: ");
+                Console.WriteLine(meeting.Topic);
+                Console.WriteLine("Minimum atteendees: " + meeting.MinAttendees);
+                Console.WriteLine("State: " + meeting.State);
+                Console.WriteLine("Version: " + meeting.Version);
+                Console.WriteLine("Coordinator: " + meeting.Coordinator);
+                invitees = meeting.GetInvitees();
+
+                if (invitees != null)
+                {
+                    Console.WriteLine("  Invitees:");
+
+                    foreach (string invitee in invitees)
+                    {
+                        Console.WriteLine("  " + invitee);
+                    }
+                }
+
+                slots_clients_dictionary = meeting.GetSlotsClientsMapping();
+
+                if (slots_clients_dictionary != null)
+                {
+                    Console.WriteLine("  Proposed \"Locations / Date\" per client:");
+
+                    foreach (KeyValuePair<Tuple<Location, DateTime>, List<string>> keyValuePair in slots_clients_dictionary)
+                    {
+                        Console.WriteLine("    Location: " + keyValuePair.Key.Item1);
+                        Console.WriteLine("    Date: " + keyValuePair.Key.Item2);
+                        Console.WriteLine("    Clients: ");
+                        
+                        foreach(string clients in keyValuePair.Value)
+                        {
+                            Console.WriteLine("        " + clients);
+                        }
+                    }
+
+                }
+
+                going_clients = meeting.GetGoingClients();
+
+                if (going_clients != null)
+                {
+                    Console.WriteLine("  Going:");
+
+                    foreach (string going_client in going_clients)
+                    {
+                        Console.WriteLine("  " + going_client);
+                    }
+                }
+
+                Console.WriteLine("Final Slot: " + meeting.FinalSlot);
+            }
+            /*
+            foreach (string meeting_topic in pending_create)
+            {
+                Console.WriteLine("Pending topic: " + meeting_topic);
+            }
+
+            foreach (KeyValuePair<string, List<string>> keyValuePair in this.receiving_create)
+            {
+                Console.WriteLine("Meeting topic: " + keyValuePair.Key);
+
+                foreach (string replica_url in keyValuePair.Value)
+                {
+                    Console.WriteLine("Replica URL: " + replica_url);
+                }
+            }*/
+        }
+
         public string ServerIdentifier
         {
             get{
@@ -178,7 +294,7 @@ namespace MSDAD.Server
             return this.known_locations;
         }
 
-        public Dictionary<string, string> GetClients()
+        private Dictionary<string, string> GetClients()
         {
             return this.server_communication.GetClientAddresses();
         }

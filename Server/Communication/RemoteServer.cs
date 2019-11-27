@@ -15,10 +15,10 @@ namespace MSDAD.Server.Communication
             this.server_communication = server_communication;
         }
 
-        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string replica_identifier)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier)
         {
             Thread.Sleep(this.server_communication.Delay());
-            this.server_communication.Create(meeting_topic, min_attendees, slots, invitees, client_identifier, replica_identifier);
+            this.server_communication.Create(meeting_topic, min_attendees, slots, invitees, client_identifier, create_replica_identifier);
         }
 
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
@@ -27,10 +27,10 @@ namespace MSDAD.Server.Communication
             this.server_communication.List(meeting_query, client_identifier);                
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_replica_identifier)
         {
             Thread.Sleep(this.server_communication.Delay());
-            this.server_communication.Join(meeting_topic, slots, client_identifier);
+            this.server_communication.Join(meeting_topic, slots, client_identifier, join_replica_identifier);
         }
 
         public void Close(string meeting_topic, string client_identifier)

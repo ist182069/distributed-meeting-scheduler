@@ -1,1 +1,2 @@
 create myTopic2 1 1 0 Porto,2020-01-10
+join myTopic2 1 Porto,2020-01-10

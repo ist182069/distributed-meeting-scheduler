@@ -269,7 +269,17 @@ namespace MSDAD.Server
         {
             return this.invitees;
         }
-        
+
+        public List<string> GetGoingClients()
+        {
+            return this.going_clients;
+        }
+
+        public Dictionary<Tuple<Location, DateTime>, List<string>> GetSlotsClientsMapping()
+        {
+            return this.slots_clients_mapping;
+        }
+
         public bool ClientConfirmed(string client_address)
         {
             if(going_clients==null)

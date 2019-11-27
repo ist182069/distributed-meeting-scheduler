@@ -33,13 +33,28 @@ namespace MSDAD.Server.Communication
         private ConcurrentDictionary<string, List<string>> receiving_create = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas
         // topicos a criar que estao pendentes
         private List<string> pending_create = new List<string>();
+        private List<string> added_create = new List<string>();
+
+        // Dicionario de acks para cada par reuniao-cliente
+        private ConcurrentDictionary<Tuple<string, string>, List<string>> receiving_join = new ConcurrentDictionary<Tuple<string, string>, List<string>>();
+        // topicos-cliente que estao pendentes
+        private List<Tuple<string, string>> pending_join = new List<Tuple<string, string>>();
+        private List<Tuple<string, string>> added_join = new List<Tuple<string, string>>();
+
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
         private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address        
 
         public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
+        public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier);
 
-        public static void OurRemoteAsyncCallBack(IAsyncResult ar)
+        public static void CreateAsyncCallBack(IAsyncResult ar)
+        {
+            CreateAsyncDelegate del = (CreateAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
+
+        public static void JoinAsyncCallBack(IAsyncResult ar)
         {
             CreateAsyncDelegate del = (CreateAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
             return;
@@ -85,27 +100,27 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string replica_identifier)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier)
         {
-            if(!this.receiving_create.ContainsKey(meeting_topic))
+            if(!added_create.Contains(meeting_topic))
             {
-                List<string> received_messages = new List<string>();
-                received_messages.Add(this.server_identifier);
-                this.receiving_create.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
-            }
-            else
-            {
-                List<string> received_messages = this.receiving_create[meeting_topic];
-                
-                if(!received_messages.Contains(replica_identifier))
+                if (!this.receiving_create.ContainsKey(meeting_topic))
                 {
-                    received_messages.Add(replica_identifier);
-                    this.receiving_create[meeting_topic] = received_messages;
-                }                
-            }
+                    List<string> received_messages = new List<string>();
+                    received_messages.Add(this.server_identifier);
+                    this.receiving_create.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
+                }
+                else
+                {
+                    List<string> received_messages = this.receiving_create[meeting_topic];
 
-            lock (pending_create)
-            {
+                    if (!received_messages.Contains(create_replica_identifier))
+                    {
+                        received_messages.Add(create_replica_identifier);
+                        this.receiving_create[meeting_topic] = received_messages;
+                    }
+                }
+
                 if (!pending_create.Contains(meeting_topic))
                 {
                     pending_create.Add(meeting_topic);
@@ -125,7 +140,7 @@ namespace MSDAD.Server.Communication
                             try
                             {
                                 CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
-                                AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.OurRemoteAsyncCallBack);
+                                AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CreateAsyncCallBack);
                                 IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, RemoteCallback, null);
                             }
                             catch (System.Net.Sockets.SocketException se)
@@ -140,10 +155,12 @@ namespace MSDAD.Server.Communication
                     // TODO:  isto e bloqueante pode ficar bloqueado para sempre. Por Timer?
                     while (true)
                     {
-                        float current_messages = (float)this.receiving_create[meeting_topic].Count;                        
+                        float current_messages = (float)this.receiving_create[meeting_topic].Count;
 
                         if (current_messages > (float)n_replicas / 2)
                         {
+                            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                            this.added_create.Add(meeting_topic);
                             if (invitees == null)
                             {
                                 foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
@@ -158,16 +175,11 @@ namespace MSDAD.Server.Communication
 
                             Console.WriteLine("\r\nNew event: " + meeting_topic);
                             Console.Write("Please run a command to be run on the server: ");
-
-                            // TODO: isto nao esta a remover nada
-                            List<string> remove_list = receiving_create[meeting_topic];
-                            receiving_create.TryRemove(meeting_topic, out remove_list);
-                            pending_create.Remove(meeting_topic);
                             break;
                         }
-                    }                    
+                    }
                 }
-            }
+            }                        
         }
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
         {
@@ -221,9 +233,86 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier)
-        {
-            this.server_library.Join(meeting_topic, slots, client_identifier);
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier)
+        {                        
+            Tuple<string, string> join_tuple;
+            
+            join_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
+
+            if (!this.added_join.Contains(join_tuple))
+            {
+
+                string meeting_lock;
+
+                if (!this.receiving_join.ContainsKey(join_tuple))
+                {
+                    List<string> received_messages = new List<string>();
+                    received_messages.Add(this.server_identifier);
+                    this.receiving_join.AddOrUpdate(join_tuple, received_messages, (key, oldValue) => received_messages);
+                }
+                else
+                {
+                    List<string> received_messages = this.receiving_join[join_tuple];
+
+                    if (!received_messages.Contains(join_server_identifier))
+                    {
+                        received_messages.Add(join_server_identifier);
+                        this.receiving_join[join_tuple] = received_messages;
+                    }
+                }
+
+                meeting_lock = meeting_topic;
+
+                lock (meeting_lock)
+                {
+
+                    if (!this.pending_join.Contains(join_tuple))
+                    {
+                        this.pending_join.Add(join_tuple);
+
+                        int server_iter = 1;
+
+                        foreach (string replica_url in this.server_addresses.Values)
+                        {
+                            if (server_iter > n_replicas)
+                            {
+                                break;
+                            }
+
+                            if (!replica_url.Equals(this.server_url))
+                            {
+                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                                try
+                                {
+                                    JoinAsyncDelegate RemoteDel = new JoinAsyncDelegate(remote_server.Join);
+                                    AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.JoinAsyncCallBack);
+                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, RemoteCallback, null);
+                                }
+                                catch (System.Net.Sockets.SocketException se)
+                                {
+                                    Console.WriteLine(se.Message);
+                                }
+                            }
+
+                            server_iter++;
+                        }
+
+                        // TODO:  isto e bloqueante pode ficar bloqueado para sempre. Por Timer?
+                        while (true)
+                        {
+                            float current_messages = (float)this.receiving_join[join_tuple].Count;
+
+                            if (current_messages > (float)n_replicas / 2)
+                            {
+                                this.server_library.Join(meeting_topic, slots, client_identifier);
+                                this.added_join.Add(join_tuple);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }    
+            
         }
 
         public void Close(String meeting_topic, string client_identifier)
@@ -334,87 +423,7 @@ namespace MSDAD.Server.Communication
 
         public void Status()
         {
-            string client_identifier;
-            string client_url;
-
-            List<string> invitees;
-
-            List<Location> locations;
-            List<Meeting> meetings;
-            List<Room> rooms;
-            List<DateTime> reserved_dates;
-
-            Dictionary<string, string> client_dictionary;
-
-            locations = server_library.GetKnownLocations();
-            client_dictionary = server_library.GetClients();
-            meetings = server_library.GetEventList();
-
-            foreach (Location location in locations)
-            {
-                Console.Write("Location: ");
-                Console.WriteLine(location.Name);
-
-                rooms = location.GetList();
-
-                foreach (Room room in rooms)
-                {
-                    Console.WriteLine("  Room: " + room.Identifier);
-                    Console.WriteLine("  Capacity: " + room.Capacity);
-                    Console.WriteLine("  Dates Reserved: ");
-                    reserved_dates = room.GetReservedDates();
-
-                    foreach (DateTime dateTime in reserved_dates)
-                    {
-                        Console.WriteLine("    " + dateTime.ToString("yyyy-MMMM-dd"));
-                    }
-                }
-            }
-
-
-            foreach (KeyValuePair<string, string> client_pair in client_dictionary)
-            {
-                client_identifier = client_pair.Key;
-                client_url = client_pair.Value;
-                Console.Write("Client: ");
-                Console.WriteLine(client_identifier + " / " + client_url);
-            }
-            foreach (Meeting meeting in meetings)
-            {
-                Console.Write("Meeting: ");
-                Console.WriteLine(meeting.Topic);
-                Console.WriteLine("Minimum atteendees: " + meeting.MinAttendees);
-                Console.WriteLine("State: " + meeting.State);
-                Console.WriteLine("Version: " + meeting.Version);
-                Console.WriteLine("Coordinator: " + meeting.Coordinator);
-                invitees = meeting.GetInvitees();
-
-                if (invitees != null)
-                {
-                    foreach (string invitee in invitees)
-                    {
-                        Console.WriteLine("  Invitees:");
-                        Console.WriteLine("  " + invitee);
-                    }
-                }
-
-                Console.WriteLine("Final Slot: " + meeting.FinalSlot);
-            }
-
-            foreach(string meeting_topic in pending_create)
-            {
-                Console.WriteLine("Pending topic: " + meeting_topic);                
-            }
-
-            foreach(KeyValuePair<string, List<string>> keyValuePair in this.receiving_create)
-            {
-                Console.WriteLine("Meeting topic: " + keyValuePair.Key);
-
-                foreach(string replica_url in keyValuePair.Value)
-                {
-                    Console.WriteLine("Replica URL: " + replica_url);
-                }
-            }
+            this.server_library.Status();
         }
 
         public int Delay()
