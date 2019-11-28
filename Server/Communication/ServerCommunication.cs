@@ -56,7 +56,7 @@ namespace MSDAD.Server.Communication
 
         public static void JoinAsyncCallBack(IAsyncResult ar)
         {
-            CreateAsyncDelegate del = (CreateAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            JoinAsyncDelegate del = (JoinAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
             return;
         }
 
@@ -104,6 +104,8 @@ namespace MSDAD.Server.Communication
         {
             if(!added_create.Contains(meeting_topic))
             {
+                string meeting_lock;
+
                 if (!this.receiving_create.ContainsKey(meeting_topic))
                 {
                     List<string> received_messages = new List<string>();
@@ -121,64 +123,70 @@ namespace MSDAD.Server.Communication
                     }
                 }
 
-                if (!pending_create.Contains(meeting_topic))
+                meeting_lock = meeting_topic;
+
+                lock (meeting_lock)
                 {
-                    pending_create.Add(meeting_topic);
-
-                    int server_iter = 1;
-
-                    foreach (string replica_url in this.server_addresses.Values)
+                    if (!pending_create.Contains(meeting_topic))
                     {
-                        if (server_iter > n_replicas)
-                        {
-                            break;
-                        }
+                        pending_create.Add(meeting_topic);
 
-                        if (!replica_url.Equals(this.server_url))
+                        int server_iter = 1;
+
+                        foreach (string replica_url in this.server_addresses.Values)
                         {
-                            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
-                            try
+                            if (server_iter > n_replicas)
                             {
-                                CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
-                                AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CreateAsyncCallBack);
-                                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, RemoteCallback, null);
+                                break;
                             }
-                            catch (System.Net.Sockets.SocketException se)
+
+                            if (!replica_url.Equals(this.server_url))
                             {
-                                Console.WriteLine(se.Message);
-                            }
-                        }
-
-                        server_iter++;
-                    }
-
-                    // TODO:  isto e bloqueante pode ficar bloqueado para sempre. Por Timer?
-                    while (true)
-                    {
-                        float current_messages = (float)this.receiving_create[meeting_topic].Count;
-
-                        if (current_messages > (float)n_replicas / 2)
-                        {
-                            this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
-                            this.added_create.Add(meeting_topic);
-                            if (invitees == null)
-                            {
-                                foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
+                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                                try
                                 {
-                                    if (address_iter.Key != client_identifier)
-                                    {
-                                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
-                                        client.SendMeeting(meeting_topic, 1, "OPEN", null);
-                                    }
+                                    CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
+                                    AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CreateAsyncCallBack);
+                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, RemoteCallback, null);
+                                }
+                                catch (System.Net.Sockets.SocketException se)
+                                {
+                                    Console.WriteLine(se.Message);
                                 }
                             }
 
-                            Console.WriteLine("\r\nNew event: " + meeting_topic);
-                            Console.Write("Please run a command to be run on the server: ");
-                            break;
+                            server_iter++;
+                        }
+
+                        // TODO:  Por timer
+                        while (true)
+                        {
+                            float current_messages = (float)this.receiving_create[meeting_topic].Count;
+
+                            if (current_messages > (float)n_replicas / 2)
+                            {
+                                this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                                this.added_create.Add(meeting_topic);
+                                if (invitees == null)
+                                {
+                                    foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
+                                    {
+                                        if (address_iter.Key != client_identifier)
+                                        {
+                                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
+                                            client.SendMeeting(meeting_topic, 1, "OPEN", null);
+                                        }
+                                    }
+                                }
+
+                                Console.WriteLine("\r\nNew event: " + meeting_topic);
+                                Console.Write("Please run a command to be run on the server: ");
+                                break;
+                            }
                         }
                     }
                 }
+                
             }                        
         }
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
@@ -297,7 +305,7 @@ namespace MSDAD.Server.Communication
                             server_iter++;
                         }
 
-                        // TODO:  isto e bloqueante pode ficar bloqueado para sempre. Por Timer?
+                        // TODO:  Por timer
                         while (true)
                         {
                             float current_messages = (float)this.receiving_join[join_tuple].Count;
