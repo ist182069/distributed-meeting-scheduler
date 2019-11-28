@@ -141,8 +141,8 @@ namespace MSDAD.Server
 
                     foreach (KeyValuePair<Tuple<Location, DateTime>, List<string>> keyValuePair in slots_clients_dictionary)
                     {
-                        Console.WriteLine("    Location: " + keyValuePair.Key.Item1);
-                        Console.WriteLine("    Date: " + keyValuePair.Key.Item2);
+                        Console.WriteLine("    Location: " + keyValuePair.Key.Item1.ToString());
+                        Console.WriteLine("    Date: " + keyValuePair.Key.Item2.ToString());
                         Console.WriteLine("    Clients: ");
                         
                         foreach(string clients in keyValuePair.Value)
