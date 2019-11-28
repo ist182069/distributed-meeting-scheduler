@@ -24,7 +24,7 @@ namespace MSDAD.Client.Commands
 
             try
             {
-                this.remote_server.Close(topic, this.client_identifier);
+                this.remote_server.Close(topic, this.client_identifier, null);
             }
             catch (ServerCoreException sce)
             {

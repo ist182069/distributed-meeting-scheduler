@@ -33,10 +33,10 @@ namespace MSDAD.Server.Communication
             this.server_communication.Join(meeting_topic, slots, client_identifier, join_replica_identifier);
         }
 
-        public void Close(string meeting_topic, string client_identifier)
+        public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)
         {
             Thread.Sleep(this.server_communication.Delay());
-            this.server_communication.Close(meeting_topic, client_identifier);
+            this.server_communication.Close(meeting_topic, client_identifier, close_replica_identifier);
         }
 
         public void Ping(string message, string user)

@@ -20,7 +20,6 @@ namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
-        bool leader = false;
         int server_port, tolerated_faults, min_delay, max_delay, n_replicas;
         string server_ip, server_url, server_identifier, server_remoting;        
 
@@ -41,12 +40,16 @@ namespace MSDAD.Server.Communication
         private List<Tuple<string, string>> pending_join = new List<Tuple<string, string>>();
         private List<Tuple<string, string>> added_join = new List<Tuple<string, string>>();
 
+        private ConcurrentDictionary<string, List<string>> receiving_close = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas
+        private List<string> pending_close = new List<string>();
+        private List<string> added_close = new List<string>();
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
         private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address        
 
         public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
         public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier);
+        public delegate void CloseAsyncDelegate(string meeting_topic, string client_identifier, string server_identifier);
 
         public static void CreateAsyncCallBack(IAsyncResult ar)
         {
@@ -57,6 +60,12 @@ namespace MSDAD.Server.Communication
         public static void JoinAsyncCallBack(IAsyncResult ar)
         {
             JoinAsyncDelegate del = (JoinAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
+
+        public static void CloseAsyncCallBack(IAsyncResult ar)
+        {
+            CloseAsyncDelegate del = (CloseAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
             return;
         }
 
@@ -84,20 +93,7 @@ namespace MSDAD.Server.Communication
             ServerURLInit();
 
             this.server_url = ServerUtils.AssembleRemotingURL(this.server_ip, this.server_port, this.server_remoting);
-            n_replicas = (tolerated_faults * 2) + 1;
-
-            leader = AmILeader();
-
-            if(leader)
-            {
-                Thread leader_thread = new Thread(new ThreadStart(new LeaderThread().Run));
-                leader_thread.IsBackground = true;
-                leader_thread.Start();
-            }
-            else
-            {
-
-            }
+            n_replicas = (tolerated_faults * 2) + 1;          
         }
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier)
@@ -323,9 +319,74 @@ namespace MSDAD.Server.Communication
             
         }
 
-        public void Close(String meeting_topic, string client_identifier)
+        public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)
         {
-            this.server_library.Close(meeting_topic, client_identifier);
+            string meeting_lock = meeting_topic;
+
+            lock (meeting_lock)
+            {
+                if (!this.receiving_close.ContainsKey(meeting_topic))
+                {
+                    List<string> received_messages = new List<string>();
+                    received_messages.Add(this.server_identifier);
+                    this.receiving_close.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
+                }
+                else
+                {
+                    List<string> received_messages = this.receiving_close[meeting_topic];
+
+                    if (!received_messages.Contains(close_replica_identifier))
+                    {
+                        received_messages.Add(close_replica_identifier);
+                        this.receiving_close[meeting_topic] = received_messages;
+                    }
+                }
+
+                if (!this.pending_close.Contains(meeting_topic))
+                {
+                    this.pending_close.Add(meeting_topic);
+
+                    int server_iter = 1;
+
+                    foreach (string replica_url in this.server_addresses.Values)
+                    {
+                        if (server_iter > n_replicas)
+                        {
+                            break;
+                        }
+
+                        if (!replica_url.Equals(this.server_url))
+                        {
+                            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                            try
+                            {
+                                CloseAsyncDelegate RemoteDel = new CloseAsyncDelegate(remote_server.Close);
+                                AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CloseAsyncCallBack);
+                                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, client_identifier, this.server_identifier, RemoteCallback, null);
+                            }
+                            catch (System.Net.Sockets.SocketException se)
+                            {
+                                Console.WriteLine(se.Message);
+                            }
+                        }
+
+                        server_iter++;
+                    }
+
+                    // TODO:  Por timer
+                    while (true)
+                    {
+                        float current_messages = (float)this.receiving_close[meeting_topic].Count;
+
+                        if (current_messages > (float)n_replicas / 2)
+                        {
+                            this.server_library.Close(meeting_topic, client_identifier);
+                            this.added_close.Add(meeting_topic);
+                            break;
+                        }
+                    }                        
+                }                 
+            }            
         }
 
 
@@ -442,23 +503,7 @@ namespace MSDAD.Server.Communication
             delay = r.Next(this.min_delay, max_delay);
 
             return delay;
-        }
-
-        public bool AmILeader()
-        {
-            int server_standard_port = 3000;
-            bool result = false;
-
-            server_standard_port += this.n_replicas;
-
-            if(this.server_port == server_standard_port)
-            {
-                result = true;
-            }
-
-            return result;
-        }
-
+        }       
     }
 }
 
