@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lock.cs" />
     <Compile Include="Commands\AddRoom.cs" />
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\Command.cs" />

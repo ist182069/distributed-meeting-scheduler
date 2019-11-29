@@ -38,7 +38,7 @@ namespace MSDAD.Server.Communication
         private ConcurrentDictionary<Tuple<string, string>, List<string>> receiving_join = new ConcurrentDictionary<Tuple<string, string>, List<string>>();
         // topicos-cliente que estao pendentes
         private List<Tuple<string, string>> pending_join = new List<Tuple<string, string>>();
-        private List<Tuple<string, string>> added_join = new List<Tuple<string, string>>();
+        private List<Tuple<string, string>> added_join = new List<Tuple<string, string>>();        
 
         private ConcurrentDictionary<string, List<string>> receiving_close = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas
         private List<string> pending_close = new List<string>();
@@ -46,6 +46,8 @@ namespace MSDAD.Server.Communication
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
         private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address        
+
+        private static ConcurrentDictionary<string, object> dictionary_locks = new ConcurrentDictionary<string, object>();
 
         public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
         public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier);
@@ -98,31 +100,41 @@ namespace MSDAD.Server.Communication
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier)
         {
-            if(!added_create.Contains(meeting_topic))
+            object create;
+
+            if (!dictionary_locks.ContainsKey(meeting_topic))
             {
-                string meeting_lock;
+                create = new object();
+                dictionary_locks.TryAdd(meeting_topic, create);
+            }
+            else
+            {
+                create = dictionary_locks[meeting_topic];
+            }
 
-                if (!this.receiving_create.ContainsKey(meeting_topic))
-                {
-                    List<string> received_messages = new List<string>();
-                    received_messages.Add(this.server_identifier);
-                    this.receiving_create.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
-                }
-                else
-                {
-                    List<string> received_messages = this.receiving_create[meeting_topic];
+            lock(create)
+            {
 
-                    if (!received_messages.Contains(create_replica_identifier))
+                if (!added_create.Contains(meeting_topic))
+                {
+
+                    if (!this.receiving_create.ContainsKey(meeting_topic))
                     {
-                        received_messages.Add(create_replica_identifier);
-                        this.receiving_create[meeting_topic] = received_messages;
+                        List<string> received_messages = new List<string>();
+                        received_messages.Add(this.server_identifier);
+                        this.receiving_create.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
                     }
-                }
+                    else
+                    {
+                        List<string> received_messages = this.receiving_create[meeting_topic];
 
-                meeting_lock = meeting_topic;
+                        if (!received_messages.Contains(create_replica_identifier))
+                        {
+                            received_messages.Add(create_replica_identifier);
+                            this.receiving_create[meeting_topic] = received_messages;
+                        }
+                    }
 
-                lock (meeting_lock)
-                {
                     if (!pending_create.Contains(meeting_topic))
                     {
                         pending_create.Add(meeting_topic);
@@ -182,8 +194,9 @@ namespace MSDAD.Server.Communication
                         }
                     }
                 }
-                
-            }                        
+
+            }
+                              
         }
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
         {
@@ -238,37 +251,43 @@ namespace MSDAD.Server.Communication
         }
 
         public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier)
-        {                        
+        {
+            object join;
             Tuple<string, string> join_tuple;
             
             join_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
 
-            if (!this.added_join.Contains(join_tuple))
+            if (!dictionary_locks.ContainsKey(meeting_topic))
             {
+                join = new object();
+                dictionary_locks.TryAdd(meeting_topic, join);
+            }
+            else
+            {
+                join = dictionary_locks[meeting_topic];
+            }
 
-                string meeting_lock;
-
-                if (!this.receiving_join.ContainsKey(join_tuple))
+            lock (join)
+            {
+                if (!this.added_join.Contains(join_tuple))
                 {
-                    List<string> received_messages = new List<string>();
-                    received_messages.Add(this.server_identifier);
-                    this.receiving_join.AddOrUpdate(join_tuple, received_messages, (key, oldValue) => received_messages);
-                }
-                else
-                {
-                    List<string> received_messages = this.receiving_join[join_tuple];
 
-                    if (!received_messages.Contains(join_server_identifier))
+                    if (!this.receiving_join.ContainsKey(join_tuple))
                     {
-                        received_messages.Add(join_server_identifier);
-                        this.receiving_join[join_tuple] = received_messages;
+                        List<string> received_messages = new List<string>();
+                        received_messages.Add(this.server_identifier);
+                        this.receiving_join.AddOrUpdate(join_tuple, received_messages, (key, oldValue) => received_messages);
                     }
-                }
+                    else
+                    {
+                        List<string> received_messages = this.receiving_join[join_tuple];
 
-                meeting_lock = meeting_topic;
-
-                lock (meeting_lock)
-                {
+                        if (!received_messages.Contains(join_server_identifier))
+                        {
+                            received_messages.Add(join_server_identifier);
+                            this.receiving_join[join_tuple] = received_messages;
+                        }
+                    }
 
                     if (!this.pending_join.Contains(join_tuple))
                     {
@@ -315,77 +334,90 @@ namespace MSDAD.Server.Communication
                         }
                     }
                 }
-            }    
-            
+            }
+                        
         }
 
         public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)
         {
-            string meeting_lock = meeting_topic;
+            object close;
 
-            lock (meeting_lock)
+            if (!dictionary_locks.ContainsKey(meeting_topic))
             {
-                if (!this.receiving_close.ContainsKey(meeting_topic))
-                {
-                    List<string> received_messages = new List<string>();
-                    received_messages.Add(this.server_identifier);
-                    this.receiving_close.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
-                }
-                else
-                {
-                    List<string> received_messages = this.receiving_close[meeting_topic];
+                close = new object();
+                dictionary_locks.TryAdd(meeting_topic, close);
+            }
+            else
+            {
+                close = dictionary_locks[meeting_topic];
+            }
 
-                    if (!received_messages.Contains(close_replica_identifier))
+            lock (close)
+            {
+                if(!added_close.Contains(meeting_topic))
+                {
+                    if (!this.receiving_close.ContainsKey(meeting_topic))
                     {
-                        received_messages.Add(close_replica_identifier);
-                        this.receiving_close[meeting_topic] = received_messages;
+                        List<string> received_messages = new List<string>();
+                        received_messages.Add(this.server_identifier);
+                        this.receiving_close.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
                     }
-                }
-
-                if (!this.pending_close.Contains(meeting_topic))
-                {
-                    this.pending_close.Add(meeting_topic);
-
-                    int server_iter = 1;
-
-                    foreach (string replica_url in this.server_addresses.Values)
+                    else
                     {
-                        if (server_iter > n_replicas)
-                        {
-                            break;
-                        }
+                        List<string> received_messages = this.receiving_close[meeting_topic];
 
-                        if (!replica_url.Equals(this.server_url))
+                        if (!received_messages.Contains(close_replica_identifier))
                         {
-                            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
-                            try
-                            {
-                                CloseAsyncDelegate RemoteDel = new CloseAsyncDelegate(remote_server.Close);
-                                AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CloseAsyncCallBack);
-                                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, client_identifier, this.server_identifier, RemoteCallback, null);
-                            }
-                            catch (System.Net.Sockets.SocketException se)
-                            {
-                                Console.WriteLine(se.Message);
-                            }
+                            received_messages.Add(close_replica_identifier);
+                            this.receiving_close[meeting_topic] = received_messages;
                         }
-
-                        server_iter++;
                     }
 
-                    // TODO:  Por timer
-                    while (true)
+                    if (!this.pending_close.Contains(meeting_topic))
                     {
-                        float current_messages = (float)this.receiving_close[meeting_topic].Count;
+                        this.pending_close.Add(meeting_topic);
 
-                        if (current_messages > (float)n_replicas / 2)
+                        int server_iter = 1;
+
+                        foreach (string replica_url in this.server_addresses.Values)
                         {
-                            this.server_library.Close(meeting_topic, client_identifier);
-                            this.added_close.Add(meeting_topic);
-                            break;
+                            if (server_iter > n_replicas)
+                            {
+                                break;
+                            }
+
+                            if (!replica_url.Equals(this.server_url))
+                            {
+                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                                try
+                                {
+                                    CloseAsyncDelegate RemoteDel = new CloseAsyncDelegate(remote_server.Close);
+                                    AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CloseAsyncCallBack);
+                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, client_identifier, this.server_identifier, RemoteCallback, null);
+                                }
+                                catch (System.Net.Sockets.SocketException se)
+                                {
+                                    Console.WriteLine(se.Message);
+                                }
+                            }
+
+                            server_iter++;
                         }
-                    }                        
-                }                 
+
+                        // TODO:  Por timer
+                        while (true)
+                        {
+                            float current_messages = (float)this.receiving_close[meeting_topic].Count;
+
+                            if (current_messages > (float)n_replicas / 2)
+                            {
+                                this.server_library.Close(meeting_topic, client_identifier);
+                                this.added_close.Add(meeting_topic);
+                                break;
+                            }
+                        }
+                    }
+                }                
             }            
         }
 
