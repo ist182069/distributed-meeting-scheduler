@@ -111,30 +111,29 @@ namespace MSDAD.Server.Communication
             {
                 create = dictionary_locks[meeting_topic];
             }
-
-            lock(create)
+       
+            if (!added_create.Contains(meeting_topic))
             {
 
-                if (!added_create.Contains(meeting_topic))
+                if (!this.receiving_create.ContainsKey(meeting_topic))
                 {
+                    List<string> received_messages = new List<string>();
+                    received_messages.Add(this.server_identifier);
+                    this.receiving_create.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
+                }
+                else
+                {
+                    List<string> received_messages = this.receiving_create[meeting_topic];
 
-                    if (!this.receiving_create.ContainsKey(meeting_topic))
+                    if (!received_messages.Contains(create_replica_identifier))
                     {
-                        List<string> received_messages = new List<string>();
-                        received_messages.Add(this.server_identifier);
-                        this.receiving_create.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
+                        received_messages.Add(create_replica_identifier);
+                        this.receiving_create[meeting_topic] = received_messages;
                     }
-                    else
-                    {
-                        List<string> received_messages = this.receiving_create[meeting_topic];
+                }
 
-                        if (!received_messages.Contains(create_replica_identifier))
-                        {
-                            received_messages.Add(create_replica_identifier);
-                            this.receiving_create[meeting_topic] = received_messages;
-                        }
-                    }
-
+                lock (create)
+                {
                     if (!pending_create.Contains(meeting_topic))
                     {
                         pending_create.Add(meeting_topic);
@@ -192,11 +191,9 @@ namespace MSDAD.Server.Communication
                                 break;
                             }
                         }
-                    }
-                }
-
-            }
-                              
+                    }                    
+                }                
+            }            
         }
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
         {
@@ -267,28 +264,28 @@ namespace MSDAD.Server.Communication
                 join = dictionary_locks[meeting_topic];
             }
 
-            lock (join)
+            if (!this.added_join.Contains(join_tuple))
             {
-                if (!this.added_join.Contains(join_tuple))
+
+                if (!this.receiving_join.ContainsKey(join_tuple))
                 {
+                    List<string> received_messages = new List<string>();
+                    received_messages.Add(this.server_identifier);
+                    this.receiving_join.AddOrUpdate(join_tuple, received_messages, (key, oldValue) => received_messages);
+                }
+                else
+                {
+                    List<string> received_messages = this.receiving_join[join_tuple];
 
-                    if (!this.receiving_join.ContainsKey(join_tuple))
+                    if (!received_messages.Contains(join_server_identifier))
                     {
-                        List<string> received_messages = new List<string>();
-                        received_messages.Add(this.server_identifier);
-                        this.receiving_join.AddOrUpdate(join_tuple, received_messages, (key, oldValue) => received_messages);
+                        received_messages.Add(join_server_identifier);
+                        this.receiving_join[join_tuple] = received_messages;
                     }
-                    else
-                    {
-                        List<string> received_messages = this.receiving_join[join_tuple];
+                }
 
-                        if (!received_messages.Contains(join_server_identifier))
-                        {
-                            received_messages.Add(join_server_identifier);
-                            this.receiving_join[join_tuple] = received_messages;
-                        }
-                    }
-
+                lock(join)
+                {
                     if (!this.pending_join.Contains(join_tuple))
                     {
                         this.pending_join.Add(join_tuple);
@@ -332,10 +329,9 @@ namespace MSDAD.Server.Communication
                                 break;
                             }
                         }
-                    }
-                }
+                    }                    
+                }                
             }
-                        
         }
 
         public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)
@@ -352,27 +348,27 @@ namespace MSDAD.Server.Communication
                 close = dictionary_locks[meeting_topic];
             }
 
-            lock (close)
+            if(!added_close.Contains(meeting_topic))
             {
-                if(!added_close.Contains(meeting_topic))
+                if (!this.receiving_close.ContainsKey(meeting_topic))
                 {
-                    if (!this.receiving_close.ContainsKey(meeting_topic))
-                    {
-                        List<string> received_messages = new List<string>();
-                        received_messages.Add(this.server_identifier);
-                        this.receiving_close.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
-                    }
-                    else
-                    {
-                        List<string> received_messages = this.receiving_close[meeting_topic];
+                    List<string> received_messages = new List<string>();
+                    received_messages.Add(this.server_identifier);
+                    this.receiving_close.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
+                }
+                else
+                {
+                    List<string> received_messages = this.receiving_close[meeting_topic];
 
-                        if (!received_messages.Contains(close_replica_identifier))
-                        {
-                            received_messages.Add(close_replica_identifier);
-                            this.receiving_close[meeting_topic] = received_messages;
-                        }
+                    if (!received_messages.Contains(close_replica_identifier))
+                    {
+                        received_messages.Add(close_replica_identifier);
+                        this.receiving_close[meeting_topic] = received_messages;
                     }
+                }
 
+                lock (close)
+                {
                     if (!this.pending_close.Contains(meeting_topic))
                     {
                         this.pending_close.Add(meeting_topic);
@@ -416,9 +412,9 @@ namespace MSDAD.Server.Communication
                                 break;
                             }
                         }
-                    }
+                    }                    
                 }                
-            }            
+            }                        
         }
 
 
