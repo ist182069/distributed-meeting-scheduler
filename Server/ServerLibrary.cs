@@ -51,6 +51,7 @@ namespace MSDAD.Server
         public void Join(string meeting_topic, List<string> slots, string client_identifier)
         {
             Meeting meeting = null;
+
             try
             {
                 List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
@@ -177,21 +178,6 @@ namespace MSDAD.Server
 
                 Console.WriteLine("Final Slot: " + meeting.FinalSlot);
             }
-            /*
-            foreach (string meeting_topic in pending_create)
-            {
-                Console.WriteLine("Pending topic: " + meeting_topic);
-            }
-
-            foreach (KeyValuePair<string, List<string>> keyValuePair in this.receiving_create)
-            {
-                Console.WriteLine("Meeting topic: " + keyValuePair.Key);
-
-                foreach (string replica_url in keyValuePair.Value)
-                {
-                    Console.WriteLine("Replica URL: " + replica_url);
-                }
-            }*/
         }
 
         public string ServerIdentifier
