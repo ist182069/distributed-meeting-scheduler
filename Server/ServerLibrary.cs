@@ -46,7 +46,7 @@ namespace MSDAD.Server
             event_list.Add(m);
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, int version)
         {
             Meeting meeting = null;
 
@@ -54,7 +54,7 @@ namespace MSDAD.Server
             {
                 List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
                 meeting = GetMeeting(meeting_topic);
-                meeting.Apply(parsedSlots, client_identifier);
+                meeting.Apply(parsedSlots, client_identifier, version);
             }
             catch (ServerCoreException sce)
             {
@@ -62,9 +62,9 @@ namespace MSDAD.Server
             }
         }
 
-        public void Close(String meeting_topic, string client_identifier)
+        public void Close(String meeting_topic, string client_identifier, int version)
         {
-            GetMeeting(meeting_topic).Schedule(client_identifier);
+            GetMeeting(meeting_topic).Schedule(client_identifier, version);
             Console.Write("Please run a command to be run on the server: ");
         }
 
@@ -398,7 +398,7 @@ namespace MSDAD.Server
                         {
                             slots = result_tuple.Item5;
                             client_identifier = result_tuple.Item7;
-                            this.Join(meeting_topic, slots, client_identifier);
+                            this.Join(meeting_topic, slots, client_identifier, version);
                         }                            
                         break;
                     case "Close":

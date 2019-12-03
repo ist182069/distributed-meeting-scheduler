@@ -58,7 +58,7 @@ namespace MSDAD.Server
                 
         }
 
-        public void Apply(List<Tuple<Location, DateTime>> slots, string client_identifier)
+        public void Apply(List<Tuple<Location, DateTime>> slots, string client_identifier, int version)
         {
 
             if (state == state.CANCELED)
@@ -91,7 +91,7 @@ namespace MSDAD.Server
                 {
                     this.AddClientToVenues(slots, client_identifier);
                 }                                    
-                this.version += 1;
+                this.version = version;
             }
         }
 
@@ -127,7 +127,7 @@ namespace MSDAD.Server
         }
         
 
-        public void Schedule(string client_identifier)
+        public void Schedule(string client_identifier, int version)
         {
             if (client_identifier != this.coordinator)
             {
@@ -175,6 +175,7 @@ namespace MSDAD.Server
 
                 if(proposedRoomsLocation.Count == 0)
                 {
+                    this.version = version;
                     this.state = state.CANCELED;
                     return;
                 }
@@ -220,7 +221,8 @@ namespace MSDAD.Server
                 }
 
                 this.going_clients = going_clients;
-                this.state = state.SCHEDULED;
+                this.version = version;
+                this.state = state.SCHEDULED;                
             }
         }
 

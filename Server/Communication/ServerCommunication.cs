@@ -420,7 +420,7 @@ namespace MSDAD.Server.Communication
 
                             if (current_messages > (float)n_replicas / 2)
                             {
-                                this.server_library.Close(meeting_topic, client_identifier);
+                                this.server_library.Close(meeting_topic, client_identifier, this.server_library.GetVersion(meeting_topic));
                                 this.added_close.Add(meeting_topic);
                                 this.CloseLog(meeting_topic, client_identifier);
                                 break;
@@ -719,7 +719,7 @@ namespace MSDAD.Server.Communication
 
                     if (current_messages > (float)n_replicas / 2)
                     {
-                        this.server_library.Join(meeting_topic, slots, client_identifier);
+                        this.server_library.Join(meeting_topic, slots, client_identifier, sent_version);
                         this.added_join.Add(join_tuple);
                         this.JoinLog(meeting_topic, slots, client_identifier);
                         break;
