@@ -57,7 +57,7 @@ namespace MSDAD.Server.Communication
         private static ConcurrentDictionary<string, object> dictionary_locks = new ConcurrentDictionary<string, object>();
         
         public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
-        public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier, int hops, List<string> logs_list);
+        public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier, int hops, List<string> logs_list, int sent_version);
         public delegate void CloseAsyncDelegate(string meeting_topic, string client_identifier, string server_identifier);
 
         public delegate void GetMeetingFromServerAsyncDelegate(string meeting_topic, string server_identifier);
@@ -270,7 +270,7 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier, int hops, List<string> logs_list)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier, int hops, List<string> logs_list, int sent_version)
         {
             object join;
             Tuple<string, string> join_tuple;
@@ -309,19 +309,30 @@ namespace MSDAD.Server.Communication
 
                 lock(join)
                 {
+                    int written_version;
                     Console.WriteLine("entrou join lock");
                     if(hops==0)
                     {
                         Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
                         bool atomic_read_result = atomic_read_tuple.Item1;
-                        List<string> highest_value_list = atomic_read_tuple.Item2;
+                        List<string> highest_value_list;
+
+                        if (atomic_read_tuple.Item2!=null)
+                        {
+                            highest_value_list = atomic_read_tuple.Item2;
+                        }
+                        else
+                        {
+                            highest_value_list = new List<string>();
+                        }
 
                         if (atomic_read_result)
                         {
                             Console.WriteLine("entrou if");
-                            this.server_library.WriteMeeting(meeting_topic, highest_value_list);                            
+                            written_version = this.server_library.WriteMeeting(meeting_topic, highest_value_list);                            
                             hops++;
-                            this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, highest_value_list);
+                            written_version++;
+                            this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, highest_value_list, written_version);
                             Console.WriteLine("entrou executou");
                         }
                     }
@@ -329,7 +340,7 @@ namespace MSDAD.Server.Communication
                     {
                         Console.WriteLine("entrou no else");
                         this.AtomicWrite(meeting_topic, logs_list);
-                        this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, logs_list);
+                        this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, logs_list, sent_version);
                         Console.WriteLine("entrou executou");
                     }
               
@@ -540,11 +551,16 @@ namespace MSDAD.Server.Communication
         {
             int version;
             string replica_url;            
-            List<string> list;
+            List<string> list = new List<string>();
 
             version = this.server_library.GetVersion(meeting_topic);
             replica_url = server_addresses[replica_identifier];
-            list = this.logs_dictionary[meeting_topic];
+
+            if(this.logs_dictionary.ContainsKey(meeting_topic))
+            {
+                list = this.logs_dictionary[meeting_topic];
+            }
+            
 
             ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
 
@@ -661,10 +677,11 @@ namespace MSDAD.Server.Communication
             return highest_version_tuple;
         }
 
-        private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple, List<string> logs_list)
+        private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple, List<string> logs_list, int sent_version)
         {
-            Console.WriteLine("join broadcast");
-            if (!this.pending_join.Contains(join_tuple))
+            Console.WriteLine("join broadcast");    
+            // adicionar || OU ADDED
+            if (!this.pending_join.Contains(join_tuple) && this.server_library.GetVersion(meeting_topic) < sent_version)
             {
                 this.pending_join.Add(join_tuple);
 
@@ -684,7 +701,7 @@ namespace MSDAD.Server.Communication
                         {
                             JoinAsyncDelegate RemoteDel = new JoinAsyncDelegate(remote_server.Join);
                             AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.JoinAsyncCallBack);
-                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, logs_list, RemoteCallback, null);
+                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
                         }
                         catch (System.Net.Sockets.SocketException se)
                         {
@@ -709,6 +726,8 @@ namespace MSDAD.Server.Communication
                     }
                 }
             }
+
+            this.pending_join.Remove(join_tuple);
         }
 
         private void CreateLog(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)

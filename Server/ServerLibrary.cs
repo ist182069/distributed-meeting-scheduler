@@ -350,16 +350,16 @@ namespace MSDAD.Server
             return version;
         }
 
-        public void WriteMeeting(string meeting_topic, List<string> logs_list)
+        public int WriteMeeting(string meeting_topic, List<string> logs_list)
         {
-            int min_attendees, version, meeting_counter = 0; ;
+            int min_attendees, version = -69, meeting_counter = 0;
             string client_identifier, operation;
             LogsParser logsParser = new LogsParser();
             List<string> slots, invitees;
             Tuple<string, int, string, int, List<string>, List<string>, string> result_tuple;
 
-            // problematico & teste
-            lock(event_list_lock)
+            // teste
+            /*lock(event_list_lock)
             {
                 foreach (Meeting m_iter in this.event_list)
                 {
@@ -370,7 +370,7 @@ namespace MSDAD.Server
 
                     meeting_counter++;
                 }
-            }            
+            } */           
             
             foreach (string json_entry in logs_list)
             {
@@ -410,7 +410,9 @@ namespace MSDAD.Server
                         }                            
                         break;
                 }
-            }                
+            }
+
+            return version;
         }       
     }
 }

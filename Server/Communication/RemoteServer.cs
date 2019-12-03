@@ -27,10 +27,10 @@ namespace MSDAD.Server.Communication
             this.server_communication.List(meeting_query, client_identifier);                
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_replica_identifier, int hops, List<string> logs_list)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_replica_identifier, int hops, List<string> logs_list, int version)
         {
             Thread.Sleep(this.server_communication.Delay());
-            this.server_communication.Join(meeting_topic, slots, client_identifier, join_replica_identifier, hops, logs_list);
+            this.server_communication.Join(meeting_topic, slots, client_identifier, join_replica_identifier, hops, logs_list, version);
         }
 
         public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)

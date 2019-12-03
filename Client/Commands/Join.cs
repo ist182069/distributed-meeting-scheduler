@@ -57,7 +57,7 @@ namespace MSDAD.Client.Commands
 
             try
             {
-                this.remote_server.Join(meeting_topic, slots, this.client_identifier, null, 0, null);
+                this.remote_server.Join(meeting_topic, slots, this.client_identifier, null, 0, null, Int32.MinValue);
 
             }
             catch (ServerCoreException sce)
