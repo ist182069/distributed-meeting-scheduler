@@ -57,7 +57,7 @@ namespace MSDAD.Server.Communication
         private static ConcurrentDictionary<string, object> dictionary_locks = new ConcurrentDictionary<string, object>();
         
         public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
-        public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier, int hops);
+        public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier, int hops, List<string> logs_list);
         public delegate void CloseAsyncDelegate(string meeting_topic, string client_identifier, string server_identifier);
 
         public delegate void GetMeetingFromServerAsyncDelegate(string meeting_topic, string server_identifier);
@@ -270,7 +270,7 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier, int hops)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier, int hops, List<string> logs_list)
         {
             object join;
             Tuple<string, string> join_tuple;
@@ -312,17 +312,25 @@ namespace MSDAD.Server.Communication
                     Console.WriteLine("entrou join lock");
                     if(hops==0)
                     {
-                        if(this.AtomicRead(meeting_topic))
+                        Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
+                        bool atomic_read_result = atomic_read_tuple.Item1;
+                        List<string> highest_value_list = atomic_read_tuple.Item2;
+
+                        if (atomic_read_result)
                         {
                             Console.WriteLine("entrou if");
+                            this.server_library.WriteMeeting(meeting_topic, highest_value_list);                            
                             hops++;
-                            this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple);
+                            this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, highest_value_list);
+                            Console.WriteLine("entrou executou");
                         }
                     }
                     else
                     {
-                        Meeting send_meeting = this.server_library.GetMeeting(meeting_topic);
-                        this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple);
+                        Console.WriteLine("entrou no else");
+                        this.AtomicWrite(meeting_topic, logs_list);
+                        this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, logs_list);
+                        Console.WriteLine("entrou executou");
                     }
               
                 }                
@@ -569,8 +577,10 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        private bool AtomicRead(string meeting_topic)
+        private Tuple<bool, List<string>> AtomicRead(string meeting_topic)
         {
+            List<string> highest_value_list = null;
+
             bool result = false;
             List<string> received_messages = new List<string>();
             received_messages.Add(this.server_identifier);            
@@ -616,15 +626,19 @@ namespace MSDAD.Server.Communication
                 if (current_messages > (float)n_replicas / 2)
                 {
                     Tuple<int, List<string>> highest_version_tuple = this.ReadHighestVersion(meeting_topic);
-                    List<string> highest_value_list = highest_version_tuple.Item2;
-                    this.server_library.WriteMeeting(meeting_topic, highest_value_list);
+                    highest_value_list = highest_version_tuple.Item2;                    
                     Console.WriteLine("!!!Fez Atomic Read!!!");
                     result = true;
                     break;
                 }
             }
 
-            return result;
+            return new Tuple<bool, List<string>>(result, highest_value_list);
+        }
+        public void AtomicWrite(string meeting_topic, List<string> logs_list)
+        {
+            this.server_library.WriteMeeting(meeting_topic, logs_list);
+            Console.WriteLine("!!!Fez Atomic Write!!!");
         }
 
         private Tuple<int, List<string>> ReadHighestVersion(string meeting_topic)
@@ -647,7 +661,7 @@ namespace MSDAD.Server.Communication
             return highest_version_tuple;
         }
 
-        private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple)
+        private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple, List<string> logs_list)
         {
             Console.WriteLine("join broadcast");
             if (!this.pending_join.Contains(join_tuple))
@@ -670,7 +684,7 @@ namespace MSDAD.Server.Communication
                         {
                             JoinAsyncDelegate RemoteDel = new JoinAsyncDelegate(remote_server.Join);
                             AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.JoinAsyncCallBack);
-                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, RemoteCallback, null);
+                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, logs_list, RemoteCallback, null);
                         }
                         catch (System.Net.Sockets.SocketException se)
                         {

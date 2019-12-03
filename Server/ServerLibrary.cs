@@ -16,6 +16,7 @@ namespace MSDAD.Server
         string server_ip, server_identifier, server_remoting;
         ServerCommunication server_communication;
 
+        private readonly object event_list_lock = new object();
         private List<Meeting> event_list = new List<Meeting>();
         private List<Location> known_locations = new List<Location>();
 
@@ -41,11 +42,8 @@ namespace MSDAD.Server
             Meeting m;
             List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
 
-            lock (this)
-            {
-                m = new Meeting(meeting_topic, min_attendees, parsedSlots, invitees, client_identifier);
-                event_list.Add(m);
-            }
+            m = new Meeting(meeting_topic, min_attendees, parsedSlots, invitees, client_identifier);
+            event_list.Add(m);
         }
 
         public void Join(string meeting_topic, List<string> slots, string client_identifier)
@@ -236,7 +234,11 @@ namespace MSDAD.Server
 
         public void AddMeeting(Meeting meeting)
         {
-            this.event_list.Add(meeting);
+            lock(event_list_lock)
+            {
+                this.event_list.Add(meeting);
+            }
+                
         }
 
         public Meeting GetMeeting(string meeting_topic)
@@ -248,7 +250,7 @@ namespace MSDAD.Server
                     return m;
                 }
             }
-            throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);
+            throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);         
         }
 
         public void AddLocation(Location location)
@@ -356,16 +358,19 @@ namespace MSDAD.Server
             List<string> slots, invitees;
             Tuple<string, int, string, int, List<string>, List<string>, string> result_tuple;
 
-            // teste
-            foreach(Meeting m_iter in this.event_list)
+            // problematico & teste
+            lock(event_list_lock)
             {
-                if(meeting_topic.Equals(m_iter.Topic))
+                foreach (Meeting m_iter in this.event_list)
                 {
-                    meeting_topic.Remove(meeting_counter);
-                }
+                    if (meeting_topic.Equals(m_iter.Topic))
+                    {
+                        meeting_topic.Remove(meeting_counter);
+                    }
 
-                meeting_counter++;
-            }
+                    meeting_counter++;
+                }
+            }            
             
             foreach (string json_entry in logs_list)
             {
