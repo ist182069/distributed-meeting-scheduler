@@ -27,10 +27,10 @@ namespace MSDAD.Server.Communication
             this.server_communication.List(meeting_query, client_identifier);                
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_replica_identifier)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_replica_identifier, int hops)
         {
             Thread.Sleep(this.server_communication.Delay());
-            this.server_communication.Join(meeting_topic, slots, client_identifier, join_replica_identifier);
+            this.server_communication.Join(meeting_topic, slots, client_identifier, join_replica_identifier, hops);
         }
 
         public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)
@@ -63,6 +63,18 @@ namespace MSDAD.Server.Communication
         {
             Thread.Sleep(this.server_communication.Delay());
             server_communication.Status();
+        }
+
+        public void GetMeeting(string meeting_topic, string server_identifier)
+        {
+            Thread.Sleep(this.server_communication.Delay());
+            server_communication.GetMeeting(meeting_topic, server_identifier);
+        }
+
+        public void SendMeeting(string meeting_topic, int version, List<string> logs_list, string server_identifier)
+        {
+            Thread.Sleep(this.server_communication.Delay());
+            server_communication.SendMeeting(meeting_topic, version, logs_list, server_identifier);
         }
     }
 }

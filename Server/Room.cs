@@ -8,7 +8,7 @@ namespace MSDAD.Server
 {
     public class Room 
     {
-        private String identifier;
+        private string identifier;
         private int capacity;
         private List<DateTime> reservations = new List<DateTime>();
 
@@ -18,11 +18,15 @@ namespace MSDAD.Server
             this.capacity = capacity;            
         }
 
-        public String Identifier
+        public string Identifier
         {
             get
             {
                 return this.identifier;
+            }
+            set
+            {
+                this.identifier = value;
             }
         }
 
@@ -31,6 +35,10 @@ namespace MSDAD.Server
             get
             {
                 return this.capacity;
+            }
+            set
+            {
+                this.capacity = value;
             }
         }
         
@@ -54,9 +62,17 @@ namespace MSDAD.Server
             return vacated;
         }
 
-        public List<DateTime> GetReservedDates()
+        public List<DateTime> ReservedDates             
         {
-            return this.reservations;
+            get
+            {
+                return this.reservations;
+            }     
+            set
+            {
+                this.reservations = value;
+            }
+
         }
     }
 }

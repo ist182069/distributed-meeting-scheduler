@@ -1,5 +1,7 @@
 ﻿using MSDAD.Library;
+using MSDAD.Server.Logs;
 using MSDAD.Server.XML;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -16,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
+
 namespace MSDAD.Server.Communication
 {
     class ServerCommunication
@@ -27,9 +30,13 @@ namespace MSDAD.Server.Communication
         RemoteServer remote_server;
         TcpChannel channel;
 
+        private ConcurrentDictionary<string, List<string>> logs_dictionary = new ConcurrentDictionary<string, List<string>>();
+
+        private ConcurrentDictionary<string, List<string>> atomic_read_received = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: id da replica que respondeu
+        private ConcurrentDictionary<string, List<Tuple<int, List<string>>>> atomic_read_tuples = new ConcurrentDictionary<string, List<Tuple<int, List<string>>>>(); // key: topic+uid ; value: Lista com os (topic, version, state) de cada cliente
 
         // recebe as mensagens para cada meeting_topic
-        private ConcurrentDictionary<string, List<string>> receiving_create = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas
+        private ConcurrentDictionary<string, List<string>> receiving_create = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas        
         // topicos a criar que estao pendentes
         private List<string> pending_create = new List<string>();
         private List<string> added_create = new List<string>();
@@ -48,10 +55,13 @@ namespace MSDAD.Server.Communication
         private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address        
 
         private static ConcurrentDictionary<string, object> dictionary_locks = new ConcurrentDictionary<string, object>();
-
+        
         public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
-        public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier);
+        public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier, int hops);
         public delegate void CloseAsyncDelegate(string meeting_topic, string client_identifier, string server_identifier);
+
+        public delegate void GetMeetingFromServerAsyncDelegate(string meeting_topic, string server_identifier);
+        public delegate void SendMeetingToServerAsyncDelegate(string meeting_topic, int version, List<string> logs_list, string server_identifier);
 
         public static void CreateAsyncCallBack(IAsyncResult ar)
         {
@@ -68,6 +78,18 @@ namespace MSDAD.Server.Communication
         public static void CloseAsyncCallBack(IAsyncResult ar)
         {
             CloseAsyncDelegate del = (CloseAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
+
+        public static void GetMeetingFromServerAsyncCallBack(IAsyncResult ar)
+        {
+            GetMeetingFromServerAsyncDelegate del = (GetMeetingFromServerAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
+
+        public static void SendMeetingToServerAsyncCallBack(IAsyncResult ar)
+        {
+            SendMeetingToServerAsyncDelegate del = (SendMeetingToServerAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
             return;
         }
 
@@ -173,7 +195,8 @@ namespace MSDAD.Server.Communication
                             if (current_messages > (float)n_replicas / 2)
                             {
                                 this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
-                                this.added_create.Add(meeting_topic);
+                                this.added_create.Add(meeting_topic);                                
+                                this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier);
                                 if (invitees == null)
                                 {
                                     foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
@@ -203,7 +226,7 @@ namespace MSDAD.Server.Communication
 
             foreach (Meeting meeting in event_list)
             {
-                if (!meeting_query.ContainsKey(meeting.Topic) && meeting.GetInvitees() == null)
+                if (!meeting_query.ContainsKey(meeting.Topic) && meeting.Invitees == null)
                 {
                     string state = meeting.State;
                     if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier))
@@ -216,9 +239,9 @@ namespace MSDAD.Server.Communication
                         remote_client.SendMeeting(meeting.Topic, meeting.Version, meeting.State, null);
                     }
                 }
-                else if (!meeting_query.ContainsKey(meeting.Topic) && meeting.GetInvitees() != null)
+                else if (!meeting_query.ContainsKey(meeting.Topic) && meeting.Invitees != null)
                 {
-                    if (meeting.GetInvitees().Contains(client_identifier)) {
+                    if (meeting.Invitees.Contains(client_identifier)) {
                         string state = meeting.State;
                         if (state.Equals("SCHEDULED") && meeting.ClientConfirmed(client_identifier))
                         {
@@ -247,12 +270,12 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, string join_server_identifier, int hops)
         {
             object join;
             Tuple<string, string> join_tuple;
             
-            join_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
+            join_tuple = new Tuple<string, string>(meeting_topic, client_identifier);            
 
             if (!dictionary_locks.ContainsKey(meeting_topic))
             {
@@ -286,54 +309,25 @@ namespace MSDAD.Server.Communication
 
                 lock(join)
                 {
-                    if (!this.pending_join.Contains(join_tuple))
+                    Console.WriteLine("entrou join lock");
+                    if(hops==0)
                     {
-                        this.pending_join.Add(join_tuple);
-
-                        int server_iter = 1;
-
-                        foreach (string replica_url in this.server_addresses.Values)
+                        if(this.AtomicRead(meeting_topic))
                         {
-                            if (server_iter > n_replicas)
-                            {
-                                break;
-                            }
-
-                            if (!replica_url.Equals(this.server_url))
-                            {
-                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
-                                try
-                                {
-                                    JoinAsyncDelegate RemoteDel = new JoinAsyncDelegate(remote_server.Join);
-                                    AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.JoinAsyncCallBack);
-                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, RemoteCallback, null);
-                                }
-                                catch (System.Net.Sockets.SocketException se)
-                                {
-                                    Console.WriteLine(se.Message);
-                                }
-                            }
-
-                            server_iter++;
+                            Console.WriteLine("entrou if");
+                            hops++;
+                            this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple);
                         }
-
-                        // TODO:  Por timer
-                        while (true)
-                        {
-                            float current_messages = (float)this.receiving_join[join_tuple].Count;
-
-                            if (current_messages > (float)n_replicas / 2)
-                            {
-                                this.server_library.Join(meeting_topic, slots, client_identifier);
-                                this.added_join.Add(join_tuple);
-                                break;
-                            }
-                        }
-                    }                    
+                    }
+                    else
+                    {
+                        Meeting send_meeting = this.server_library.GetMeeting(meeting_topic);
+                        this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple);
+                    }
+              
                 }                
             }
-        }
-
+        }       
         public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)
         {
             object close;
@@ -409,6 +403,7 @@ namespace MSDAD.Server.Communication
                             {
                                 this.server_library.Close(meeting_topic, client_identifier);
                                 this.added_close.Add(meeting_topic);
+                                this.CloseLog(meeting_topic, client_identifier);
                                 break;
                             }
                         }
@@ -532,6 +527,202 @@ namespace MSDAD.Server.Communication
 
             return delay;
         }       
+
+        public void GetMeeting(string meeting_topic, string replica_identifier)
+        {
+            int version;
+            string replica_url;            
+            List<string> list;
+
+            version = this.server_library.GetVersion(meeting_topic);
+            replica_url = server_addresses[replica_identifier];
+            list = this.logs_dictionary[meeting_topic];
+
+            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+
+            try
+            {
+                SendMeetingToServerAsyncDelegate RemoteDel = new SendMeetingToServerAsyncDelegate(remote_server.SendMeeting);
+                AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToServerAsyncCallBack);
+                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, version, list, this.server_identifier, RemoteCallback, null);
+                Console.WriteLine("Enviou GM: " + replica_url);
+            }
+            catch (System.Net.Sockets.SocketException se)
+            {
+                Console.WriteLine(se.Message);
+            }
+        }
+
+        public void SendMeeting(string meeting_topic, int version, List<string> logs_list, string replica_identifier)
+        {
+            List<string> received_messages = this.atomic_read_received[meeting_topic];
+            List<Tuple<int, List<string>>> received_tuples = this.atomic_read_tuples[meeting_topic];
+
+            if (!received_messages.Contains(replica_identifier))
+            {
+                received_messages.Add(replica_identifier);
+                this.atomic_read_received[meeting_topic] = received_messages;
+
+                received_tuples.Add(new Tuple<int, List<string>>(version, logs_list));
+                this.atomic_read_tuples[meeting_topic] = received_tuples;
+                Console.WriteLine("passou tudo: ");
+            }
+        }
+
+        private bool AtomicRead(string meeting_topic)
+        {
+            bool result = false;
+            List<string> received_messages = new List<string>();
+            received_messages.Add(this.server_identifier);            
+            int version = this.server_library.GetVersion(meeting_topic);
+            List<Tuple<int, List<string>>> received_versions = new List<Tuple<int, List<string>>>();
+            this.atomic_read_received.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
+            this.atomic_read_tuples.AddOrUpdate(meeting_topic, received_versions, (key, oldValue) => received_versions);
+
+            int server_iter = 1;
+
+            Console.WriteLine("entrou atomic read");
+            foreach (string replica_url in this.server_addresses.Values)
+            {
+                if (server_iter > n_replicas)
+                {
+                    break;
+                }
+
+                if (!replica_url.Equals(this.server_url))
+                {
+                    ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                    try
+                    {
+                        GetMeetingFromServerAsyncDelegate RemoteDel = new GetMeetingFromServerAsyncDelegate(remote_server.GetMeeting);
+                        AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.GetMeetingFromServerAsyncCallBack);
+                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, this.server_identifier, RemoteCallback, null);
+                        Console.WriteLine("enviou para os gajos");
+                    }
+                    catch (System.Net.Sockets.SocketException se)
+                    {
+                        Console.WriteLine(se.Message);
+                    }
+                }
+
+                server_iter++;
+            }
+
+            while (true)
+            {
+                float current_messages = (float)this.atomic_read_received[meeting_topic].Count;
+                Thread.Sleep(3000);
+                Console.WriteLine(current_messages);
+                if (current_messages > (float)n_replicas / 2)
+                {
+                    Tuple<int, List<string>> highest_version_tuple = this.ReadHighestVersion(meeting_topic);
+                    List<string> highest_value_list = highest_version_tuple.Item2;
+                    this.server_library.WriteMeeting(meeting_topic, highest_value_list);
+                    Console.WriteLine("!!!Fez Atomic Read!!!");
+                    result = true;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        private Tuple<int, List<string>> ReadHighestVersion(string meeting_topic)
+        {
+            int current_version, maximum_version = Int32.MinValue;
+            Tuple<int, List<string>> highest_version_tuple = null;
+            List<Tuple<int, List<string>>> received_tuples = this.atomic_read_tuples[meeting_topic];
+
+            foreach(Tuple<int, List<string>> current_tuple in received_tuples)
+            {
+                current_version = current_tuple.Item1;
+
+                if(current_version>maximum_version)
+                {
+                    maximum_version = current_version;
+                    highest_version_tuple = current_tuple;
+                }
+            }
+
+            return highest_version_tuple;
+        }
+
+        private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple)
+        {
+            Console.WriteLine("join broadcast");
+            if (!this.pending_join.Contains(join_tuple))
+            {
+                this.pending_join.Add(join_tuple);
+
+                int server_iter = 1;
+
+                foreach (string replica_url in this.server_addresses.Values)
+                {
+                    if (server_iter > n_replicas)
+                    {
+                        break;
+                    }
+
+                    if (!replica_url.Equals(this.server_url))
+                    {
+                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                        try
+                        {
+                            JoinAsyncDelegate RemoteDel = new JoinAsyncDelegate(remote_server.Join);
+                            AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.JoinAsyncCallBack);
+                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, RemoteCallback, null);
+                        }
+                        catch (System.Net.Sockets.SocketException se)
+                        {
+                            Console.WriteLine(se.Message);
+                        }
+                    }
+
+                    server_iter++;
+                }
+
+                // TODO:  Por timer
+                while (true)
+                {
+                    float current_messages = (float)this.receiving_join[join_tuple].Count;
+
+                    if (current_messages > (float)n_replicas / 2)
+                    {
+                        this.server_library.Join(meeting_topic, slots, client_identifier);
+                        this.added_join.Add(join_tuple);
+                        this.JoinLog(meeting_topic, slots, client_identifier);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void CreateLog(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
+        {           
+            if(!logs_dictionary.ContainsKey(meeting_topic))
+            {
+                string json_log = new LogsParser().Create_ParseJSON(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                List<string> logs_list = new List<string>();
+                logs_list.Add(json_log);
+                this.logs_dictionary.TryAdd(meeting_topic, logs_list);
+            }                
+        }
+        private void JoinLog(string meeting_topic, List<string> slots, string client_identifier)
+        {            
+            string json_log = new LogsParser().Join_ParseJSON(meeting_topic, slots, client_identifier);
+            List<string> logs_list = logs_dictionary[meeting_topic];
+            logs_list.Add(json_log);
+            this.logs_dictionary[meeting_topic] = logs_list;
+        }
+
+        private void CloseLog(string meeting_topic, string client_identifier)
+        {
+            string json_log = new LogsParser().Close_ParseJSON(meeting_topic, client_identifier);
+            List<string> logs_list = logs_dictionary[meeting_topic];
+            logs_list.Add(json_log);
+            this.logs_dictionary[meeting_topic] = logs_list;
+        }
+
     }
 }
 

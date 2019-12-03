@@ -1,5 +1,6 @@
 ﻿using MSDAD.Library;
 using MSDAD.Server.Communication;
+using MSDAD.Server.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,14 +90,14 @@ namespace MSDAD.Server
                 Console.Write("Location: ");
                 Console.WriteLine(location.Name);
 
-                rooms = location.GetList();
+                rooms = location.Rooms;
 
                 foreach (Room room in rooms)
                 {
                     Console.WriteLine("  Room: " + room.Identifier);
                     Console.WriteLine("  Capacity: " + room.Capacity);
                     Console.WriteLine("  Dates Reserved: ");
-                    reserved_dates = room.GetReservedDates();
+                    reserved_dates = room.ReservedDates;
 
                     foreach (DateTime dateTime in reserved_dates)
                     {
@@ -121,7 +122,7 @@ namespace MSDAD.Server
                 Console.WriteLine("State: " + meeting.State);
                 Console.WriteLine("Version: " + meeting.Version);
                 Console.WriteLine("Coordinator: " + meeting.Coordinator);
-                invitees = meeting.GetInvitees();
+                invitees = meeting.Invitees;
 
                 if (invitees != null)
                 {
@@ -133,7 +134,7 @@ namespace MSDAD.Server
                     }
                 }
 
-                slots_clients_dictionary = meeting.GetSlotsClientsMapping();
+                slots_clients_dictionary = meeting. GetSlotsClientsMapping();
 
                 if (slots_clients_dictionary != null)
                 {
@@ -153,7 +154,7 @@ namespace MSDAD.Server
 
                 }
 
-                going_clients = meeting.GetGoingClients();
+                going_clients = meeting.GoingClients;
 
                 if (going_clients != null)
                 {
@@ -243,7 +244,7 @@ namespace MSDAD.Server
             this.event_list.Add(meeting);
         }
 
-        private Meeting GetMeeting(string meeting_topic)
+        public Meeting GetMeeting(string meeting_topic)
         {
             foreach (Meeting m in this.event_list)
             {
@@ -271,7 +272,7 @@ namespace MSDAD.Server
 
             if(existingLocation!=null)
             {
-                rooms = location.GetList();
+                rooms = location.Rooms;
 
                 foreach(Room room in rooms)
                 {
@@ -329,5 +330,62 @@ namespace MSDAD.Server
             }
             return parsed_slots;
         }
+
+        // problematico
+        public int GetVersion(string meeting_topic)
+        {   
+            Meeting read_meeting;
+
+            int version;
+
+            try
+            {
+                read_meeting = this.GetMeeting(meeting_topic);
+                version = read_meeting.Version;
+
+            }
+            catch (ServerCoreException sce)
+            {
+                // Se nao existe trata a excepcao pondo estes campos genericos
+                version = 0;
+            }                
+
+            return version;
+        }
+
+        public void WriteMeeting(string meeting_topic, List<string> logs_list)
+        {
+            int min_attendees;
+            string client_identifier, operation;
+            LogsParser logsParser = new LogsParser();
+            List<string> slots, invitees;
+            Tuple<string, string, int, List<string>, List<string>, string> result_tuple;
+
+            foreach (string json_entry in logs_list)
+            {
+                result_tuple = logsParser.ParseEntry(json_entry);
+                operation = result_tuple.Item1;
+
+                switch (operation)
+                {
+                    case "Create":
+                        min_attendees = result_tuple.Item3;
+                        slots = result_tuple.Item4;
+                        invitees = result_tuple.Item5;
+                        client_identifier = result_tuple.Item6;
+                        this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                        break;
+                    case "Join":
+                        slots = result_tuple.Item4;
+                        client_identifier = result_tuple.Item6;
+                        this.Join(meeting_topic, slots, client_identifier);
+                        break;
+                    case "Close":
+                        client_identifier = result_tuple.Item6;
+                        this.Close(meeting_topic, client_identifier);
+                        break;
+                }
+            }                
+        }       
     }
 }

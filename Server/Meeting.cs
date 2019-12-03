@@ -9,17 +9,16 @@ namespace MSDAD.Server
 {
     enum state {OPEN, SCHEDULED, CANCELED};
 
-    public class Meeting
+    public class Meeting : MarshalByRefObject
     {
         private int min_attendees, version;
         private string coordinator, topic;
         private state state;
-        private List<string> invitees;
 
-        private Dictionary<Tuple<Location, DateTime>, List<string>> slots_clients_mapping;
-        
-        private List<string> going_clients;
         private string final_slot;
+        private List<string> invitees;
+        private List<string> going_clients;
+        private Dictionary<Tuple<Location, DateTime>, List<string>> slots_clients_mapping;                
 
         public Meeting(string meeting_topic, int min_attendees, List<Tuple<Location,DateTime>> slots, List<string> invitees, string client_identifier)
         {
@@ -231,6 +230,10 @@ namespace MSDAD.Server
             {
                 return this.topic;
             }
+            set
+            {
+                this.topic = value;
+            }
         }
 
         public string Coordinator
@@ -255,6 +258,10 @@ namespace MSDAD.Server
             {
                 return version;
             }
+            set
+            {
+                version = value;
+            }
         }
        
         public string State
@@ -263,21 +270,50 @@ namespace MSDAD.Server
             {
                 return this.state.ToString();
             }
-        }  
-        
-        public List<string> GetInvitees()
+        }       
+
+        public void SetState(string state_string)
         {
-            return this.invitees;
+            switch (state_string)
+            {
+                case "OPEN":
+                    this.state = state.OPEN;
+                    break;
+                case "SCHEDULED":
+                    this.state = state.SCHEDULED;
+                    break;
+                case "CANCELLED":
+                    this.state = state.CANCELED;
+                    break;
+                default:
+                    throw new ServerCoreException("State is not supposed to be equal to: \"" + state_string + "\"");
+            }            
+        }
+        
+        public List<string> Invitees
+        {
+            get
+            {
+                return this.invitees;
+            }
         }
 
-        public List<string> GetGoingClients()
+        public List<string> GoingClients
         {
-            return this.going_clients;
+            get
+            {
+                return this.going_clients;
+            }            
         }
 
         public Dictionary<Tuple<Location, DateTime>, List<string>> GetSlotsClientsMapping()
         {
-            return this.slots_clients_mapping;
+            return this.slots_clients_mapping;            
+        }
+
+        public void SetSlotsClientsMapping(Dictionary<Tuple<Location, DateTime>, List<string>> slots_clients_mapping)
+        {
+            this.slots_clients_mapping = slots_clients_mapping;
         }
 
         public bool ClientConfirmed(string client_address)
