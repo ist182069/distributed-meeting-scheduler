@@ -406,7 +406,7 @@ namespace MSDAD.Server
                         if (this.GetVersion(meeting_topic) < version)
                         {
                             client_identifier = result_tuple.Item7;
-                            this.Close(meeting_topic, client_identifier);
+                            this.Close(meeting_topic, client_identifier, version);
                         }                            
                         break;
                 }

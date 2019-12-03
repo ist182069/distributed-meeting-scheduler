@@ -24,7 +24,7 @@ namespace MSDAD
             void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
             void List(Dictionary<string, string> meeting_query, string client_identifier);
             void Join(string meeting_topic, List<string> slots, string client_identifier, string server_identifier, int hops, List<string> logs_list, int version);
-            void Close(string meeting_topic, string client_identifier, string server_identifier);
+            void Close(string meeting_topic, string client_identifier, string server_identifier, int hops, List<string> logs_list, int version);
             void Wait(int milliseconds);
             void Status();
             void GetMeeting(string meeting_topic, string server_identifier);

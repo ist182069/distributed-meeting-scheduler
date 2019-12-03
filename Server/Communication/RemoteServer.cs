@@ -32,13 +32,11 @@ namespace MSDAD.Server.Communication
             Thread.Sleep(this.server_communication.Delay());
             this.server_communication.Join(meeting_topic, slots, client_identifier, join_replica_identifier, hops, logs_list, version);
         }
-
-        public void Close(string meeting_topic, string client_identifier, string close_replica_identifier)
+        public void Close(string meeting_topic, string client_identifier, string server_identifier, int hops, List<string> logs_list, int version)
         {
             Thread.Sleep(this.server_communication.Delay());
-            this.server_communication.Close(meeting_topic, client_identifier, close_replica_identifier);
+            this.server_communication.Close(meeting_topic, client_identifier, server_identifier, hops, logs_list, version);
         }
-
         public void Ping(string message, string user)
         {
             Thread.Sleep(this.server_communication.Delay());
@@ -75,6 +73,6 @@ namespace MSDAD.Server.Communication
         {
             Thread.Sleep(this.server_communication.Delay());
             server_communication.SendMeeting(meeting_topic, version, logs_list, server_identifier);
-        }
+        }        
     }
 }
