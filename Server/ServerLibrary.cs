@@ -142,7 +142,16 @@ namespace MSDAD.Server
 
                     foreach (KeyValuePair<Tuple<Location, DateTime>, List<string>> keyValuePair in slots_clients_dictionary)
                     {
-                        Console.WriteLine("    Location: " + keyValuePair.Key.Item1.ToString());
+                        Console.WriteLine("    Location: " + keyValuePair.Key.Item1.Name);
+                        foreach (Room room in keyValuePair.Key.Item1.Rooms)
+                        {
+                            Console.WriteLine("      Room: " + room.Identifier);
+                            Console.WriteLine("      Capacity: " + room.Capacity);
+                            foreach(DateTime dateTime in room.ReservedDates)
+                            {
+                                Console.WriteLine("        Date: " + dateTime.ToString());
+                            }
+                        }
                         Console.WriteLine("    Date: " + keyValuePair.Key.Item2.ToString());
                         Console.WriteLine("    Clients: ");
                         
@@ -355,12 +364,23 @@ namespace MSDAD.Server
 
         public void WriteMeeting(string meeting_topic, List<string> logs_list)
         {
-            int min_attendees;
+            int min_attendees, version, meeting_counter = 0; ;
             string client_identifier, operation;
             LogsParser logsParser = new LogsParser();
             List<string> slots, invitees;
-            Tuple<string, string, int, List<string>, List<string>, string> result_tuple;
+            Tuple<string, int, string, int, List<string>, List<string>, string> result_tuple;
 
+            // teste
+            foreach(Meeting m_iter in this.event_list)
+            {
+                if(meeting_topic.Equals(m_iter.Topic))
+                {
+                    meeting_topic.Remove(meeting_counter);
+                }
+
+                meeting_counter++;
+            }
+            
             foreach (string json_entry in logs_list)
             {
                 result_tuple = logsParser.ParseEntry(json_entry);
@@ -368,21 +388,35 @@ namespace MSDAD.Server
 
                 switch (operation)
                 {
+
+                    // ou entao aquio gajo mudar tudo desde inicio
                     case "Create":
-                        min_attendees = result_tuple.Item3;
-                        slots = result_tuple.Item4;
-                        invitees = result_tuple.Item5;
-                        client_identifier = result_tuple.Item6;
-                        this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                        version = result_tuple.Item2;
+                        if (this.GetVersion(meeting_topic) < version)
+                        {
+                            min_attendees = result_tuple.Item4;
+                            slots = result_tuple.Item5;
+                            invitees = result_tuple.Item6;
+                            client_identifier = result_tuple.Item7;
+                            this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                        }                            
                         break;
                     case "Join":
-                        slots = result_tuple.Item4;
-                        client_identifier = result_tuple.Item6;
-                        this.Join(meeting_topic, slots, client_identifier);
+                        version = result_tuple.Item2;
+                        if (this.GetVersion(meeting_topic) < version)
+                        {
+                            slots = result_tuple.Item5;
+                            client_identifier = result_tuple.Item7;
+                            this.Join(meeting_topic, slots, client_identifier);
+                        }                            
                         break;
                     case "Close":
-                        client_identifier = result_tuple.Item6;
-                        this.Close(meeting_topic, client_identifier);
+                        version = result_tuple.Item2;
+                        if (this.GetVersion(meeting_topic) < version)
+                        {
+                            client_identifier = result_tuple.Item7;
+                            this.Close(meeting_topic, client_identifier);
+                        }                            
                         break;
                 }
             }                

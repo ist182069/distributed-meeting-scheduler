@@ -10,7 +10,8 @@ namespace MSDAD.Server.Logs
 {
     class LogsParser
     {
-        public Tuple<string, string, int, List<string>, List<string>, string> ParseEntry(string json_entry)
+        // op and version are the first two arguments
+        public Tuple<string, int, string, int, List<string>, List<string>, string> ParseEntry(string json_entry)
         {
             Console.WriteLine(json_entry);            
             JObject jo = JObject.Parse(json_entry);
@@ -18,7 +19,7 @@ namespace MSDAD.Server.Logs
 
             string op;
             string meeting_topic;
-            int min_attendees;
+            int version, min_attendees;
             List<string> slots;
             List<string> invitees;
             string client_identifier;
@@ -29,42 +30,45 @@ namespace MSDAD.Server.Logs
                     Create create = JsonConvert.DeserializeObject<Create>(json_entry);
 
                     op = create.Operation;
+                    version = create.Version;
                     meeting_topic = create.MeetingTopic;
                     min_attendees = create.MinAttendees;
                     slots = create.Slots;
                     invitees = create.Invitees;
                     client_identifier = create.ClientIdentifier;
 
-                    return new Tuple<string, string, int, List<string>, List<string>, string>(op, meeting_topic, min_attendees, slots, invitees, client_identifier);
+                    return new Tuple<string, int, string, int, List<string>, List<string>, string>(op, version, meeting_topic, min_attendees, slots, invitees, client_identifier);
                 case "Join":
                     Join join = JsonConvert.DeserializeObject<Join>(json_entry);
 
                     op = join.Operation;
+                    version = join.Version;
                     meeting_topic = join.MeetingTopic;
                     min_attendees = -69;
                     slots = join.Slots;
                     invitees = null;
                     client_identifier = join.ClientIdentifier;
 
-                    return new Tuple<string, string, int, List<string>, List<string>, string>(op, meeting_topic, min_attendees, slots, invitees, client_identifier);
+                    return new Tuple<string, int, string, int, List<string>, List<string>, string>(op, version, meeting_topic, min_attendees, slots, invitees, client_identifier);
                 case "Close":
                     Close close = JsonConvert.DeserializeObject<Close>(json_entry);
 
                     op = close.Operation;
+                    version = close.Version;
                     meeting_topic = close.MeetingTopic;
                     min_attendees = -69;
                     slots = null;
                     invitees = null;
                     client_identifier = close.ClientIdentifier;
 
-                    return new Tuple<string, string, int, List<string>, List<string>, string>(op, meeting_topic, min_attendees, slots, invitees, client_identifier);
+                    return new Tuple<string, int, string, int, List<string>, List<string>, string>(op, version, meeting_topic, min_attendees, slots, invitees, client_identifier);
                 default:
                     throw new Exception("Not supposed to happen");
             }
         }
-        public string Create_ParseJSON(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
+        public string Create_ParseJSON(string meeting_topic, int version, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
         {
-            Create create = new Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+            Create create = new Create(version, meeting_topic, min_attendees, slots, invitees, client_identifier);
             string json_create = JsonConvert.SerializeObject(create);
 
             return json_create;
@@ -75,9 +79,9 @@ namespace MSDAD.Server.Logs
             Create create = JsonConvert.DeserializeObject<Create>(json_string);
         }
 
-        public string Join_ParseJSON(string meeting_topic, List<string> slots, string client_identifier)
+        public string Join_ParseJSON(string meeting_topic, int version, List<string> slots, string client_identifier)
         {
-            Join join = new Join(meeting_topic, client_identifier, slots);
+            Join join = new Join(version, meeting_topic, client_identifier, slots);
             string json_create = JsonConvert.SerializeObject(join);
 
             return json_create;
@@ -88,9 +92,9 @@ namespace MSDAD.Server.Logs
             Join join = JsonConvert.DeserializeObject<Join>(json_string);
         }
 
-        public string Close_ParseJSON(string meeting_topic, string client_identifier)
+        public string Close_ParseJSON(string meeting_topic, int version, string client_identifier)
         {
-            Close close = new Close(meeting_topic, client_identifier);
+            Close close = new Close(version, meeting_topic, client_identifier);
             string json_create = JsonConvert.SerializeObject(close);
 
             return json_create;
@@ -105,12 +109,13 @@ namespace MSDAD.Server.Logs
     class Create
     {
         string operation, meeting_topic, client_identifier;
-        int min_attendees;
+        int version, min_attendees;
         List<string> slots, invitees;
 
-        public Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
+        public Create(int version, string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
         {
             this.operation = "Create";
+            this.version = version;
             this.meeting_topic = meeting_topic;
             this.min_attendees = min_attendees;
             this.slots = slots;
@@ -127,6 +132,17 @@ namespace MSDAD.Server.Logs
             set
             {
                 this.operation = value;
+            }
+        }
+        public int Version
+        {
+            get
+            {
+                return this.version;
+            }
+            set
+            {
+                this.version = value;
             }
         }
         public string MeetingTopic 
@@ -192,11 +208,13 @@ namespace MSDAD.Server.Logs
 
     class Join
     {
+        int version;
         string operation, client_identifier, meeting_topic;
         List<string> slots;
-        public Join(string client_identifier, string meeting_topic, List<string> slots)
+        public Join(int version, string client_identifier, string meeting_topic, List<string> slots)
         {
             this.operation = "Join";
+            this.version = version;
             this.client_identifier = client_identifier;
             this.meeting_topic = meeting_topic;
             this.slots = slots;
@@ -211,6 +229,17 @@ namespace MSDAD.Server.Logs
             set
             {
                 this.operation = value;
+            }
+        }
+        public int Version
+        {
+            get
+            {
+                return this.version;
+            }
+            set
+            {
+                this.version = value;
             }
         }
         public string MeetingTopic
@@ -252,10 +281,12 @@ namespace MSDAD.Server.Logs
 
     class Close
     {
+        int version;
         string operation, client_identifier, meeting_topic;
-        public Close(string meeting_topic, string client_identifier)
+        public Close(int version, string meeting_topic, string client_identifier)
         {
             this.operation = "Close";
+            this.version = version;
             this.meeting_topic = meeting_topic;
             this.client_identifier = client_identifier;            
         }
@@ -271,7 +302,17 @@ namespace MSDAD.Server.Logs
                 this.operation = value;
             }
         }
-
+        public int Version
+        {
+            get
+            {
+                return this.version;
+            }
+            set
+            {
+                this.version = value;
+            }
+        }
         public string MeetingTopic
         {
             get

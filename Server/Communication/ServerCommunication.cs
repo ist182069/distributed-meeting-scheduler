@@ -701,15 +701,17 @@ namespace MSDAD.Server.Communication
         {           
             if(!logs_dictionary.ContainsKey(meeting_topic))
             {
-                string json_log = new LogsParser().Create_ParseJSON(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                int write_version = server_library.GetVersion(meeting_topic);
+                string json_log = new LogsParser().Create_ParseJSON(meeting_topic, write_version, min_attendees, slots, invitees, client_identifier);
                 List<string> logs_list = new List<string>();
                 logs_list.Add(json_log);
                 this.logs_dictionary.TryAdd(meeting_topic, logs_list);
             }                
         }
         private void JoinLog(string meeting_topic, List<string> slots, string client_identifier)
-        {            
-            string json_log = new LogsParser().Join_ParseJSON(meeting_topic, slots, client_identifier);
+        {
+            int write_version = server_library.GetVersion(meeting_topic);
+            string json_log = new LogsParser().Join_ParseJSON(meeting_topic, write_version, slots, client_identifier);
             List<string> logs_list = logs_dictionary[meeting_topic];
             logs_list.Add(json_log);
             this.logs_dictionary[meeting_topic] = logs_list;
@@ -717,7 +719,8 @@ namespace MSDAD.Server.Communication
 
         private void CloseLog(string meeting_topic, string client_identifier)
         {
-            string json_log = new LogsParser().Close_ParseJSON(meeting_topic, client_identifier);
+            int write_version = server_library.GetVersion(meeting_topic);
+            string json_log = new LogsParser().Close_ParseJSON(meeting_topic, write_version, client_identifier);
             List<string> logs_list = logs_dictionary[meeting_topic];
             logs_list.Add(json_log);
             this.logs_dictionary[meeting_topic] = logs_list;
