@@ -206,20 +206,18 @@ namespace MSDAD.Server.Communication
                                         thread.Abort();
                                     }
                                     
+
                                 }
                                 catch (System.Net.Sockets.SocketException se)
                                 {
-                                    Console.WriteLine("entrei excecao create: " + this.replicas_state[n_replicas]);
                                     this.replicas_state[server_iter] = false;
                                     this.crashed_servers++;
-                                    Console.WriteLine("sai excecao create: " + this.replicas_state[n_replicas]);
                                 }
                             }
 
                             server_iter++;
                         }
 
-                        // TODO:  Por timer
                         int timer_counter = 0;
                         while (timer_counter<40)
                         {
@@ -251,8 +249,7 @@ namespace MSDAD.Server.Communication
 
                         if(timer_counter == 40)
                         {
-                            //Executa o create outra vez
-                            Console.WriteLine("Kabum");
+                            Console.WriteLine("Could not receive quorum: Abort");
                         }
                     }                    
                 }                
@@ -400,18 +397,26 @@ namespace MSDAD.Server.Communication
 
                             server_iter++;
                         }
-                        
-                        // TODO:  Por timer
-                        while (true)
+
+                        int timer_counter = 0;
+                        while (timer_counter<40)
                         {
+                            Thread.Sleep(250);
                             float current_messages = (float)this.receiving_join[join_tuple].Count;
 
                             if (current_messages > (float)(this.n_replicas-this.crashed_servers)/ 2)
                             {
+                                Console.WriteLine("join: " + meeting_topic);
                                 this.server_library.Join(meeting_topic, slots, client_identifier);
                                 this.added_join.Add(join_tuple);
                                 break;
                             }
+                            timer_counter++;
+                        }
+
+                        if(timer_counter == 40)
+                        {
+                            Console.WriteLine("Could not receive quorum: Abort");
                         }
                     }                    
                 }                
@@ -506,17 +511,26 @@ namespace MSDAD.Server.Communication
                             server_iter++;
                         }
 
-                        // TODO:  Por timer
-                        while (true)
+                        int timer_counter = 0;
+                        while (timer_counter < 40)
                         {
+                            Thread.Sleep(250);
                             float current_messages = (float)this.receiving_close[meeting_topic].Count;
 
                             if (current_messages > (float)(this.n_replicas-this.crashed_servers)/ 2)
                             {
                                 this.server_library.Close(meeting_topic, client_identifier);
                                 this.added_close.Add(meeting_topic);
+                                Console.WriteLine("close: " + meeting_topic);
                                 break;
                             }
+
+                            timer_counter++;
+                        }
+
+                        if(timer_counter == 40)
+                        {
+                            Console.WriteLine("Could not receive quorum: Abort");
                         }
                     }                    
                 }                
@@ -645,7 +659,6 @@ namespace MSDAD.Server.Communication
             {
                 if (this.n_replicas < n_replicas)
                 {
-                    Console.WriteLine("previous: " + this.n_replicas + ", next: " + n_replicas);
                     this.n_replicas = n_replicas;
                 }
             }
