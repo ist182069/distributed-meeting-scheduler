@@ -56,7 +56,7 @@ namespace MSDAD.Server.Communication
 
         private static ConcurrentDictionary<string, object> dictionary_locks = new ConcurrentDictionary<string, object>();
         
-        public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier);
+        public delegate void CreateAsyncDelegate(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string server_identifier, int hops, List<string> logs_list, int sent_version);
         public delegate void JoinAsyncDelegate(string meeting_topic, List<string> slots, string client_identifier, string server_identifier, int hops, List<string> logs_list, int sent_version);
         public delegate void CloseAsyncDelegate(string meeting_topic, string client_identifier, string server_identifier, int hops, List<string> logs_list, int sent_version);
 
@@ -120,7 +120,7 @@ namespace MSDAD.Server.Communication
             n_replicas = (tolerated_faults * 2) + 1;          
         }
 
-        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier, int hops, List<string> logs_list, int sent_version)
         {
             object create;
 
@@ -156,65 +156,48 @@ namespace MSDAD.Server.Communication
 
                 lock (create)
                 {
-                    if (!pending_create.Contains(meeting_topic))
+                    int written_version;
+                    Console.WriteLine("entrou create lock");
+                    if (hops == 0)
                     {
-                        pending_create.Add(meeting_topic);
+                        Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
+                        bool atomic_read_result = atomic_read_tuple.Item1;
+                        List<string> highest_value_list;
 
-                        int server_iter = 1;
-
-                        foreach (string replica_url in this.server_addresses.Values)
+                        if (atomic_read_tuple.Item2 != null)
                         {
-                            if (server_iter > n_replicas)
-                            {
-                                break;
-                            }
-
-                            if (!replica_url.Equals(this.server_url))
-                            {
-                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
-                                try
-                                {
-                                    CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
-                                    AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CreateAsyncCallBack);
-                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, RemoteCallback, null);
-                                }
-                                catch (System.Net.Sockets.SocketException se)
-                                {
-                                    Console.WriteLine(se.Message);
-                                }
-                            }
-
-                            server_iter++;
+                            highest_value_list = atomic_read_tuple.Item2;
+                        }
+                        else
+                        {
+                            highest_value_list = new List<string>();
                         }
 
-                        // TODO:  Por timer
-                        while (true)
+                        if (atomic_read_result)
                         {
-                            float current_messages = (float)this.receiving_create[meeting_topic].Count;
-
-                            if (current_messages > (float)n_replicas / 2)
+                            Console.WriteLine("entrou if");
+                            written_version = this.server_library.WriteMeeting(meeting_topic, highest_value_list);
+                            hops++;
+                            written_version++;
+                            Console.WriteLine("");
+                            Console.WriteLine(written_version);
+                            Console.WriteLine("");
+                            if(written_version<0)
                             {
-                                this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
-                                this.added_create.Add(meeting_topic);                                
-                                this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier);
-                                if (invitees == null)
-                                {
-                                    foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
-                                    {
-                                        if (address_iter.Key != client_identifier)
-                                        {
-                                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
-                                            client.SendMeeting(meeting_topic, 1, "OPEN", null);
-                                        }
-                                    }
-                                }
-
-                                Console.WriteLine("\r\nNew event: " + meeting_topic);
-                                Console.Write("Please run a command to be run on the server: ");
-                                break;
+                                written_version = 1;
                             }
+                            this.CreateBroadcast(meeting_topic, min_attendees, slots, invitees, client_identifier, hops, highest_value_list, written_version);
+                            Console.WriteLine("entrou executou");
                         }
-                    }                    
+                    }
+                    else
+                    {
+
+                        Console.WriteLine("entrou no else");
+                        this.AtomicWrite(meeting_topic, logs_list);
+                        this.CreateBroadcast(meeting_topic, min_attendees, slots, invitees, client_identifier, hops, logs_list, sent_version);
+                        Console.WriteLine("entrou executou");
+                    }
                 }                
             }            
         }
@@ -332,6 +315,9 @@ namespace MSDAD.Server.Communication
                             written_version = this.server_library.WriteMeeting(meeting_topic, highest_value_list);                            
                             hops++;
                             written_version++;
+                            Console.WriteLine("");
+                            Console.WriteLine(written_version);
+                            Console.WriteLine("");
                             this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, highest_value_list, written_version);
                             Console.WriteLine("entrou executou");
                         }
@@ -407,8 +393,21 @@ namespace MSDAD.Server.Communication
                             written_version = this.server_library.WriteMeeting(meeting_topic, highest_value_list);
                             hops++;
                             written_version++;
+                            Console.WriteLine("");
+                            Console.WriteLine(written_version);
+                            Console.WriteLine("");
                             this.CloseBroadcast(meeting_topic, client_identifier, hops, highest_value_list, written_version);
                             Console.WriteLine("close executou");
+                            
+                            List<string> dred = logs_dictionary[meeting_topic];
+
+                            Console.WriteLine("dred");
+                            foreach (string d in dred)
+                            {
+                                Console.WriteLine(d);
+                            }
+                            Console.WriteLine("close executou");
+
                         }
                     }
                     else
@@ -668,6 +667,72 @@ namespace MSDAD.Server.Communication
             return highest_version_tuple;
         }
 
+        private void CreateBroadcast(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, int hops, List<string> logs_list, int sent_version)
+        {
+            Console.WriteLine("estado:" + this.server_library.GetVersion(meeting_topic) + " " + sent_version);
+            if (!pending_create.Contains(meeting_topic) && this.server_library.GetVersion(meeting_topic) < sent_version)
+            {
+                Console.WriteLine("if");
+                Console.WriteLine();
+                pending_create.Add(meeting_topic);
+
+                int server_iter = 1;
+
+                foreach (string replica_url in this.server_addresses.Values)
+                {
+                    if (server_iter > n_replicas)
+                    {
+                        break;
+                    }
+
+                    if (!replica_url.Equals(this.server_url))
+                    {
+                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                        try
+                        {
+                            CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
+                            AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CreateAsyncCallBack);
+                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+                        }
+                        catch (System.Net.Sockets.SocketException se)
+                        {
+                            Console.WriteLine(se.Message);
+                        }
+                    }
+
+                    server_iter++;
+                }
+
+                // TODO:  Por timer
+                while (true)
+                {
+                    float current_messages = (float)this.receiving_create[meeting_topic].Count;
+
+                    if (current_messages > (float)n_replicas / 2)
+                    {
+                        this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                        this.added_create.Add(meeting_topic);
+                        this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                        if (invitees == null)
+                        {
+                            foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
+                            {
+                                if (address_iter.Key != client_identifier)
+                                {
+                                    ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
+                                    client.SendMeeting(meeting_topic, 1, "OPEN", null);
+                                }
+                            }
+                        }
+
+                        Console.WriteLine("\r\nNew event: " + meeting_topic);
+                        Console.Write("Please run a command to be run on the server: ");
+                        break;
+                    }
+                }
+            }
+            this.pending_create.Remove(meeting_topic);
+        }
         private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple, List<string> logs_list, int sent_version)
         {
             Console.WriteLine("join broadcast");    
@@ -723,9 +788,10 @@ namespace MSDAD.Server.Communication
 
         private void CloseBroadcast(string meeting_topic, string client_identifier, int hops, List<string> logs_list, int sent_version)
         {
-            Console.WriteLine("close broadcast");
-            if (!this.pending_close.Contains(meeting_topic))
+            Console.WriteLine("close broadcast: " + this.server_library.GetVersion(meeting_topic) + " : " + sent_version);
+            if (!this.pending_close.Contains(meeting_topic) && this.server_library.GetVersion(meeting_topic) < sent_version)
             {
+                Console.WriteLine("if");
                 this.pending_close.Add(meeting_topic);
 
                 int server_iter = 1;
@@ -762,7 +828,7 @@ namespace MSDAD.Server.Communication
 
                     if (current_messages > (float)n_replicas / 2)
                     {
-                        this.server_library.Close(meeting_topic, client_identifier, this.server_library.GetVersion(meeting_topic));
+                        this.server_library.Close(meeting_topic, client_identifier, sent_version);
                         this.added_close.Add(meeting_topic);
                         this.CloseLog(meeting_topic, client_identifier);
                         break;
@@ -796,6 +862,8 @@ namespace MSDAD.Server.Communication
         {
             int write_version = server_library.GetVersion(meeting_topic);
             string json_log = new LogsParser().Close_ParseJSON(meeting_topic, write_version, client_identifier);
+            Console.WriteLine("dred");
+            Console.WriteLine(json_log);
             List<string> logs_list = logs_dictionary[meeting_topic];
             logs_list.Add(json_log);
             this.logs_dictionary[meeting_topic] = logs_list;

@@ -15,10 +15,10 @@ namespace MSDAD.Server.Communication
             this.server_communication = server_communication;
         }
 
-        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier)
+        public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier, int hops, List<string> logs_list, int version)
         {
             Thread.Sleep(this.server_communication.Delay());
-            this.server_communication.Create(meeting_topic, min_attendees, slots, invitees, client_identifier, create_replica_identifier);
+            this.server_communication.Create(meeting_topic, min_attendees, slots, invitees, client_identifier, create_replica_identifier, hops, logs_list, version);
         }
 
         public void List(Dictionary<string, string> meeting_query, string client_identifier)
