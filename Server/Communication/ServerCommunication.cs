@@ -23,8 +23,10 @@ namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
-        int server_port, tolerated_faults, min_delay, max_delay, n_replicas;
-        string server_ip, server_url, server_identifier, server_remoting;        
+        int server_port, tolerated_faults, min_delay, max_delay, crashed_servers = 0, n_replicas;   
+        string server_ip, server_url, server_identifier, server_remoting;
+        List<Boolean> replicas_state = new List<Boolean>();
+        object n_replicas_lock = new object();
 
         ServerLibrary server_library;
         RemoteServer remote_server;
@@ -117,7 +119,37 @@ namespace MSDAD.Server.Communication
             ServerURLInit();
 
             this.server_url = ServerUtils.AssembleRemotingURL(this.server_ip, this.server_port, this.server_remoting);
-            n_replicas = (tolerated_faults * 2) + 1;          
+
+            n_replicas = this.server_port - 3000;
+
+            for (int i = 0; i < 101; i++)
+            {
+                this.replicas_state.Add(true);
+            }
+
+            int server_iter = 1;
+
+            foreach (string replica_url in this.server_addresses.Values)
+            {
+                if (server_iter > n_replicas)
+                {
+                    break;
+                }
+
+                try
+                {
+                    ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                    remote_server.NReplicasUpdate(n_replicas);
+                }
+                catch (System.Net.Sockets.SocketException se)
+                {
+                    Console.WriteLine("Deteta Crash no Start\n");
+                    replicas_state[ServerUtils.GetPortFromUrl(replica_url) - 3000] = false;
+                    this.crashed_servers++;
+                }
+
+                server_iter++;
+            }
         }
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier, int hops, List<string> logs_list, int sent_version)
@@ -543,30 +575,49 @@ namespace MSDAD.Server.Communication
         public void GetMeeting(string meeting_topic, string replica_identifier)
         {
             int version;
-            string replica_url;            
+            string replica_url;
             List<string> list = new List<string>();
+            TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
             version = this.server_library.GetVersion(meeting_topic);
             replica_url = server_addresses[replica_identifier];
+            int replica_port = CommonUtils.GetPortFromUrl(replica_url);
 
             if(this.logs_dictionary.ContainsKey(meeting_topic))
             {
                 list = this.logs_dictionary[meeting_topic];
             }
             
-
             ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+            remote_server.IsAlive();
 
             try
             {
                 SendMeetingToServerAsyncDelegate RemoteDel = new SendMeetingToServerAsyncDelegate(remote_server.SendMeeting);
                 AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToServerAsyncCallBack);
-                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, version, list, this.server_identifier, RemoteCallback, null);
+
+                Thread thread = new Thread(() =>
+                {
+                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, version, list, this.server_identifier, RemoteCallback, null);
+                });
+
+                thread.Start();
+
+                bool finished = thread.Join(timeout);
+                if (!finished)
+                {
+                    this.replicas_state[replica_port-3000] = false;
+                    this.crashed_servers++;
+                    thread.Abort();
+                }
+
                 Console.WriteLine("Enviou GM: " + replica_url);
             }
             catch (System.Net.Sockets.SocketException se)
             {
                 Console.WriteLine(se.Message);
+                this.replicas_state[replica_port-3000] = false;
+                this.crashed_servers++;
             }
         }
 
@@ -599,6 +650,7 @@ namespace MSDAD.Server.Communication
             this.atomic_read_tuples.AddOrUpdate(meeting_topic, received_versions, (key, oldValue) => received_versions);
 
             int server_iter = 1;
+            TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
             Console.WriteLine("entrou atomic read");
             foreach (string replica_url in this.server_addresses.Values)
@@ -608,31 +660,59 @@ namespace MSDAD.Server.Communication
                     break;
                 }
 
-                if (!replica_url.Equals(this.server_url))
+                if (this.replicas_state[server_iter] == false)
                 {
-                    ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                    server_iter++;
+                    continue;
+                }
+
+                if (!replica_url.Equals(this.server_url))
+                {                    
                     try
                     {
+                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                        remote_server.IsAlive();
+
                         GetMeetingFromServerAsyncDelegate RemoteDel = new GetMeetingFromServerAsyncDelegate(remote_server.GetMeeting);
                         AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.GetMeetingFromServerAsyncCallBack);
-                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, this.server_identifier, RemoteCallback, null);
+
+                        Thread thread = new Thread(() =>
+                        {
+                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, this.server_identifier, RemoteCallback, null);
+                        });
+
+                        thread.Start();
+
+                        bool finished = thread.Join(timeout);
+                        if (!finished)
+                        {
+                            this.replicas_state[server_iter] = false;
+                            this.crashed_servers++;
+                            thread.Abort();
+                        }
+
+
                         Console.WriteLine("enviou para os gajos");
                     }
                     catch (System.Net.Sockets.SocketException se)
                     {
                         Console.WriteLine(se.Message);
+                        this.replicas_state[server_iter] = false;
+                        this.crashed_servers++;
                     }
                 }
 
                 server_iter++;
             }
 
-            while (true)
+            int timer_counter = 0;
+            while (timer_counter < 40)
             {
+                Thread.Sleep(250);
                 float current_messages = (float)this.atomic_read_received[meeting_topic].Count;
-                Thread.Sleep(3000);
+
                 Console.WriteLine(current_messages);
-                if (current_messages > (float)n_replicas / 2)
+                if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                 {
                     Tuple<int, List<string>> highest_version_tuple = this.ReadHighestVersion(meeting_topic);
                     highest_value_list = highest_version_tuple.Item2;                    
@@ -640,6 +720,13 @@ namespace MSDAD.Server.Communication
                     result = true;
                     break;
                 }
+                timer_counter++;
+            }
+
+            if(timer_counter==40)
+            {
+                // TODO: throw new ServerCoreException("Could not receive quorum: Abort");
+                Console.WriteLine("Could not receive quorum: Abort");
             }
 
             return new Tuple<bool, List<string>>(result, highest_value_list);
@@ -680,26 +767,49 @@ namespace MSDAD.Server.Communication
                 pending_create.Add(meeting_topic);
 
                 int server_iter = 1;
+                TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
                 foreach (string replica_url in this.server_addresses.Values)
                 {
-                    if (server_iter > n_replicas)
+                    if (server_iter > this.n_replicas)
                     {
                         break;
                     }
-
-                    if (!replica_url.Equals(this.server_url))
+                    if (this.replicas_state[server_iter] == false)
                     {
-                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                        server_iter++;
+                        continue;
+                    }
+                    if (!replica_url.Equals(this.server_url))
+                    {                        
                         try
                         {
+                            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                            remote_server.IsAlive();
+
                             CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
                             AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CreateAsyncCallBack);
-                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+                            Thread thread = new Thread(() =>
+                            {
+                                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+                            });
+
+                            thread.Start();
+
+                            bool finished = thread.Join(timeout);
+                            if (!finished)
+                            {
+                                this.replicas_state[server_iter] = false;
+                                this.crashed_servers++;
+                                thread.Abort();
+                            }
+
                         }
                         catch (System.Net.Sockets.SocketException se)
                         {
                             Console.WriteLine(se.Message);
+                            this.replicas_state[server_iter] = false;
+                            this.crashed_servers++;
                         }
                     }
 
@@ -707,11 +817,13 @@ namespace MSDAD.Server.Communication
                 }
 
                 // TODO:  Por timer
-                while (true)
+                int timer_counter = 0;
+                while (timer_counter < 40)
                 {
+                    Thread.Sleep(250);
                     float current_messages = (float)this.receiving_create[meeting_topic].Count;
 
-                    if (current_messages > (float)n_replicas / 2)
+                    if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                     {
                         this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
                         this.added_create.Add(meeting_topic);
@@ -732,8 +844,14 @@ namespace MSDAD.Server.Communication
                         Console.Write("Please run a command to be run on the server: ");
                         break;
                     }
+                    timer_counter++;
+                }
+                if (timer_counter == 40)
+                {
+                    Console.WriteLine("Could not receive quorum: Abort");
                 }
             }
+            // TODO: verificar se atomic read tambem tem de ter isto
             this.pending_create.Remove(meeting_topic);
         }
         private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple, List<string> logs_list, int sent_version)
@@ -745,26 +863,50 @@ namespace MSDAD.Server.Communication
                 this.pending_join.Add(join_tuple);
 
                 int server_iter = 1;
+                TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
                 foreach (string replica_url in this.server_addresses.Values)
                 {
-                    if (server_iter > n_replicas)
+                    if (server_iter > this.n_replicas)
                     {
                         break;
                     }
-
-                    if (!replica_url.Equals(this.server_url))
+                    if (this.replicas_state[server_iter] == false)
                     {
-                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                        server_iter++;
+                        continue;
+                    }
+                    if (!replica_url.Equals(this.server_url))
+                    {                        
                         try
                         {
+                            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                            remote_server.IsAlive();
+
                             JoinAsyncDelegate RemoteDel = new JoinAsyncDelegate(remote_server.Join);
                             AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.JoinAsyncCallBack);
-                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+                            //IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+
+                            Thread thread = new Thread(() =>
+                            {
+                                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+                            });
+
+                            thread.Start();
+
+                            bool finished = thread.Join(timeout);
+                            if (!finished)
+                            {
+                                this.replicas_state[server_iter] = false;
+                                this.crashed_servers++;
+                                thread.Abort();
+                            }
                         }
                         catch (System.Net.Sockets.SocketException se)
                         {
                             Console.WriteLine(se.Message);
+                            this.replicas_state[server_iter] = false;
+                            this.crashed_servers++;
                         }
                     }
 
@@ -772,17 +914,25 @@ namespace MSDAD.Server.Communication
                 }
 
                 // TODO:  Por timer
-                while (true)
+                int timer_counter = 0;
+                while (timer_counter < 40)
                 {
+                    Thread.Sleep(250);
                     float current_messages = (float)this.receiving_join[join_tuple].Count;
 
-                    if (current_messages > (float)n_replicas / 2)
-                    {
+                    if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
+                    {                        
                         this.server_library.Join(meeting_topic, slots, client_identifier, sent_version);
                         this.added_join.Add(join_tuple);
                         this.JoinLog(meeting_topic, slots, client_identifier);
+                        Console.WriteLine("join: " + meeting_topic);
                         break;
                     }
+                    timer_counter++;
+                }
+                if (timer_counter == 40)
+                {
+                    Console.WriteLine("Could not receive quorum: Abort");
                 }
             }
 
@@ -798,26 +948,52 @@ namespace MSDAD.Server.Communication
                 this.pending_close.Add(meeting_topic);
 
                 int server_iter = 1;
+                TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
                 foreach (string replica_url in this.server_addresses.Values)
                 {
-                    if (server_iter > n_replicas)
+                    if (server_iter > this.n_replicas)
                     {
                         break;
                     }
 
-                    if (!replica_url.Equals(this.server_url))
+                    if (this.replicas_state[server_iter] == false)
                     {
-                        ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                        server_iter++;
+                        continue;
+                    }
+
+                    if (!replica_url.Equals(this.server_url))
+                    {                        
                         try
                         {
+                            ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                            remote_server.IsAlive();
+
                             CloseAsyncDelegate RemoteDel = new CloseAsyncDelegate(remote_server.Close);
                             AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CloseAsyncCallBack);
-                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+
+                            Thread thread = new Thread(() =>
+                            {
+                                IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, client_identifier, this.server_identifier, hops, logs_list, sent_version, RemoteCallback, null);
+                            });
+
+                            thread.Start();
+
+                            bool finished = thread.Join(timeout);
+                            if (!finished)
+                            {
+                                this.replicas_state[server_iter] = false;
+                                this.crashed_servers++;
+                                thread.Abort();
+                            }
+
                         }
                         catch (System.Net.Sockets.SocketException se)
                         {
                             Console.WriteLine(se.Message);
+                            this.replicas_state[server_iter] = false;
+                            this.crashed_servers++;
                         }
                     }
 
@@ -825,17 +1001,25 @@ namespace MSDAD.Server.Communication
                 }
 
                 // TODO:  Por timer
-                while (true)
+                int timer_counter = 0;
+                while (timer_counter < 40)
                 {
+                    Thread.Sleep(250);
                     float current_messages = (float)this.receiving_close[meeting_topic].Count;
 
-                    if (current_messages > (float)n_replicas / 2)
+                    if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                     {
                         this.server_library.Close(meeting_topic, client_identifier, sent_version);
                         this.added_close.Add(meeting_topic);
                         this.CloseLog(meeting_topic, client_identifier);
+                        Console.WriteLine("close: " + meeting_topic);
                         break;
                     }
+                    timer_counter++;
+                }
+                if (timer_counter == 40)
+                {
+                    Console.WriteLine("Could not receive quorum: Abort");
                 }
             }
             this.pending_close.Remove(meeting_topic);
@@ -870,6 +1054,17 @@ namespace MSDAD.Server.Communication
             List<string> logs_list = logs_dictionary[meeting_topic];
             logs_list.Add(json_log);
             this.logs_dictionary[meeting_topic] = logs_list;
+        }
+
+        public void setNReplica(int n_replicas)
+        {
+            lock (n_replicas_lock)
+            {
+                if (this.n_replicas < n_replicas)
+                {
+                    this.n_replicas = n_replicas;
+                }
+            }
         }
 
     }

@@ -63,6 +63,16 @@ namespace MSDAD.Server.Communication
             server_communication.Status();
         }
 
+        public void NReplicasUpdate(int n_replicas)
+        {
+            server_communication.setNReplica(n_replicas);
+        }
+
+        public void IsAlive()
+        {
+            //returns exception if not alive.
+        }
+
         public void GetMeeting(string meeting_topic, string server_identifier)
         {
             Thread.Sleep(this.server_communication.Delay());
