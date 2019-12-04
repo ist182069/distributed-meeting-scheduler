@@ -86,7 +86,7 @@ namespace MSDAD.Client.Commands
             {
                 try
                 {
-                    this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier, null);
+                    this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier, null, 0, null, Int32.MinValue);
                 } catch(ServerCoreException sce)
                 {
                     Console.WriteLine(sce.Message);
@@ -118,7 +118,7 @@ namespace MSDAD.Client.Commands
 
                 try
                 {
-                    this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier, null);
+                    this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier, null, 0, null, Int32.MinValue);
                 } catch(ServerCoreException sce)
                 {
                     Console.WriteLine(sce.Message);

@@ -4,11 +4,7 @@
   <RoomViews>
     <RoomXML>
       <Name>room1</Name>
-      <Capacity>10</Capacity>
-    </RoomXML>
-    <RoomXML>
-      <Name>room2</Name>
-      <Capacity>20</Capacity>
+      <Capacity>2</Capacity>
     </RoomXML>
   </RoomViews>
 </LocationXML>

@@ -8,32 +8,43 @@ namespace MSDAD.Server
 {
     public class Location
     {
-        private String name;
+        private string name;
         private List<Room> rooms;
 
-        public Location(String name)
+        public Location(string name)
         {
             this.name = name;
             this.rooms = new List<Room>();
         }
 
-        public Location(String name, List<Room> rooms)
+        public Location(string name, List<Room> rooms)
         {
             this.name = name;
             this.rooms = rooms;
         }
 
-        public String Name
+        public string Name
         {
             get
             {
-                return name;
+                return this.name;
+            }
+            set
+            {
+                this.name = value;
             }
         }
 
-        public List<Room> GetList()
+        public List<Room> Rooms
         {
-            return this.rooms;
+            get
+            {
+                return this.rooms;
+            }            
+            set
+            {
+                this.rooms = value;
+            }
         }
 
         public void Add(Room room)

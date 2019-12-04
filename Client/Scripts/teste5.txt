@@ -1,0 +1,5 @@
+create myTopic2 2 1 2 Porto,2020-01-10 c1 c2
+wait 3000
+join myTopic2 1 Porto,2020-01-10 
+wait 3000
+close myTopic2

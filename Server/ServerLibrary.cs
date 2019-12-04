@@ -1,5 +1,6 @@
 ﻿using MSDAD.Library;
 using MSDAD.Server.Communication;
+using MSDAD.Server.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace MSDAD.Server
         string server_ip, server_identifier, server_remoting;
         ServerCommunication server_communication;
 
+        private readonly object event_list_lock = new object();
         private List<Meeting> event_list = new List<Meeting>();
         private List<Location> known_locations = new List<Location>();
 
@@ -40,21 +42,19 @@ namespace MSDAD.Server
             Meeting m;
             List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
 
-            lock (this)
-            {
-                m = new Meeting(meeting_topic, min_attendees, parsedSlots, invitees, client_identifier);
-                event_list.Add(m);
-            }
+            m = new Meeting(meeting_topic, min_attendees, parsedSlots, invitees, client_identifier);
+            event_list.Add(m);
         }
 
-        public void Join(string meeting_topic, List<string> slots, string client_identifier)
+        public void Join(string meeting_topic, List<string> slots, string client_identifier, int version)
         {
             Meeting meeting = null;
+
             try
             {
                 List<Tuple<Location, DateTime>> parsedSlots = ListOfParsedSlots(slots);
                 meeting = GetMeeting(meeting_topic);
-                meeting.Apply(parsedSlots, client_identifier);
+                meeting.Apply(parsedSlots, client_identifier, version);
             }
             catch (ServerCoreException sce)
             {
@@ -62,9 +62,9 @@ namespace MSDAD.Server
             }
         }
 
-        public void Close(String meeting_topic, string client_identifier)
+        public void Close(String meeting_topic, string client_identifier, int version)
         {
-            GetMeeting(meeting_topic).Schedule(client_identifier);
+            GetMeeting(meeting_topic).Schedule(client_identifier, version);
             Console.Write("Please run a command to be run on the server: ");
         }
 
@@ -89,14 +89,14 @@ namespace MSDAD.Server
                 Console.Write("Location: ");
                 Console.WriteLine(location.Name);
 
-                rooms = location.GetList();
+                rooms = location.Rooms;
 
                 foreach (Room room in rooms)
                 {
                     Console.WriteLine("  Room: " + room.Identifier);
                     Console.WriteLine("  Capacity: " + room.Capacity);
                     Console.WriteLine("  Dates Reserved: ");
-                    reserved_dates = room.GetReservedDates();
+                    reserved_dates = room.ReservedDates;
 
                     foreach (DateTime dateTime in reserved_dates)
                     {
@@ -121,7 +121,7 @@ namespace MSDAD.Server
                 Console.WriteLine("State: " + meeting.State);
                 Console.WriteLine("Version: " + meeting.Version);
                 Console.WriteLine("Coordinator: " + meeting.Coordinator);
-                invitees = meeting.GetInvitees();
+                invitees = meeting.Invitees;
 
                 if (invitees != null)
                 {
@@ -133,7 +133,7 @@ namespace MSDAD.Server
                     }
                 }
 
-                slots_clients_dictionary = meeting.GetSlotsClientsMapping();
+                slots_clients_dictionary = meeting. GetSlotsClientsMapping();
 
                 if (slots_clients_dictionary != null)
                 {
@@ -141,7 +141,16 @@ namespace MSDAD.Server
 
                     foreach (KeyValuePair<Tuple<Location, DateTime>, List<string>> keyValuePair in slots_clients_dictionary)
                     {
-                        Console.WriteLine("    Location: " + keyValuePair.Key.Item1.ToString());
+                        Console.WriteLine("    Location: " + keyValuePair.Key.Item1.Name);
+                        foreach (Room room in keyValuePair.Key.Item1.Rooms)
+                        {
+                            Console.WriteLine("      Room: " + room.Identifier);
+                            Console.WriteLine("      Capacity: " + room.Capacity);
+                            foreach(DateTime dateTime in room.ReservedDates)
+                            {
+                                Console.WriteLine("        Date: " + dateTime.ToString());
+                            }
+                        }
                         Console.WriteLine("    Date: " + keyValuePair.Key.Item2.ToString());
                         Console.WriteLine("    Clients: ");
                         
@@ -153,7 +162,7 @@ namespace MSDAD.Server
 
                 }
 
-                going_clients = meeting.GetGoingClients();
+                going_clients = meeting.GoingClients;
 
                 if (going_clients != null)
                 {
@@ -167,21 +176,6 @@ namespace MSDAD.Server
 
                 Console.WriteLine("Final Slot: " + meeting.FinalSlot);
             }
-            /*
-            foreach (string meeting_topic in pending_create)
-            {
-                Console.WriteLine("Pending topic: " + meeting_topic);
-            }
-
-            foreach (KeyValuePair<string, List<string>> keyValuePair in this.receiving_create)
-            {
-                Console.WriteLine("Meeting topic: " + keyValuePair.Key);
-
-                foreach (string replica_url in keyValuePair.Value)
-                {
-                    Console.WriteLine("Replica URL: " + replica_url);
-                }
-            }*/
         }
 
         public string ServerIdentifier
@@ -240,10 +234,14 @@ namespace MSDAD.Server
 
         public void AddMeeting(Meeting meeting)
         {
-            this.event_list.Add(meeting);
+            lock(event_list_lock)
+            {
+                this.event_list.Add(meeting);
+            }
+                
         }
 
-        private Meeting GetMeeting(string meeting_topic)
+        public Meeting GetMeeting(string meeting_topic)
         {
             foreach (Meeting m in this.event_list)
             {
@@ -252,7 +250,7 @@ namespace MSDAD.Server
                     return m;
                 }
             }
-            throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);
+            throw new ServerCoreException(ErrorCodes.NONEXISTENT_MEETING);         
         }
 
         public void AddLocation(Location location)
@@ -271,7 +269,7 @@ namespace MSDAD.Server
 
             if(existingLocation!=null)
             {
-                rooms = location.GetList();
+                rooms = location.Rooms;
 
                 foreach(Room room in rooms)
                 {
@@ -329,5 +327,92 @@ namespace MSDAD.Server
             }
             return parsed_slots;
         }
+
+        // problematico
+        public int GetVersion(string meeting_topic)
+        {   
+            Meeting read_meeting;
+
+            int version;
+
+            try
+            {
+                read_meeting = this.GetMeeting(meeting_topic);
+                version = read_meeting.Version;
+
+            }
+            catch (ServerCoreException sce)
+            {
+                // Se nao existe trata a excepcao pondo estes campos genericos
+                version = 0;
+            }                
+
+            return version;
+        }
+
+        public int WriteMeeting(string meeting_topic, List<string> logs_list)
+        {
+            int min_attendees, version = -69, meeting_counter = 0;
+            string client_identifier, operation;
+            LogsParser logsParser = new LogsParser();
+            List<string> slots, invitees;
+            Tuple<string, int, string, int, List<string>, List<string>, string> result_tuple;
+
+            // teste
+            /*lock(event_list_lock)
+            {
+                foreach (Meeting m_iter in this.event_list)
+                {
+                    if (meeting_topic.Equals(m_iter.Topic))
+                    {
+                        meeting_topic.Remove(meeting_counter);
+                    }
+
+                    meeting_counter++;
+                }
+            } */           
+            
+            foreach (string json_entry in logs_list)
+            {
+                result_tuple = logsParser.ParseEntry(json_entry);
+                operation = result_tuple.Item1;
+
+                switch (operation)
+                {
+
+                    // ou entao aquio gajo mudar tudo desde inicio
+                    case "Create":
+                        version = result_tuple.Item2;
+                        if (this.GetVersion(meeting_topic) < version)
+                        {
+                            min_attendees = result_tuple.Item4;
+                            slots = result_tuple.Item5;
+                            invitees = result_tuple.Item6;
+                            client_identifier = result_tuple.Item7;
+                            this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                        }                            
+                        break;
+                    case "Join":
+                        version = result_tuple.Item2;
+                        if (this.GetVersion(meeting_topic) < version)
+                        {
+                            slots = result_tuple.Item5;
+                            client_identifier = result_tuple.Item7;
+                            this.Join(meeting_topic, slots, client_identifier, version);
+                        }                            
+                        break;
+                    case "Close":
+                        version = result_tuple.Item2;
+                        if (this.GetVersion(meeting_topic) < version)
+                        {
+                            client_identifier = result_tuple.Item7;
+                            this.Close(meeting_topic, client_identifier, version);
+                        }                            
+                        break;
+                }
+            }
+
+            return version;
+        }       
     }
 }
