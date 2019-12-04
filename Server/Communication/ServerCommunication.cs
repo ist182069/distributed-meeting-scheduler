@@ -123,6 +123,9 @@ namespace MSDAD.Server.Communication
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier, int hops, List<string> logs_list, int sent_version)
         {
             object create;
+            Tuple<string, string> join_tuple;
+
+            join_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
 
             if (!dictionary_locks.ContainsKey(meeting_topic))
             {
@@ -132,9 +135,9 @@ namespace MSDAD.Server.Communication
             else
             {
                 create = dictionary_locks[meeting_topic];
-            }
-       
-            if (!added_create.Contains(meeting_topic))
+            }            
+
+            if (!added_create.Contains(meeting_topic) && !this.added_join.Contains(join_tuple) && !added_close.Contains(meeting_topic))
             {
 
                 if (!this.receiving_create.ContainsKey(meeting_topic))
@@ -270,7 +273,7 @@ namespace MSDAD.Server.Communication
                 join = dictionary_locks[meeting_topic];
             }
 
-            if (!this.added_join.Contains(join_tuple))
+            if (!this.added_join.Contains(join_tuple) && !this.added_close.Contains(meeting_topic))
             {
 
                 if (!this.receiving_join.ContainsKey(join_tuple))
