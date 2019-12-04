@@ -36,6 +36,7 @@ namespace MSDAD.PCS.Commands
                     if (pOpenThread == IntPtr.Zero)
                     {
                         continue;
+
                     }
 
                     var suspendCount = 0;

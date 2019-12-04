@@ -58,11 +58,21 @@ namespace MSDAD.Server.Communication
             Thread.Sleep(this.server_communication.Delay());
             server_communication.AddClientAddress(client_identifier, client_remoting, client_ip, client_port);
         }
-
+        
         public void Status()
         {
             Thread.Sleep(this.server_communication.Delay());
             server_communication.Status();
+        }
+
+        public void NReplicasUpdate(int n_replicas)
+        {
+            server_communication.setNReplica(n_replicas);
+        }
+
+        public void IsAlive()
+        {
+            //returns exception if not alive.
         }
     }
 }

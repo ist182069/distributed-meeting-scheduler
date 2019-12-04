@@ -18,3 +18,12 @@ C:\tmp\Projecto-DAD-2018-2019\Client\bin\Debug\Client.pdb
 C:\tmp\Projecto-DAD-2018-2019\Client\bin\Debug\Library.dll
 C:\tmp\Projecto-DAD-2018-2019\Client\bin\Debug\Library.pdb
 C:\tmp\Projecto-DAD-2018-2019\Client\obj\Debug\Client.csproj.CopyComplete
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\bin\Debug\Client.exe.config
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\bin\Debug\Client.exe
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\bin\Debug\Client.pdb
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\bin\Debug\Library.dll
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\bin\Debug\Library.pdb
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\obj\Debug\Client.csprojAssemblyReference.cache
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\obj\Debug\Client.csproj.CopyComplete
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\obj\Debug\Client.exe
+C:\Users\Pedro Agostinho\Desktop\DAD\Projeto\Replicada\Projecto-DAD-2018-2019\Client\obj\Debug\Client.pdb

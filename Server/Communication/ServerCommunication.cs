@@ -20,13 +20,14 @@ namespace MSDAD.Server.Communication
 {
     class ServerCommunication
     {
-        int server_port, tolerated_faults, min_delay, max_delay, n_replicas;
-        string server_ip, server_url, server_identifier, server_remoting;        
+        int server_port, tolerated_faults, min_delay, max_delay,crashed_servers = 0,n_replicas;
+        string server_ip, server_url, server_identifier, server_remoting;
+        List<Boolean> replicas_state = new List<Boolean>();
+        object n_replicas_lock = new object();
 
         ServerLibrary server_library;
         RemoteServer remote_server;
         TcpChannel channel;
-
 
         // recebe as mensagens para cada meeting_topic
         private ConcurrentDictionary<string, List<string>> receiving_create = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas
@@ -95,7 +96,35 @@ namespace MSDAD.Server.Communication
             ServerURLInit();
 
             this.server_url = ServerUtils.AssembleRemotingURL(this.server_ip, this.server_port, this.server_remoting);
-            n_replicas = (tolerated_faults * 2) + 1;          
+            n_replicas = this.server_port - 3000;
+            for (int i = 0; i < 101; i++)
+            {
+                this.replicas_state.Add(true);
+            }
+
+            int server_iter = 1;
+
+            foreach (string replica_url in this.server_addresses.Values)
+            {
+                if (server_iter > n_replicas)
+                {
+                    break;
+                }
+
+                try
+                {
+                    ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                    remote_server.NReplicasUpdate(n_replicas);
+                }
+                catch (System.Net.Sockets.SocketException se)
+                {
+                    Console.WriteLine("Deteta Crash no Start\n");
+                    replicas_state[ServerUtils.GetPortFromUrl(replica_url) - 3000] = false;
+                    this.crashed_servers++;
+                }
+
+                server_iter++;
+            }
         }
 
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier)
@@ -139,26 +168,51 @@ namespace MSDAD.Server.Communication
                         pending_create.Add(meeting_topic);
 
                         int server_iter = 1;
+                        TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
                         foreach (string replica_url in this.server_addresses.Values)
                         {
-                            if (server_iter > n_replicas)
+                            if (server_iter > this.n_replicas)
                             {
                                 break;
                             }
 
-                            if (!replica_url.Equals(this.server_url))
+                            if (this.replicas_state[server_iter] == false)
                             {
-                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                                server_iter++;
+                                continue;
+                            }
+
+                            if (!replica_url.Equals(this.server_url))
+                            {                               
                                 try
                                 {
+                                    ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                                    remote_server.IsAlive();
+
                                     CreateAsyncDelegate RemoteDel = new CreateAsyncDelegate(remote_server.Create);
                                     AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CreateAsyncCallBack);
-                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, RemoteCallback, null);
+                                    Thread thread = new Thread(() =>
+                                    {
+                                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, min_attendees, slots, invitees, client_identifier, this.server_identifier, RemoteCallback, null);
+                                    });
+
+                                    thread.Start();
+
+                                    bool finished = thread.Join(timeout);
+                                    if (!finished) {
+                                        this.replicas_state[server_iter] = false;
+                                        this.crashed_servers++;
+                                        thread.Abort();
+                                    }
+                                    
                                 }
                                 catch (System.Net.Sockets.SocketException se)
                                 {
-                                    Console.WriteLine(se.Message);
+                                    Console.WriteLine("entrei excecao create: " + this.replicas_state[n_replicas]);
+                                    this.replicas_state[server_iter] = false;
+                                    this.crashed_servers++;
+                                    Console.WriteLine("sai excecao create: " + this.replicas_state[n_replicas]);
                                 }
                             }
 
@@ -166,11 +220,13 @@ namespace MSDAD.Server.Communication
                         }
 
                         // TODO:  Por timer
-                        while (true)
+                        int timer_counter = 0;
+                        while (timer_counter<40)
                         {
+                            Thread.Sleep(250);
                             float current_messages = (float)this.receiving_create[meeting_topic].Count;
 
-                            if (current_messages > (float)n_replicas / 2)
+                            if (current_messages > (float)(this.n_replicas-this.crashed_servers) / 2)
                             {
                                 this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
                                 this.added_create.Add(meeting_topic);
@@ -190,6 +246,13 @@ namespace MSDAD.Server.Communication
                                 Console.Write("Please run a command to be run on the server: ");
                                 break;
                             }
+                            timer_counter++;
+                        }
+
+                        if(timer_counter == 40)
+                        {
+                            //Executa o create outra vez
+                            Console.WriteLine("Kabum");
                         }
                     }                    
                 }                
@@ -291,38 +354,59 @@ namespace MSDAD.Server.Communication
                         this.pending_join.Add(join_tuple);
 
                         int server_iter = 1;
+                        TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
                         foreach (string replica_url in this.server_addresses.Values)
                         {
-                            if (server_iter > n_replicas)
+                            if (server_iter > this.n_replicas)
                             {
                                 break;
                             }
 
+                            if (this.replicas_state[server_iter] == false)
+                            {
+                                server_iter++;
+                                continue;
+                            }
+
                             if (!replica_url.Equals(this.server_url))
                             {
-                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
                                 try
                                 {
+                                    ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                                    remote_server.IsAlive();
                                     JoinAsyncDelegate RemoteDel = new JoinAsyncDelegate(remote_server.Join);
                                     AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.JoinAsyncCallBack);
-                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, RemoteCallback, null);
+                                    Thread thread = new Thread(() =>
+                                    {
+                                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, slots, client_identifier, this.server_identifier, RemoteCallback, null);
+                                    });
+
+                                    thread.Start();
+
+                                    bool finished = thread.Join(timeout);
+                                    if (!finished) {
+                                        this.replicas_state[server_iter] = false;
+                                        this.crashed_servers++;
+                                        thread.Abort();
+                                    }
                                 }
                                 catch (System.Net.Sockets.SocketException se)
                                 {
-                                    Console.WriteLine(se.Message);
+                                    this.replicas_state[server_iter] = false;
+                                    this.crashed_servers++;
                                 }
                             }
 
                             server_iter++;
                         }
-
+                        
                         // TODO:  Por timer
                         while (true)
                         {
                             float current_messages = (float)this.receiving_join[join_tuple].Count;
 
-                            if (current_messages > (float)n_replicas / 2)
+                            if (current_messages > (float)(this.n_replicas-this.crashed_servers)/ 2)
                             {
                                 this.server_library.Join(meeting_topic, slots, client_identifier);
                                 this.added_join.Add(join_tuple);
@@ -374,26 +458,48 @@ namespace MSDAD.Server.Communication
                         this.pending_close.Add(meeting_topic);
 
                         int server_iter = 1;
+                        TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
                         foreach (string replica_url in this.server_addresses.Values)
                         {
-                            if (server_iter > n_replicas)
+                            if (server_iter > this.n_replicas)
                             {
                                 break;
                             }
 
+                            if(this.replicas_state[server_iter] == false)
+                            {
+                                server_iter++;
+                                continue;
+                            }
+
                             if (!replica_url.Equals(this.server_url))
                             {
-                                ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
                                 try
                                 {
+                                    ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
+                                    remote_server.IsAlive();
                                     CloseAsyncDelegate RemoteDel = new CloseAsyncDelegate(remote_server.Close);
                                     AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.CloseAsyncCallBack);
-                                    IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, client_identifier, this.server_identifier, RemoteCallback, null);
+                                    Thread thread = new Thread(() =>
+                                    {
+                                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, client_identifier, this.server_identifier, RemoteCallback, null);
+                                    });
+
+                                    thread.Start();
+
+                                    bool finished = thread.Join(timeout);
+                                    if (!finished)
+                                    {
+                                        this.replicas_state[server_iter] = false;
+                                        this.crashed_servers++;
+                                        thread.Abort();
+                                    }
                                 }
                                 catch (System.Net.Sockets.SocketException se)
                                 {
-                                    Console.WriteLine(se.Message);
+                                    this.replicas_state[server_iter] = false;
+                                    this.crashed_servers++;
                                 }
                             }
 
@@ -405,7 +511,7 @@ namespace MSDAD.Server.Communication
                         {
                             float current_messages = (float)this.receiving_close[meeting_topic].Count;
 
-                            if (current_messages > (float)n_replicas / 2)
+                            if (current_messages > (float)(this.n_replicas-this.crashed_servers)/ 2)
                             {
                                 this.server_library.Close(meeting_topic, client_identifier);
                                 this.added_close.Add(meeting_topic);
@@ -532,6 +638,20 @@ namespace MSDAD.Server.Communication
 
             return delay;
         }       
+
+        public void setNReplica(int n_replicas)
+        {
+            lock (n_replicas_lock)
+            {
+                if (this.n_replicas < n_replicas)
+                {
+                    Console.WriteLine("previous: " + this.n_replicas + ", next: " + n_replicas);
+                    this.n_replicas = n_replicas;
+                }
+            }
+            
+        }
+
     }
 }
 

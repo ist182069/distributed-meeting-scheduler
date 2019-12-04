@@ -26,7 +26,8 @@ namespace MSDAD
             void Join(string meeting_topic, List<string> slots, string client_identifier, string server_identifier);
             void Close(string meeting_topic, string client_identifier, string server_identifier);
             void Wait(int milliseconds);
-
+            void NReplicasUpdate(int n_replicas);
+            void IsAlive();
             void Status();
         }
 
