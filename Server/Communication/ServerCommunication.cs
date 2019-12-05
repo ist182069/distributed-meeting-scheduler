@@ -65,6 +65,9 @@ namespace MSDAD.Server.Communication
         public delegate void GetMeetingFromServerAsyncDelegate(string meeting_topic, string server_identifier);
         public delegate void SendMeetingToServerAsyncDelegate(string meeting_topic, int version, List<string> logs_list, string server_identifier);
 
+        public delegate void SendMeetingToClientAsyncDelegate(string meeting_topic, int meeting_version, string meeting_state, string extraInfo);
+        public delegate void SendMeetingToClientGossipAsyncDelegate(string meeting_topic, int meeting_version, string meeting_state, string extraInfo, List<string> client_list);
+
         public static void CreateAsyncCallBack(IAsyncResult ar)
         {
             CreateAsyncDelegate del = (CreateAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
@@ -92,6 +95,18 @@ namespace MSDAD.Server.Communication
         public static void SendMeetingToServerAsyncCallBack(IAsyncResult ar)
         {
             SendMeetingToServerAsyncDelegate del = (SendMeetingToServerAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
+
+        public static void SendMeetingToClientAsyncCallBack(IAsyncResult ar)
+        {
+            SendMeetingToClientAsyncDelegate del = (SendMeetingToClientAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
+
+        public static void SendMeetingToClientGossipAsyncCallBack(IAsyncResult ar)
+        {
+            SendMeetingToClientGossipAsyncDelegate del = (SendMeetingToClientGossipAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
             return;
         }
 
@@ -845,14 +860,8 @@ namespace MSDAD.Server.Communication
                         this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier);
                         if (invitees == null)
                         {
-                            foreach (KeyValuePair<string, string> address_iter in this.client_addresses)
-                            {
-                                if (address_iter.Key != client_identifier)
-                                {
-                                    ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + address_iter.Value);
-                                    client.SendMeeting(meeting_topic, 1, "OPEN", null);
-                                }
-                            }
+                            Console.WriteLine("enviou aos gajos");
+                            this.SendLogNMessages(meeting_topic);
                         }
 
                         Console.WriteLine("\r\nNew event: " + meeting_topic);
@@ -1080,6 +1089,76 @@ namespace MSDAD.Server.Communication
                     this.n_replicas = n_replicas;
                 }
             }
+        }
+
+        private void SendLogNMessages(string meeting_topic)
+        {            
+            int number_clients = this.client_addresses.Keys.Count;
+            
+            if(number_clients!=0)
+            {
+                double clients_double = Convert.ToDouble(number_clients);
+                double clients_log = Math.Log(clients_double);
+
+                Console.WriteLine("clients_double: " + clients_double);
+                Console.WriteLine("clients_log: " + clients_log);
+
+                // se for 0 e porque so havia um
+                if(clients_log != 0)
+                {
+                    double log_round = Math.Ceiling(clients_log);
+                    string[] random_clients = this.PickNRandomClients((int) log_round);
+
+                    for(int i = 0; i < random_clients.Length; i++)
+                    {
+                        Console.WriteLine("client:" + random_clients[i]);
+                        List<string> sent_clients = this.client_addresses.Values.ToList();
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + random_clients[i]);                        
+                        
+                        SendMeetingToClientGossipAsyncDelegate RemoteDel = new SendMeetingToClientGossipAsyncDelegate(client.SendMeetingGossip);
+                        AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToClientGossipAsyncCallBack);
+                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, 1, "OPEN", null, sent_clients, RemoteCallback, null);
+                    }                    
+                }                                    
+            }
+            
+        }
+
+        private string[] PickNRandomClients(int n_clients)
+        {
+            int insertion_counter = 0, random_int;
+            string random_address;
+            string[] selected_clients;
+            Random random;
+            KeyValuePair<string, string> client_pair;
+            
+            selected_clients = new string[n_clients];
+            random = new Random();
+
+            Console.WriteLine("pick and send");
+            Console.WriteLine("number of clients:" + n_clients);            
+            while (true)
+            {
+                
+                random_int = random.Next(0, (n_clients+1));
+                client_pair = this.client_addresses.ElementAt(random_int);
+                random_address = client_pair.Value;
+
+                if(!selected_clients.Contains(random_address))
+                {
+                    Console.WriteLine("Nao contem foda-se:" + random_address);
+                    selected_clients[insertion_counter] = random_address;
+                    insertion_counter++;
+                }
+                if(insertion_counter == n_clients)
+                {
+                    Console.WriteLine("PAROU!");
+                    break;
+                }
+                Console.WriteLine("chosen clients:" + random_address);
+            }
+
+            return selected_clients;
         }
 
     }

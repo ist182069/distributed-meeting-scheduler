@@ -14,6 +14,8 @@ namespace MSDAD
 
             void SendMeeting(string meeting_topic, int meeting_version, string meeting_state, string extraInfo);
 
+            void SendMeetingGossip(string meeting_topic, int meeting_version, string meeting_state, string extraInfo, List<string> client_list);
+
             void Status();
         }
 

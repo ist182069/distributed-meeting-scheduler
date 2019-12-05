@@ -10,6 +10,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Text;
 using System.Threading.Tasks;
 using MSDAD.Client.Exceptions;
+using System.Runtime.Remoting.Messaging;
 
 namespace MSDAD.Client.Comunication
 {        
@@ -21,6 +22,16 @@ namespace MSDAD.Client.Comunication
         ClientLibrary client_library;
         RemoteClient remote_client;
         TcpChannel channel;
+
+        List<Tuple<string, int>> gossip_tuples = new List<Tuple<string, int>>();
+
+        public delegate void SendMeetingToClientGossipAsyncDelegate(string meeting_topic, int meeting_version, string meeting_state, string extraInfo, List<string> client_list);
+
+        public static void SendMeetingToClientGossipAsyncCallBack(IAsyncResult ar)
+        {
+            SendMeetingToClientGossipAsyncDelegate del = (SendMeetingToClientGossipAsyncDelegate)((AsyncResult)ar).AsyncDelegate;
+            return;
+        }
 
         public ClientCommunication(ClientLibrary client_library)
         {
@@ -58,7 +69,25 @@ namespace MSDAD.Client.Comunication
             meetingView = new MeetingView(topic, version, state, extraInfo);
 
             this.client_library.AddMeetingView(meetingView);
-        }    
+        }
+
+        public void AddMeetingViewGossip(string topic, int version, string state, string extraInfo, List<string> client_list)
+        {
+            Tuple<string, int> gossip_tuple = new Tuple<string, int>(topic, version);
+
+            if(!this.gossip_tuples.Contains(gossip_tuple))
+            {
+                this.gossip_tuples.Add(gossip_tuple);
+
+                MeetingView meetingView;
+
+                meetingView = new MeetingView(topic, version, state, extraInfo);
+
+                this.client_library.AddMeetingView(meetingView);
+
+                this.SendLogNMessages(topic, client_list);
+            }            
+        }
 
         public void Status()
         {
@@ -85,6 +114,71 @@ namespace MSDAD.Client.Comunication
                 Console.WriteLine("Version: " + meetingView.MeetingVersion);
                 Console.WriteLine("Info: " + meetingView.MeetingInfo);
             }
+        }
+
+        public void SendLogNMessages(string meeting_topic, List<string> client_addresses)
+        {
+            Console.WriteLine("bora propagar!!!");
+            int number_clients = client_addresses.Count;
+
+            if (number_clients != 0)
+            {
+                double clients_double = Convert.ToDouble(number_clients);
+                double clients_log = Math.Log(clients_double);
+
+                // se for 0 e porque so havia um
+                if (clients_log != 0)
+                {
+                    double log_round = Math.Ceiling(clients_log);
+                    string[] random_clients = this.PickNRandomClients((int)log_round, client_addresses);
+
+                    for (int i = 0; i < random_clients.Length; i++)
+                    {
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + random_clients[i]);
+
+                        SendMeetingToClientGossipAsyncDelegate RemoteDel = new SendMeetingToClientGossipAsyncDelegate(client.SendMeetingGossip);
+                        AsyncCallback RemoteCallback = new AsyncCallback(ClientCommunication.SendMeetingToClientGossipAsyncCallBack);
+                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, 1, "OPEN", null, client_addresses, RemoteCallback, null);
+                    }
+                }
+
+            }
+            Console.WriteLine("propagou!!!");
+        }
+
+        private string[] PickNRandomClients(int n_clients, List<string> client_addresses)
+        {
+            int insertion_counter = 0, random_int;
+            string random_address, random_remoting_id;
+            string[] selected_clients;
+            Random random;
+
+            selected_clients = new string[(n_clients-1)];
+            random = new Random();
+
+            Console.WriteLine("pick and send");
+            Console.WriteLine("number of clients:" + n_clients);
+            while (true)
+            {
+
+                random_int = random.Next(0, (n_clients+1));
+                random_address = client_addresses[random_int];
+                random_remoting_id = CommonUtils.GetRemotingIdFromUrl("tcp://" + random_address);
+
+                Console.WriteLine("chosen address:" + random_address);
+                if (!selected_clients.Contains(random_address) && !this.client_remoting.Equals(random_remoting_id))
+                {
+                    Console.WriteLine("Adicionou");
+                    selected_clients[insertion_counter] = random_address;
+                    insertion_counter++;
+                }
+                if (insertion_counter == (n_clients-1))
+                {
+                    break;
+                }
+            }
+
+            return selected_clients;
         }
     }
 }
