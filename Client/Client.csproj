@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ServerChange.cs" />
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\Close.cs" />
     <Compile Include="Commands\Join.cs" />

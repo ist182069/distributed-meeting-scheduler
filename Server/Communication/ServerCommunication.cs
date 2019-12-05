@@ -108,20 +108,21 @@ namespace MSDAD.Server.Communication
         }
 
         public void Start()
-        {
+        {            
             channel = new TcpChannel(this.server_port);
             ChannelServices.RegisterChannel(channel, true);
 
-            this.remote_server = new RemoteServer(this);
+            this.remote_server = new RemoteServer(this);            
             RemotingServices.Marshal(this.remote_server, server_remoting, typeof(RemoteServer));
-
+            
+            // colocar uma init lock aqui
             LocationAndRoomInit();
             ServerURLInit();
 
             this.server_url = ServerUtils.AssembleRemotingURL(this.server_ip, this.server_port, this.server_remoting);
 
             n_replicas = this.server_port - 3000;
-
+            
             for (int i = 0; i < 101; i++)
             {
                 this.replicas_state.Add(true);
@@ -367,7 +368,8 @@ namespace MSDAD.Server.Communication
               
                 }                
             }
-        }       
+        }
+        
         public void Close(string meeting_topic, string client_identifier, string close_replica_identifier, int hops, List<string> logs_list, int sent_version)
         {
             object close;
@@ -480,12 +482,12 @@ namespace MSDAD.Server.Communication
             return this.client_addresses[client_identifier];
         }
 
-        public void AddClientAddress(string client_identifier, string client_remoting, string client_ip, int client_port)
+        public int AddClientAddress(string client_identifier, string client_remoting, string client_ip, int client_port)
         {
             string client_address;
 
             client_address = ServerUtils.AssembleAddress(client_ip, client_port);
-
+            
             if (ServerUtils.ValidateAddress(client_address))
             {
                 lock (this)
@@ -493,12 +495,17 @@ namespace MSDAD.Server.Communication
                     try
                     {
                         client_addresses.Add(client_identifier, client_address + "/" + client_remoting);
+                        return this.n_replicas;
                     }
                     catch (ArgumentException)
                     {
                         throw new ServerCoreException(ErrorCodes.USER_WITH_SAME_ID);
                     }
                 }
+            } 
+            else
+            {
+                throw new ServerCoreException("Error: Client address is not valid!");
             }
         }
 
@@ -715,6 +722,7 @@ namespace MSDAD.Server.Communication
                 if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                 {
                     Tuple<int, List<string>> highest_version_tuple = this.ReadHighestVersion(meeting_topic);
+                    // TODO rebenta aqui porque o gajo pode ser null : tens de adicionar o gajo a ele proprio
                     highest_value_list = highest_version_tuple.Item2;                    
                     Console.WriteLine("!!!Fez Atomic Read!!!");
                     result = true;

@@ -12,7 +12,7 @@ namespace MSDAD.Client.Commands
     abstract class Command
     {
         public int client_port;
-        public string client_ip, client_address, client_identifier, client_remoting, server_url;
+        public string client_ip, client_address, client_identifier, client_remoting, server_url, command;
         public ClientLibrary client_library;
         public ServerInterface remote_server;
 

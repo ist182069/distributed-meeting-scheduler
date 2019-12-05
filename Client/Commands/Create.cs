@@ -4,6 +4,7 @@ using MSDAD.Library;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -91,7 +92,22 @@ namespace MSDAD.Client.Commands
                 {
                     Console.WriteLine(sce.Message);
                 }
-                
+                catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
+                {
+                    this.remote_server = new ServerChange(ref base.client_library).Execute();
+
+                    if (this.remote_server!=null)
+                    {
+                        int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
+                        base.client_library.NReplicas = n_replicas;
+                        this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier, null, 0, null, Int32.MinValue);
+                    }
+                    else
+                    {
+                        throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
+                    }
+                }
+
                 meeting_view = new MeetingView(meeting_topic, 1, "OPEN", null);
                 this.client_library.AddMeetingView(meeting_view);
             }
@@ -122,6 +138,19 @@ namespace MSDAD.Client.Commands
                 } catch(ServerCoreException sce)
                 {
                     Console.WriteLine(sce.Message);
+                } catch(System.Net.Sockets.SocketException se)
+                {
+                    this.remote_server = new ServerChange(ref base.client_library).Execute();
+                    if (this.remote_server != null)
+                    {
+                        int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
+                        base.client_library.NReplicas = n_replicas;
+                        this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier, null, 0, null, Int32.MinValue);
+                    }
+                    else
+                    {
+                        throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
+                    }
                 }
                 
             }

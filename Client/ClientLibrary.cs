@@ -11,7 +11,7 @@ namespace MSDAD.Client
 {
     class ClientLibrary
     {
-        int client_port;
+        int client_port, n_replicas;
         string client_ip, client_identifier, client_remoting, server_url;
         ClientCommunication client_communication;
 
@@ -71,6 +71,10 @@ namespace MSDAD.Client
             {
                 return this.server_url;
             }
+            set
+            {
+                this.server_url = value;
+            }
             
         }
         public int ClientPort
@@ -117,5 +121,17 @@ namespace MSDAD.Client
                 this.meeting_views = meeting_views;
             }
         }      
+        
+        public int NReplicas
+        {
+            get
+            {
+                return this.n_replicas;
+            }
+            set
+            {
+                this.n_replicas = value;
+            }
+        }
     }
 }

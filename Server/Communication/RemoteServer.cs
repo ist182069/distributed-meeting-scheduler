@@ -51,10 +51,13 @@ namespace MSDAD.Server.Communication
             throw new NotImplementedException();
         }
 
-        public void Hello(string client_identifier, string client_remoting, string client_ip, int client_port)
+        public int Hello(string client_identifier, string client_remoting, string client_ip, int client_port)
         {
+            int n_replicas;
+
             Thread.Sleep(this.server_communication.Delay());
-            server_communication.AddClientAddress(client_identifier, client_remoting, client_ip, client_port);
+            n_replicas = server_communication.AddClientAddress(client_identifier, client_remoting, client_ip, client_port);
+            return n_replicas;
         }
 
         public void Status()

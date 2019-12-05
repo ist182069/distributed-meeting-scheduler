@@ -1,4 +1,5 @@
 ﻿using MSDAD.Client.Comunication;
+using MSDAD.Client.Exceptions;
 using MSDAD.Library;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,6 @@ namespace MSDAD.Client.Commands
     {
         public List(ref ClientLibrary client_library) : base(ref client_library)
         {
-
         }
         public override object Execute()
         {
@@ -35,6 +35,21 @@ namespace MSDAD.Client.Commands
             {
                 Console.WriteLine(sce.Message);
             }
+            catch (System.Net.Sockets.SocketException se)
+            {
+                this.remote_server = new ServerChange(ref base.client_library).Execute();
+                if (this.remote_server != null)
+                {
+                    int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
+                    base.client_library.NReplicas = n_replicas;
+                    this.remote_server.List(meeting_query, this.client_identifier);
+                }
+                else
+                {
+                    throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
+                }
+            }
+
             foreach (MeetingView mV in meeting_views)
             {
                 Console.WriteLine("Topic:"+mV.MeetingTopic + " State:" + mV.MeetingState + "\nVersion:" + mV.MeetingVersion);
