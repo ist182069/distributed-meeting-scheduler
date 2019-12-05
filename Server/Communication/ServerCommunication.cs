@@ -659,6 +659,7 @@ namespace MSDAD.Server.Communication
                 logs_list = this.logs_dictionary[meeting_topic];
             }
             Tuple<int, List<string>> atomic_tuple = new Tuple<int, List<string>>(version, logs_list);
+            received_versions.Add(atomic_tuple);
             this.atomic_read_received.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
             this.atomic_read_tuples.AddOrUpdate(meeting_topic, received_versions, (key, oldValue) => received_versions);
 
