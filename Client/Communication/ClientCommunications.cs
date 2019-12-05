@@ -124,7 +124,7 @@ namespace MSDAD.Client.Comunication
             if (number_clients != 0)
             {
                 double clients_double = Convert.ToDouble(number_clients);
-                double clients_log = Math.Log(clients_double);
+                double clients_log = Math.Log(clients_double, 2);
 
                 // se for 0 e porque so havia um
                 if (clients_log != 0)
@@ -148,12 +148,12 @@ namespace MSDAD.Client.Comunication
 
         private string[] PickNRandomClients(int n_clients, List<string> client_addresses)
         {
-            int insertion_counter = 0, random_int;
+            int insertion_counter = 0, random_int, break_condition;
             string random_address, random_remoting_id;
             string[] selected_clients;
             Random random;
-
-            selected_clients = new string[(n_clients-1)];
+            
+            selected_clients = new string[n_clients];
             random = new Random();
 
             Console.WriteLine("pick and send");
@@ -172,7 +172,7 @@ namespace MSDAD.Client.Comunication
                     selected_clients[insertion_counter] = random_address;
                     insertion_counter++;
                 }
-                if (insertion_counter == (n_clients-1))
+                if (insertion_counter == n_clients)
                 {
                     break;
                 }

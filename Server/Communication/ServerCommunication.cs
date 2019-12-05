@@ -1098,7 +1098,7 @@ namespace MSDAD.Server.Communication
             if(number_clients!=0)
             {
                 double clients_double = Convert.ToDouble(number_clients);
-                double clients_log = Math.Log(clients_double);
+                double clients_log = Math.Log(clients_double, 2);
 
                 Console.WriteLine("clients_double: " + clients_double);
                 Console.WriteLine("clients_log: " + clients_log);
@@ -1120,6 +1120,7 @@ namespace MSDAD.Server.Communication
                         IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, 1, "OPEN", null, sent_clients, RemoteCallback, null);
                     }                    
                 }                                    
+                // TODO: ele ja criou localmente
             }
             
         }
