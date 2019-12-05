@@ -54,8 +54,8 @@ namespace MSDAD.Client
             }
             catch (ServerCoreException sce)
             {
-                Console.WriteLine("Could not properly initialize the client! Aborting...");
-                Console.WriteLine(sce.StackTrace);
+                Console.WriteLine("\r\nCould not properly initialize the client! Aborting...");
+                Console.WriteLine(sce.Message);
             }
             this.script_name = client_arguments_split[3];
         }

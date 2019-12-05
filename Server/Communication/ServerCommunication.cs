@@ -650,9 +650,15 @@ namespace MSDAD.Server.Communication
 
             bool result = false;
             List<string> received_messages = new List<string>();
+            List<string> logs_list = new List<string>();
             received_messages.Add(this.server_identifier);            
             int version = this.server_library.GetVersion(meeting_topic);
-            List<Tuple<int, List<string>>> received_versions = new List<Tuple<int, List<string>>>();
+            List<Tuple<int, List<string>>> received_versions = new List<Tuple<int, List<string>>>();            
+            if (this.logs_dictionary.ContainsKey(meeting_topic))
+            {
+                logs_list = this.logs_dictionary[meeting_topic];
+            }
+            Tuple<int, List<string>> atomic_tuple = new Tuple<int, List<string>>(version, logs_list);
             this.atomic_read_received.AddOrUpdate(meeting_topic, received_messages, (key, oldValue) => received_messages);
             this.atomic_read_tuples.AddOrUpdate(meeting_topic, received_versions, (key, oldValue) => received_versions);
 

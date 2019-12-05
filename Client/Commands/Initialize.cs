@@ -27,10 +27,10 @@ namespace MSDAD.Client.Commands
                 client_library.ClientCommunication.Destroy();
                 throw e;
             }
-            catch (System.Net.Sockets.SocketException se)
+            catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
             {
                 // TODO: ele aqui corre o algoritmo de forma diferente
-                Console.WriteLine("Error! Server: \"" + base.client_library.ServerURL +"\" was not found...");
+                throw new ServerCoreException("Error! Server: \"" + base.client_library.ServerURL +"\" was not found...");
             }
             return null;
         }

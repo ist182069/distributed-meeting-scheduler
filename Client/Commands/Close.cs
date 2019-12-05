@@ -31,7 +31,7 @@ namespace MSDAD.Client.Commands
             {
                 Console.WriteLine(sce.Message);
             }
-            catch (System.Net.Sockets.SocketException se)
+            catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
             {
 
                 this.remote_server = new ServerChange(ref base.client_library).Execute();
