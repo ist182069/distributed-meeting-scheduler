@@ -227,19 +227,17 @@ namespace MSDAD.Server.Communication
 
                         if (atomic_read_result)
                         {
-                            Console.WriteLine("entrou if");
-                            written_version = this.server_library.WriteMeeting(meeting_topic, highest_value_list);
+                            Console.WriteLine("entrou if dos 0 hops");
+                            written_version = this.AtomicWrite(meeting_topic, highest_value_list);
                             hops++;
                             written_version++;
-                            Console.WriteLine("");
-                            Console.WriteLine(written_version);
-                            Console.WriteLine("");
+                            Console.WriteLine("written version: " + written_version);
                             if(written_version<0)
                             {
                                 written_version = 1;
                             }
                             this.CreateBroadcast(meeting_topic, min_attendees, slots, invitees, client_identifier, hops, highest_value_list, written_version);
-                            Console.WriteLine("entrou executou");
+                            Console.WriteLine("fez create broadcast");
                         }
                     }
                     else
@@ -248,7 +246,7 @@ namespace MSDAD.Server.Communication
                         Console.WriteLine("entrou no else");
                         this.AtomicWrite(meeting_topic, logs_list);
                         this.CreateBroadcast(meeting_topic, min_attendees, slots, invitees, client_identifier, hops, logs_list, sent_version);
-                        Console.WriteLine("entrou executou");
+                        Console.WriteLine("fez create broadcast");
                     }
                 }                
             }            
@@ -348,6 +346,7 @@ namespace MSDAD.Server.Communication
                     Console.WriteLine("entrou join lock");
                     if(hops==0)
                     {
+                        Console.WriteLine("hops = 0");
                         Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
                         bool atomic_read_result = atomic_read_tuple.Item1;
                         List<string> highest_value_list;
@@ -363,8 +362,8 @@ namespace MSDAD.Server.Communication
 
                         if (atomic_read_result)
                         {
-                            Console.WriteLine("entrou if");
-                            written_version = this.server_library.WriteMeeting(meeting_topic, highest_value_list);                            
+                            Console.WriteLine("entrou if dos 0 hops");
+                            written_version = this.AtomicWrite(meeting_topic, highest_value_list);                            
                             hops++;
                             written_version++;
                             Console.WriteLine("");
@@ -443,7 +442,7 @@ namespace MSDAD.Server.Communication
                         if (atomic_read_result)
                         {
                             Console.WriteLine("entrou if");
-                            written_version = this.server_library.WriteMeeting(meeting_topic, highest_value_list);
+                            written_version = this.AtomicWrite(meeting_topic, highest_value_list);
                             hops++;
                             written_version++;
                             Console.WriteLine("");
@@ -683,6 +682,12 @@ namespace MSDAD.Server.Communication
             if (this.logs_dictionary.ContainsKey(meeting_topic))
             {
                 logs_list = this.logs_dictionary[meeting_topic];
+
+                Console.WriteLine("current_logs: " + logs_list);
+                foreach(string log in logs_list)
+                {
+                    Console.WriteLine("log:" + log);
+                }
             }
             Tuple<int, List<string>> atomic_tuple = new Tuple<int, List<string>>(version, logs_list);
             received_versions.Add(atomic_tuple);
@@ -692,7 +697,7 @@ namespace MSDAD.Server.Communication
             int server_iter = 1;
             TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
-            Console.WriteLine("entrou atomic read");
+            Console.WriteLine("entrou Atomic Read");
             foreach (string replica_url in this.server_addresses.Values)
             {
                 if (server_iter > n_replicas)
@@ -732,7 +737,7 @@ namespace MSDAD.Server.Communication
                         }
 
 
-                        Console.WriteLine("enviou para os gajos");
+                        Console.WriteLine("enviou para os gajos GET MEETING ");
                     }
                     catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
                     {
@@ -751,12 +756,13 @@ namespace MSDAD.Server.Communication
                 Thread.Sleep(250);
                 float current_messages = (float)this.atomic_read_received[meeting_topic].Count;
 
-                Console.WriteLine(current_messages);
+                Console.WriteLine("received messages:" + current_messages);
                 if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                 {
+                    Console.WriteLine("le a mais alta");
                     Tuple<int, List<string>> highest_version_tuple = this.ReadHighestVersion(meeting_topic);
                     highest_value_list = highest_version_tuple.Item2;                    
-                    Console.WriteLine("!!!Fez Atomic Read!!!");
+                    Console.WriteLine("!!!Fez Atomic Read!!!: " + highest_version_tuple.Item1);
                     result = true;
                     break;
                 }
@@ -775,11 +781,12 @@ namespace MSDAD.Server.Communication
 
             return new Tuple<bool, List<string>>(result, highest_value_list);
         }
-        public void AtomicWrite(string meeting_topic, List<string> logs_list)
+        public int AtomicWrite(string meeting_topic, List<string> logs_list)
         {
-            this.server_library.WriteMeeting(meeting_topic, logs_list);
-            this.logs_dictionary[meeting_topic] = logs_list;
+            int written_version = this.server_library.WriteMeeting(meeting_topic, logs_list);
+            //this.logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
             Console.WriteLine("!!!Fez Atomic Write!!!");
+            return written_version;
         }
 
         private Tuple<int, List<string>> ReadHighestVersion(string meeting_topic)
@@ -788,11 +795,16 @@ namespace MSDAD.Server.Communication
             Tuple<int, List<string>> highest_version_tuple = null;
             List<Tuple<int, List<string>>> received_tuples = this.atomic_read_tuples[meeting_topic];
 
-            foreach(Tuple<int, List<string>> current_tuple in received_tuples)
-            {
+            Console.WriteLine("Read highest version");
+            foreach (Tuple<int, List<string>> current_tuple in received_tuples)
+            {                
                 current_version = current_tuple.Item1;
-
-                if(current_version>maximum_version)
+                Console.WriteLine("current_tuple_version: " + current_tuple.Item1 + " + " + current_tuple.Item2.Count);
+                foreach(string ngg in current_tuple.Item2)
+                {
+                    Console.WriteLine("ye: " + ngg);
+                }
+                if (current_version>maximum_version)
                 {
                     maximum_version = current_version;
                     highest_version_tuple = current_tuple;
@@ -807,8 +819,7 @@ namespace MSDAD.Server.Communication
             Console.WriteLine("estado:" + this.server_library.GetVersion(meeting_topic) + " " + sent_version);
             if (!pending_create.Contains(meeting_topic) && this.server_library.GetVersion(meeting_topic) < sent_version)
             {
-                Console.WriteLine("if");
-                Console.WriteLine();
+                Console.WriteLine("if do create broadcast");
                 pending_create.Add(meeting_topic);
 
                 int server_iter = 1;
@@ -869,6 +880,9 @@ namespace MSDAD.Server.Communication
 
                     if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                     {
+                        Console.WriteLine("quorum create");
+                        Console.WriteLine("quorum create");
+                        Console.WriteLine("quorum create");
                         this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
                         this.added_create.Add(meeting_topic);
                         this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier);
@@ -1082,39 +1096,38 @@ namespace MSDAD.Server.Communication
 
         private void CreateLog(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier)
         {           
-            if(!logs_dictionary.ContainsKey(meeting_topic))
-            {
-                int write_version = server_library.GetVersion(meeting_topic);
-                string json_log = new LogsParser().Create_ParseJSON(meeting_topic, write_version, min_attendees, slots, invitees, client_identifier);
-                List<string> logs_list = new List<string>();
-                logs_list.Add(json_log);
-                this.logs_dictionary.TryAdd(meeting_topic, logs_list);
-            }                
+            int write_version = server_library.GetVersion(meeting_topic);
+            Console.WriteLine("create log: " + write_version);
+            string json_log = new LogsParser().Create_ParseJSON(meeting_topic, write_version, min_attendees, slots, invitees, client_identifier);
+            Console.WriteLine("log criado: " + json_log);
+            List<string> logs_list = new List<string>();
+            logs_list.Add(json_log);
+            this.logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
+            Console.WriteLine("criou log");         
         }
         private void JoinLog(string meeting_topic, List<string> slots, string client_identifier)
         {
-            if (this.logs_dictionary.ContainsKey(meeting_topic))
-            {
-                int write_version = server_library.GetVersion(meeting_topic);
-                string json_log = new LogsParser().Join_ParseJSON(meeting_topic, write_version, slots, client_identifier);
-                List<string> logs_list = logs_dictionary[meeting_topic];
-                logs_list.Add(json_log);
-                this.logs_dictionary[meeting_topic] = logs_list;
-            }
+            int write_version = server_library.GetVersion(meeting_topic);
+            Console.WriteLine("join log: " + write_version);
+            string json_log = new LogsParser().Join_ParseJSON(meeting_topic, write_version, slots, client_identifier);
+            Console.WriteLine("log criado: " + json_log);
+            List<string> logs_list = logs_dictionary[meeting_topic];
+            logs_list.Add(json_log);
+            this.logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
+            Console.WriteLine("fez log");
         }
 
         private void CloseLog(string meeting_topic, string client_identifier)
         {
-            if (this.logs_dictionary.ContainsKey(meeting_topic))
-            {
-                int write_version = server_library.GetVersion(meeting_topic);
-                string json_log = new LogsParser().Close_ParseJSON(meeting_topic, write_version, client_identifier);
-                Console.WriteLine("dred");
-                Console.WriteLine(json_log);
-                List<string> logs_list = logs_dictionary[meeting_topic];
-                logs_list.Add(json_log);
-                this.logs_dictionary[meeting_topic] = logs_list;
-            }
+            Console.WriteLine("close log");
+            int write_version = server_library.GetVersion(meeting_topic);
+            string json_log = new LogsParser().Close_ParseJSON(meeting_topic, write_version, client_identifier);
+            Console.WriteLine("dred");
+            Console.WriteLine(json_log);
+            List<string> logs_list = logs_dictionary[meeting_topic];
+            logs_list.Add(json_log);
+            this.logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
+            Console.WriteLine("fez log");
         }
 
         public void setNReplica(int n_replicas)

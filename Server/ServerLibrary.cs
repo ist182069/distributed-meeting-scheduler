@@ -352,30 +352,20 @@ namespace MSDAD.Server
 
         public int WriteMeeting(string meeting_topic, List<string> logs_list)
         {
-            int min_attendees, version = -69, meeting_counter = 0;
+            Console.WriteLine("Entrou no WriteMeeting");
+            Console.WriteLine("Entrou no WriteMeeting:" + logs_list.Count);
+            int min_attendees, version = -69;
             string client_identifier, operation;
             LogsParser logsParser = new LogsParser();
             List<string> slots, invitees;
-            Tuple<string, int, string, int, List<string>, List<string>, string> result_tuple;
-
-            // teste
-            /*lock(event_list_lock)
-            {
-                foreach (Meeting m_iter in this.event_list)
-                {
-                    if (meeting_topic.Equals(m_iter.Topic))
-                    {
-                        meeting_topic.Remove(meeting_counter);
-                    }
-
-                    meeting_counter++;
-                }
-            } */           
+            Tuple<string, int, string, int, List<string>, List<string>, string> result_tuple;                     
             
             foreach (string json_entry in logs_list)
             {
+                Console.WriteLine("json entry:" + json_entry);
                 result_tuple = logsParser.ParseEntry(json_entry);
                 operation = result_tuple.Item1;
+                Console.WriteLine(operation);
 
                 switch (operation)
                 {
