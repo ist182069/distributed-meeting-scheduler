@@ -32,6 +32,7 @@ namespace MSDAD.Client.Commands
             Console.WriteLine("remoting url: " + client_url);
             Console.WriteLine("server url: " + server_url);
 
+            Console.WriteLine("Meeting Views: ");
             foreach (MeetingView meetingView in meetingViews)
             {
                 Console.WriteLine("Topic: " + meetingView.MeetingTopic);

@@ -25,7 +25,6 @@ namespace MSDAD.Client.Commands
             int min_attendees, num_slots, num_invitees;
             string invitee_address, room, meeting_topic;
 
-            MeetingView meeting_view;
             List<string> slots = new List<string>(), invitees;
 
             meeting_topic = this.words[1];
@@ -108,9 +107,6 @@ namespace MSDAD.Client.Commands
                     }
                     Console.WriteLine("lidou bem com a excepcao");
                 }
-
-                meeting_view = new MeetingView(meeting_topic, 1, "OPEN", null);
-                this.client_library.AddMeetingView(meeting_view);
             }
             else
             {
@@ -122,12 +118,6 @@ namespace MSDAD.Client.Commands
                     if (invitees.Contains(invitee_address))
                     {
                         throw new ClientLocalException(ErrorCodes.DUPLICATED_SLOT);
-                    }
-
-                    if (invitee_address == this.client_address)
-                    {
-                        meeting_view = new MeetingView(meeting_topic, 1, "OPEN", null);
-                        this.client_library.AddMeetingView(meeting_view);
                     }
 
                     invitees.Add(invitee_address);

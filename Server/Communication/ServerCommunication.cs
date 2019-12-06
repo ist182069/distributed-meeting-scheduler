@@ -866,7 +866,7 @@ namespace MSDAD.Server.Communication
                         if (invitees == null)
                         {
                             Console.WriteLine("enviou aos gajos");
-                            this.SendLogNMessages(meeting_topic);
+                            this.SendLogNMessages(meeting_topic, client_identifier);
                         }
 
                         Console.WriteLine("\r\nNew event: " + meeting_topic);
@@ -1102,7 +1102,7 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        private void SendLogNMessages(string meeting_topic)
+        private void SendLogNMessages(string meeting_topic, string client_identifer)
         {            
             int number_clients = this.client_addresses.Keys.Count;
             
@@ -1130,8 +1130,19 @@ namespace MSDAD.Server.Communication
                         AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToClientGossipAsyncCallBack);
                         IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, 1, "OPEN", null, sent_clients, RemoteCallback, null);
                     }                    
-                }                                    
-                // TODO: ele ja criou localmente
+                }    
+                else
+                {
+                    if (this.client_addresses.ContainsKey(client_identifer))
+                    {
+                        string client_address = this.client_addresses[client_identifer];
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address);
+
+                        SendMeetingToClientAsyncDelegate RemoteDel = new SendMeetingToClientAsyncDelegate(client.SendMeeting);
+                        AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToClientAsyncCallBack);
+                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, 1, "OPEN", null, RemoteCallback, null);
+                    }
+                }                
             }
             
         }
