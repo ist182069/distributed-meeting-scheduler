@@ -13,7 +13,7 @@ namespace MSDAD.Server.Logs
         // op and version are the first two arguments
         public Tuple<string, int, string, int, List<string>, List<string>, string> ParseEntry(string json_entry)
         {
-            Console.WriteLine(json_entry);            
+            Console.WriteLine("Parsing the folliwng Json entry: " + json_entry);            
             JObject jo = JObject.Parse(json_entry);
             string operation = jo["Operation"].ToString();
 

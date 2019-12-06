@@ -118,7 +118,7 @@ namespace MSDAD.Client.Comunication
 
         public void SendLogNMessages(string meeting_topic, List<string> client_addresses)
         {
-            Console.WriteLine("bora propagar!!!");
+            Console.WriteLine("Propagating \"" + meeting_topic + "\" to log2(" + client_addresses.Count +") servers.");
             int number_clients = client_addresses.Count;
 
             if (number_clients != 0)
@@ -143,7 +143,7 @@ namespace MSDAD.Client.Comunication
                 }
 
             }
-            Console.WriteLine("propagou!!!");
+            Console.WriteLine("Propagation was successfully done!");
         }
 
         private string[] PickNRandomClients(int n_clients, List<string> client_addresses)
@@ -156,8 +156,7 @@ namespace MSDAD.Client.Comunication
             selected_clients = new string[n_clients];
             random = new Random();
 
-            Console.WriteLine("pick and send");
-            Console.WriteLine("number of clients:" + n_clients);
+            Console.WriteLine("Picking random \"" + n_clients + "\" clients gossip with...");            
             while (true)
             {
 
@@ -165,10 +164,10 @@ namespace MSDAD.Client.Comunication
                 random_address = client_addresses[random_int];
                 random_remoting_id = CommonUtils.GetRemotingIdFromUrl("tcp://" + random_address);
 
-                Console.WriteLine("chosen address:" + random_address);
+                Console.WriteLine("Trying client address: \"" + random_address + "\"...");
                 if (!selected_clients.Contains(random_address) && !this.client_remoting.Equals(random_remoting_id))
                 {
-                    Console.WriteLine("Adicionou");
+                    Console.WriteLine("Will gossip with client: \"" + random_address + "\"...");
                     selected_clients[insertion_counter] = random_address;
                     insertion_counter++;
                 }

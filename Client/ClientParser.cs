@@ -86,7 +86,7 @@ namespace MSDAD.Client
 
             script_path = this.AssembleScript();
 
-            Console.WriteLine(script_path);
+            Console.WriteLine("The script was found on path: \"" + script_path + "\".");
 
             if (script_path != null && this.ScriptExists(script_path))
             {
@@ -185,7 +185,7 @@ namespace MSDAD.Client
         }
         private void ParseLine(string text_line)
         {
-            Console.WriteLine(text_line);
+            Console.WriteLine("The parse command was: " + text_line);
             string[] words = text_line.Split(' ');
 
             switch(words[0])

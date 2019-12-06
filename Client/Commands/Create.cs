@@ -105,7 +105,6 @@ namespace MSDAD.Client.Commands
                     {
                         throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
                     }
-                    Console.WriteLine("lidou bem com a excepcao");
                 }
             }
             else

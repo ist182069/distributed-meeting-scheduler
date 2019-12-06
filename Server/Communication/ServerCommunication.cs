@@ -209,10 +209,10 @@ namespace MSDAD.Server.Communication
                 lock (create)
                 {
                     int written_version;
-                    Console.WriteLine("entrou create lock");
+                    Console.WriteLine("Client \"" + client_identifier + "\" trying to create meeting \"" + meeting_topic + "\".");
                     if (hops == 0)
                     {
-                        Console.WriteLine("0 hops");
+                        Console.WriteLine("Getting logs from the other replicas...");
                         Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
                         bool atomic_read_result = atomic_read_tuple.Item1;
                         List<string> highest_value_list;
@@ -228,26 +228,23 @@ namespace MSDAD.Server.Communication
 
                         if (atomic_read_result)
                         {
-                            Console.WriteLine("entrou if dos 0 hops");
+                            Console.WriteLine("Atomic read was sucessfull!");
                             written_version = this.AtomicWrite(meeting_topic, highest_value_list, ref this.added_create, ref this.added_join, ref this.added_close);
                             hops++;
                             written_version++;
-                            Console.WriteLine("written version: " + written_version);
+                            Console.WriteLine("Will try to write version: " + written_version);
                             if(written_version<0)
                             {
                                 written_version = 1;
                             }
                             this.CreateBroadcast(meeting_topic, min_attendees, slots, invitees, client_identifier, hops, highest_value_list, written_version);
-                            Console.WriteLine("fez create broadcast");
+                            Console.WriteLine("Reliable Broadcast of the Create method just terminated...");
                         }
                     }
                     else
                     {
-
-                        Console.WriteLine("entrou no else");
                         this.AtomicWrite(meeting_topic, logs_list, ref this.added_create, ref this.added_join, ref this.added_close);
                         this.CreateBroadcast(meeting_topic, min_attendees, slots, invitees, client_identifier, hops, logs_list, sent_version);
-                        Console.WriteLine("fez create broadcast");
                     }
                 }                
             }            
@@ -344,10 +341,10 @@ namespace MSDAD.Server.Communication
                 lock(join)
                 {
                     int written_version;
-                    Console.WriteLine("entrou join lock");
+                    Console.WriteLine("Client: \"" + client_identifier + "\" attempting to join meeting \"" + meeting_topic + "\"...");
                     if(hops==0)
                     {
-                        Console.WriteLine("hops = 0");
+                        Console.WriteLine("Will atempt to fetch the most recent logs from other replicas...");
                         Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
                         bool atomic_read_result = atomic_read_tuple.Item1;
                         List<string> highest_value_list;
@@ -363,23 +360,19 @@ namespace MSDAD.Server.Communication
 
                         if (atomic_read_result)
                         {
-                            Console.WriteLine("entrou if dos 0 hops");
+                            Console.WriteLine("Atomic read was sucessfull!");
                             written_version = this.AtomicWrite(meeting_topic, highest_value_list, ref this.added_create, ref this.added_join, ref this.added_close);
                             hops++;
                             written_version++;
-                            Console.WriteLine("");
-                            Console.WriteLine(written_version);
-                            Console.WriteLine("");
+                            Console.WriteLine("Will try to write version: " + written_version);
                             this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, highest_value_list, written_version);
-                            Console.WriteLine("entrou executou");
+                            Console.WriteLine("Reliable Broadcast for Join method just terminated!");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("entrou no else");
                         this.AtomicWrite(meeting_topic, logs_list, ref this.added_create, ref this.added_join, ref this.added_close);
                         this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, logs_list, sent_version);
-                        Console.WriteLine("entrou executou");
                     }
               
                 }                
@@ -425,11 +418,12 @@ namespace MSDAD.Server.Communication
                 lock (close)
                 {
                     int written_version;
-                    Console.WriteLine("entrou close lock");
+                    Console.WriteLine("Client: \"" + client_identifier + "\" attempting to close meeting \"" + meeting_topic + "\"...");
                     this.CloseBroadcast(meeting_topic, client_identifier, hops, logs_list, sent_version);
 
                     if (hops == 0)
                     {
+                        Console.WriteLine("Will atempt to fetch the most recent logs from other replicas...");
                         Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
                         bool atomic_read_result = atomic_read_tuple.Item1;
                         List<string> highest_value_list;
@@ -445,36 +439,19 @@ namespace MSDAD.Server.Communication
 
                         if (atomic_read_result)
                         {
-                            Console.WriteLine("entrou if");
+                            Console.WriteLine("Atomic read was sucessfull!");
                             written_version = this.AtomicWrite(meeting_topic, highest_value_list, ref this.added_create, ref this.added_join, ref this.added_close);
                             hops++;
                             written_version++;
-                            Console.WriteLine("");
-                            Console.WriteLine(written_version);
-                            Console.WriteLine("");
+                            Console.WriteLine("Will attempt to write version: " + written_version);
                             this.CloseBroadcast(meeting_topic, client_identifier, hops, highest_value_list, written_version);
-                            Console.WriteLine("close executou");
-                            
-                            if(logs_dictionary.ContainsKey(meeting_topic))
-                            {
-                                List<string> dred = logs_dictionary[meeting_topic];
-
-                                Console.WriteLine("dred");
-                                foreach (string d in dred)
-                                {
-                                    Console.WriteLine(d);
-                                }
-                                Console.WriteLine("close executou");
-                            }
-
+                            Console.WriteLine("Reliable broadcast for Close method just terminated!");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("entrou no else");
                         this.AtomicWrite(meeting_topic, logs_list, ref this.added_create, ref this.added_join, ref this.added_close);
                         this.CloseBroadcast(meeting_topic, client_identifier, hops, logs_list, sent_version);
-                        Console.WriteLine("close executou");
                     }
                 }                
             }                        
@@ -640,7 +617,7 @@ namespace MSDAD.Server.Communication
                     thread.Abort();
                 }
 
-                Console.WriteLine("Enviou GM: " + replica_url);
+                Console.WriteLine("Sent the most recent logs for \"" + meeting_topic + "\" to replica: " + replica_url);
             }
             catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
             {
@@ -653,22 +630,20 @@ namespace MSDAD.Server.Communication
         // TODO: Unique ID para este gajo porque e partilho por varios TOPIC-VERSION-WRITER
         public void SendMeeting(string meeting_topic, int version, List<string> logs_list, string replica_identifier)
         {
-            Console.WriteLine("Entrou SM");
-            Console.WriteLine("Entrou SM");
+            Console.WriteLine("Fetching most recent logs for meeting: \"" + meeting_topic + "\"");
             List<string> received_messages = this.atomic_read_received[meeting_topic];
             List<Tuple<int, List<string>>> received_tuples = this.atomic_read_tuples[meeting_topic];
-
-            Console.WriteLine("Entrou SM");
+            Console.WriteLine("Trying to load the information received...");
             
             if (!received_messages.Contains(replica_identifier))
             {
-                Console.WriteLine("If para por informacao");
+                Console.Write("Adding information for the received messages...");
                 received_messages.Add(replica_identifier);
                 this.atomic_read_received[meeting_topic] = received_messages;
 
                 received_tuples.Add(new Tuple<int, List<string>>(version, logs_list));
                 this.atomic_read_tuples[meeting_topic] = received_tuples;
-                Console.WriteLine("passou tudo: ");
+                Console.WriteLine("Success! ");
             }
         }
 
@@ -687,10 +662,10 @@ namespace MSDAD.Server.Communication
             {
                 logs_list = this.logs_dictionary[meeting_topic];
 
-                Console.WriteLine("current_logs: " + logs_list);
+                Console.WriteLine("Current number of logs for meeting + \"" + meeting_topic + "\":" + logs_list);
                 foreach(string log in logs_list)
                 {
-                    Console.WriteLine("log:" + log);
+                    Console.WriteLine("  Log:" + log);
                 }
             }
             Tuple<int, List<string>> atomic_tuple = new Tuple<int, List<string>>(version, logs_list);
@@ -701,7 +676,7 @@ namespace MSDAD.Server.Communication
             int server_iter = 1;
             TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
 
-            Console.WriteLine("entrou Atomic Read");
+            Console.WriteLine("Attempting Atomic Read...");
             foreach (string replica_url in this.server_addresses.Values)
             {
                 if (server_iter > n_replicas)
@@ -741,7 +716,7 @@ namespace MSDAD.Server.Communication
                         }
 
 
-                        Console.WriteLine("enviou para os gajos GET MEETING ");
+                        Console.WriteLine("Sent a fetch request to replica: " + replica_url);
                     }
                     catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
                     {
@@ -760,13 +735,14 @@ namespace MSDAD.Server.Communication
                 Thread.Sleep(250);
                 float current_messages = (float)this.atomic_read_received[meeting_topic].Count;
 
-                Console.WriteLine("received messages:" + current_messages);
+                Console.WriteLine("Number of received messages for update request: " + current_messages);
                 if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                 {
-                    Console.WriteLine("le a mais alta");
+                    Console.WriteLine("Getting the log with the highest version number...");
                     Tuple<int, List<string>> highest_version_tuple = this.ReadHighestVersion(meeting_topic);
                     highest_value_list = highest_version_tuple.Item2;                    
-                    Console.WriteLine("!!!Fez Atomic Read!!!: " + highest_version_tuple.Item1);
+                    Console.WriteLine("Atomic read was sucessfull!");
+                    Console.WriteLine("Number of elements on the most recent log file: " + highest_version_tuple.Item1);
                     result = true;
                     break;
                 }
@@ -779,16 +755,18 @@ namespace MSDAD.Server.Communication
                 Console.WriteLine("Could not receive quorum: Abort");
             }
 
-            // TODO continuar isto
-            /*this.atomic_read_received.TryRemove(meeting_topic, out _);
-            this.atomic_read_tuples.TryRemove(meeting_topic, out _);*/
+            // TODO: continuar isto
+            /*
+            this.atomic_read_received.TryRemove(meeting_topic, out _);
+            this.atomic_read_tuples.TryRemove(meeting_topic, out _);
+            */
 
             return new Tuple<bool, List<string>>(result, highest_value_list);
         }
         public int AtomicWrite(string meeting_topic, List<string> logs_list, ref List<Tuple<string, string>> added_create, ref List<Tuple<string, string>> added_join, ref List<Tuple<string, string>> added_close)
         {
             int written_version = this.server_library.WriteMeeting(meeting_topic, logs_list, ref this.logs_dictionary, ref added_create, ref added_join, ref added_close);
-            Console.WriteLine("!!!Fez Atomic Write!!!");
+            Console.WriteLine("Atomic write successfull!");
             return written_version;
         }
 
@@ -798,14 +776,15 @@ namespace MSDAD.Server.Communication
             Tuple<int, List<string>> highest_version_tuple = null;
             List<Tuple<int, List<string>>> received_tuples = this.atomic_read_tuples[meeting_topic];
 
-            Console.WriteLine("Read highest version");
+            Console.WriteLine("Getting the updated logs with the highest version...");
             foreach (Tuple<int, List<string>> current_tuple in received_tuples)
             {                
                 current_version = current_tuple.Item1;
-                Console.WriteLine("current_tuple_version: " + current_tuple.Item1 + " + " + current_tuple.Item2.Count);
-                foreach(string ngg in current_tuple.Item2)
+                Console.WriteLine("Current_tuple_version: " + current_tuple.Item1); 
+                Console.WriteLine("Number of elements in current iteration log: " + current_tuple.Item2.Count);
+                foreach (string log_iter in current_tuple.Item2)
                 {
-                    Console.WriteLine("ye: " + ngg);
+                    Console.WriteLine("  Log: " + log_iter);
                 }
                 if (current_version>maximum_version)
                 {
@@ -824,10 +803,11 @@ namespace MSDAD.Server.Communication
 
             create_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
 
-            Console.WriteLine("estado:" + this.server_library.GetVersion(meeting_topic) + " " + sent_version);
+            Console.WriteLine("Version meeting \"" + meeting_topic + "\" written:" + this.server_library.GetVersion(meeting_topic));
+            Console.WriteLine("Most recent version: " + sent_version);
             if (!pending_create.Contains(create_tuple) && this.server_library.GetVersion(meeting_topic) < sent_version)
             {
-                Console.WriteLine("if do create broadcast");
+                Console.WriteLine("Attempting to Reliable Broadcast the Create method...");
                 pending_create.Add(create_tuple);
 
                 int server_iter = 1;
@@ -886,38 +866,36 @@ namespace MSDAD.Server.Communication
                     Thread.Sleep(250);
                     float current_messages = (float)this.receiving_create[meeting_topic].Count;
 
+                    Console.WriteLine("Received \"" + current_messages + "\" from replicas...");
                     if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                     {
-                        Console.WriteLine("quorum create");
-                        Console.WriteLine("quorum create");
-                        Console.WriteLine("quorum create");
+                        Console.WriteLine("Quorum for the create method was sucessfull!");
                         this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
                         this.added_create.Add(create_tuple);
                         this.server_library.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier, ref this.logs_dictionary);
                         if (invitees == null)
                         {
-                            Console.WriteLine("enviou aos gajos");
+                            Console.WriteLine("Gossiping with some clients...");
                             List<string> client_addresses_list = this.client_addresses.Values.ToList();
                             this.SendLogNMessages(meeting_topic, client_addresses_list);
-                            Console.WriteLine("funcionou");
+                            Console.WriteLine("Gossip was propagated!");
                         }
                         else
                         {
-                            Console.WriteLine("enviou aos invitees");
+                            Console.WriteLine("Gossiping with some invitees...");
                             List<string> invitees_addresses_list = new List<string>();
                             foreach(string sent_invitee in invitees)
                             {
                                 if (this.client_addresses.ContainsKey(sent_invitee))
                                 {
                                     string invitee_address = this.client_addresses[sent_invitee];
-                                    Console.WriteLine("&%$%&/invitee_address: ");
-                                    Console.WriteLine(invitee_address);
-                                    Console.WriteLine("&%$% &/");                                    
+                                    Console.Write("Gossiping with invitee: ");
+                                    Console.WriteLine(invitee_address);                            
                                     invitees_addresses_list.Add(invitee_address);
                                 }
                             }
                             this.SendLogNMessages(meeting_topic, invitees_addresses_list);
-                            Console.WriteLine("funcionou");
+                            Console.WriteLine("Gossip was propagated!");
                         }
                         Console.WriteLine("\r\nNew event: " + meeting_topic);
                         Console.Write("Please run a command to be run on the server: ");
@@ -935,11 +913,14 @@ namespace MSDAD.Server.Communication
         }
         private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple, List<string> logs_list, int sent_version)
         {
-            Console.WriteLine("join broadcast");    
+            Console.WriteLine("Version meeting \"" + meeting_topic + "\" written:" + this.server_library.GetVersion(meeting_topic));
+            Console.WriteLine("Most recent version: " + sent_version);            
             // adicionar || OU ADDED
             if (!this.pending_join.Contains(join_tuple) && this.server_library.GetVersion(meeting_topic) < sent_version)
-            {
+            {                
                 this.pending_join.Add(join_tuple);
+
+                Console.WriteLine("Attempting to Reliable Broadcast the Join method...");
 
                 int server_iter = 1;
                 TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
@@ -998,12 +979,15 @@ namespace MSDAD.Server.Communication
                     Thread.Sleep(250);
                     float current_messages = (float)this.receiving_join[join_tuple].Count;
 
+                    Console.WriteLine("Number of received messsages: " + current_messages);
                     if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
-                    {                        
+                    {
+                        Console.WriteLine("Quorum for Join was sucessfull!");
                         this.server_library.Join(meeting_topic, slots, client_identifier, sent_version);
                         this.added_join.Add(join_tuple);
                         this.server_library.JoinLog(meeting_topic, slots, client_identifier, ref this.logs_dictionary);
-                        Console.WriteLine("join: " + meeting_topic);
+                        Console.WriteLine("Client \"" + client_identifier + "\" sucessfully ");
+                        Console.WriteLine("joined: \"" + meeting_topic + "\".");
                         break;
                     }
                     timer_counter++;
@@ -1021,11 +1005,13 @@ namespace MSDAD.Server.Communication
         {
             Tuple<string, string> close_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
 
-            Console.WriteLine("close broadcast: " + this.server_library.GetVersion(meeting_topic) + " : " + sent_version);
+            Console.WriteLine("Version meeting \"" + meeting_topic + "\" written:" + this.server_library.GetVersion(meeting_topic));
+            Console.WriteLine("Most recent version: " + sent_version);
             if (!this.pending_close.Contains(close_tuple) && this.server_library.GetVersion(meeting_topic) < sent_version)
-            {
-                Console.WriteLine("if");
+            {                
                 this.pending_close.Add(close_tuple);
+
+                Console.WriteLine("Attempting to Reliable Broadcast the Join method...");
 
                 int server_iter = 1;
                 TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
@@ -1086,12 +1072,15 @@ namespace MSDAD.Server.Communication
                     Thread.Sleep(250);
                     float current_messages = (float)this.receiving_close[meeting_topic].Count;
 
+                    Console.WriteLine("Messages for quorum: " + current_messages);
                     if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                     {
+                        Console.WriteLine("Quorum was successfully done!");
                         this.server_library.Close(meeting_topic, client_identifier, sent_version);
                         this.added_close.Add(close_tuple);
                         this.server_library.CloseLog(meeting_topic, client_identifier, ref this.logs_dictionary);
-                        Console.WriteLine("close: " + meeting_topic);
+                        Console.Write("Client \"" + client_identifier + "\" ");
+                        Console.WriteLine("closed: \"" + meeting_topic + "\".");
                         break;
                     }
                     timer_counter++;
@@ -1124,8 +1113,8 @@ namespace MSDAD.Server.Communication
                 double clients_double = Convert.ToDouble(number_clients);
                 double clients_log = Math.Log(clients_double, 2);
 
-                Console.WriteLine("clients_double: " + clients_double);
-                Console.WriteLine("clients_log: " + clients_log);
+                Console.WriteLine("Number of clients in server: " + clients_double);
+                Console.WriteLine("Logarithm of such clients: " + clients_log);
 
                 // se for 0 e porque so havia um
                 if(clients_log != 0)
@@ -1133,14 +1122,10 @@ namespace MSDAD.Server.Communication
                     double log_round = Math.Ceiling(clients_log);
                     string[] random_clients = this.PickNRandomClients((int) log_round, client_addresses);
 
-                    Console.WriteLine("#######");
-                    Console.WriteLine(random_clients.Length);
-                    Console.WriteLine("#######");
+                    Console.WriteLine("Random clients list length: " + random_clients.Length);
                     for (int i = 0; i < random_clients.Length; i++)
                     {
-                        Console.WriteLine("$$$$");
-                        Console.WriteLine("client:" + random_clients[i]);
-                        Console.WriteLine("$$$$");
+                        Console.WriteLine("Client to gossip with: " + random_clients[i]);
                         if (this.client_addresses.ContainsValue(random_clients[i]))
                         {
                             ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + random_clients[i]);
@@ -1154,9 +1139,7 @@ namespace MSDAD.Server.Communication
                 else
                 {
                     string single_address = client_addresses[0];
-                    Console.WriteLine("?????");
-                    Console.WriteLine("?????");
-                    Console.WriteLine(single_address);
+                    Console.WriteLine("Client to send message to: " + single_address);
                     if (this.client_addresses.ContainsValue(single_address))
                     {
                         ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + single_address);
@@ -1180,8 +1163,7 @@ namespace MSDAD.Server.Communication
             selected_clients = new string[n_clients];
             random = new Random();
 
-            Console.WriteLine("pick and send");
-            Console.WriteLine("number of clients:" + n_clients);            
+            Console.WriteLine("Picking  \"" +  n_clients + "\" to gossip with!");      
             while (true)
             {
                 
@@ -1190,16 +1172,15 @@ namespace MSDAD.Server.Communication
 
                 if(!selected_clients.Contains(random_address))
                 {
-                    Console.WriteLine("Nao contem foda-se:" + random_address);
+                    Console.WriteLine("Sending messages to the following address:" + random_address);
                     selected_clients[insertion_counter] = random_address;
                     insertion_counter++;
                 }
                 if(insertion_counter == n_clients)
                 {
-                    Console.WriteLine("PAROU!");
+                    Console.WriteLine("Clients were chosen!");
                     break;
                 }
-                Console.WriteLine("chosen clients:" + random_address);
             }
 
             return selected_clients;

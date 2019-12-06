@@ -59,7 +59,7 @@ namespace MSDAD.Library
                 result = pattern.IsMatch(address);
             }
 
-            Console.WriteLine(result);
+            Console.WriteLine("Is \"" + address + "\" valid? " + result.ToString());
 
             return result;
         }

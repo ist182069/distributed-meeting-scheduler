@@ -29,22 +29,21 @@ namespace MSDAD
             client_number = Int32.Parse(this.clientLibrary.ClientIdentifier.Remove(0,1));
             n_replicas = this.clientLibrary.NReplicas;
 
-            Console.WriteLine(client_number + " : " + n_replicas);
+            Console.WriteLine("Server knows \"" + client_number + "\" clients...");
+            Console.WriteLine("Server has \"" + n_replicas + "\" replicas...");
             try_replica = (client_number % n_replicas) + 1;
-            Console.WriteLine("try_replica = (client_number % n_replicas) + 1; " + try_replica);
+            Console.WriteLine("Since current replica has failed will try to connect to replica \"" + try_replica + "\"...");
 
             for(int i = 0; i < n_replicas; i++)
             {
                 server_url = "tcp://localhost:" + (try_replica + 3000) + "/Server" + try_replica;
-                Console.WriteLine(server_url);
+                Console.WriteLine("Replica url: \"" + server_url + "\".");
                 try
                 {
                     this.clientLibrary.ServerURL = server_url;
                     this.remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
                     this.remote_server.IsAlive();
                     break;
-                    
-                    // cena fodix que pensei em que passas o comando original aqui para dentro
                 }
                 catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
                 {
