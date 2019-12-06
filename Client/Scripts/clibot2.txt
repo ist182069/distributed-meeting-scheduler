@@ -1,0 +1,2 @@
+wait 3000
+join myTopic2 2 Porto,2020-01-10 Lisboa,2020-01-10

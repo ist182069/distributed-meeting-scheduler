@@ -1,0 +1,27 @@
+AddRoom Porto 3 room1
+AddRoom Porto 5 room2
+AddRoom Porto 8 room3
+AddRoom Porto 10 room4
+AddRoom Porto 20 room5
+AddRoom Lisboa 3 room1 
+AddRoom Lisboa 5 room2
+AddRoom Lisboa 8 room3
+AddRoom Lisboa 10 room4
+AddRoom Lisboa 20 room5
+Server s1 tcp://localhost:3001/server1 1 0 0
+Server s2 tcp://localhost:3002/server2 1 0 0
+Server s3 tcp://localhost:3003/server3 1 0 0
+Server s4 tcp://localhost:3004/server4 1 0 0
+Server s5 tcp://localhost:3005/server5 1 0 0
+Wait 3000
+Client c1 tcp://localhost:4001/client1 tcp://localhost:3001/server1 coor1.txt
+Client c2 tcp://localhost:4002/client2 tcp://localhost:3001/server1 clibot1.txt
+Client c3 tcp://localhost:4003/client3 tcp://localhost:3001/server1 clibot1.txt
+Client c4 tcp://localhost:4004/client4 tcp://localhost:3001/server1 clibot1.txt
+Wait 10000
+Crash s1
+Client c5 tcp://localhost:4005/client5 tcp://localhost:3002/server2 coor2.txt
+Client c6 tcp://localhost:4006/client6 tcp://localhost:3002/server2 clibot2.txt
+Client c7 tcp://localhost:4007/client7 tcp://localhost:3002/server2 clibot2.txt
+Client c8 tcp://localhost:4008/client8 tcp://localhost:3002/server2 clibot2.txt
+Client c9 tcp://localhost:4009/client9 tcp://localhost:3002/server2 clibot2.txt

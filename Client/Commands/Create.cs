@@ -95,7 +95,7 @@ namespace MSDAD.Client.Commands
                 catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
                 {
                     this.remote_server = new ServerChange(ref base.client_library).Execute();
-
+                    
                     if (this.remote_server!=null)
                     {
                         int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
@@ -106,6 +106,7 @@ namespace MSDAD.Client.Commands
                     {
                         throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
                     }
+                    Console.WriteLine("lidou bem com a excepcao");
                 }
 
                 meeting_view = new MeetingView(meeting_topic, 1, "OPEN", null);

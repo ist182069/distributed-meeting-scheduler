@@ -211,6 +211,7 @@ namespace MSDAD.Server.Communication
                     Console.WriteLine("entrou create lock");
                     if (hops == 0)
                     {
+                        Console.WriteLine("0 hops");
                         Tuple<bool, List<string>> atomic_read_tuple = this.AtomicRead(meeting_topic);
                         bool atomic_read_result = atomic_read_tuple.Item1;
                         List<string> highest_value_list;
@@ -451,14 +452,17 @@ namespace MSDAD.Server.Communication
                             this.CloseBroadcast(meeting_topic, client_identifier, hops, highest_value_list, written_version);
                             Console.WriteLine("close executou");
                             
-                            List<string> dred = logs_dictionary[meeting_topic];
-
-                            Console.WriteLine("dred");
-                            foreach (string d in dred)
+                            if(logs_dictionary.ContainsKey(meeting_topic))
                             {
-                                Console.WriteLine(d);
+                                List<string> dred = logs_dictionary[meeting_topic];
+
+                                Console.WriteLine("dred");
+                                foreach (string d in dred)
+                                {
+                                    Console.WriteLine(d);
+                                }
+                                Console.WriteLine("close executou");
                             }
-                            Console.WriteLine("close executou");
 
                         }
                     }
@@ -764,6 +768,7 @@ namespace MSDAD.Server.Communication
         public void AtomicWrite(string meeting_topic, List<string> logs_list)
         {
             this.server_library.WriteMeeting(meeting_topic, logs_list);
+            this.logs_dictionary[meeting_topic] = logs_list;
             Console.WriteLine("!!!Fez Atomic Write!!!");
         }
 
@@ -1062,22 +1067,28 @@ namespace MSDAD.Server.Communication
         }
         private void JoinLog(string meeting_topic, List<string> slots, string client_identifier)
         {
-            int write_version = server_library.GetVersion(meeting_topic);
-            string json_log = new LogsParser().Join_ParseJSON(meeting_topic, write_version, slots, client_identifier);
-            List<string> logs_list = logs_dictionary[meeting_topic];
-            logs_list.Add(json_log);
-            this.logs_dictionary[meeting_topic] = logs_list;
+            if (this.logs_dictionary.ContainsKey(meeting_topic))
+            {
+                int write_version = server_library.GetVersion(meeting_topic);
+                string json_log = new LogsParser().Join_ParseJSON(meeting_topic, write_version, slots, client_identifier);
+                List<string> logs_list = logs_dictionary[meeting_topic];
+                logs_list.Add(json_log);
+                this.logs_dictionary[meeting_topic] = logs_list;
+            }
         }
 
         private void CloseLog(string meeting_topic, string client_identifier)
         {
-            int write_version = server_library.GetVersion(meeting_topic);
-            string json_log = new LogsParser().Close_ParseJSON(meeting_topic, write_version, client_identifier);
-            Console.WriteLine("dred");
-            Console.WriteLine(json_log);
-            List<string> logs_list = logs_dictionary[meeting_topic];
-            logs_list.Add(json_log);
-            this.logs_dictionary[meeting_topic] = logs_list;
+            if (this.logs_dictionary.ContainsKey(meeting_topic))
+            {
+                int write_version = server_library.GetVersion(meeting_topic);
+                string json_log = new LogsParser().Close_ParseJSON(meeting_topic, write_version, client_identifier);
+                Console.WriteLine("dred");
+                Console.WriteLine(json_log);
+                List<string> logs_list = logs_dictionary[meeting_topic];
+                logs_list.Add(json_log);
+                this.logs_dictionary[meeting_topic] = logs_list;
+            }
         }
 
         public void setNReplica(int n_replicas)

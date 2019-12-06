@@ -31,6 +31,8 @@ namespace MSDAD.Client.Commands
             this.client_port = this.client_library.ClientPort;
             this.client_ip = this.client_library.ClientIP;
             this.client_address = ClientUtils.AssembleAddress(client_ip, client_port);
+            Console.WriteLine("URL");
+            Console.WriteLine(this.server_url);
             this.remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
         }
         public abstract object Execute();

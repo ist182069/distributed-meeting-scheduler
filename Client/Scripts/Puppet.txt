@@ -1,0 +1,7 @@
+AddRoom Porto 3 room1
+Server s1 tcp://localhost:3001/server1 1 0 0
+Server s2 tcp://localhost:3002/server2 1 0 0
+Wait 3000
+Client c1 tcp://localhost:4001/client1 tcp://localhost:3001/server1 coor.txt
+Wait 3000
+Crash s1

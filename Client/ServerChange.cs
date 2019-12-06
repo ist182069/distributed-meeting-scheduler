@@ -30,12 +30,13 @@ namespace MSDAD
             n_replicas = this.clientLibrary.NReplicas;
 
             Console.WriteLine(client_number + " : " + n_replicas);
-            try_replica = (client_number % n_replicas) + 1;                        
+            try_replica = (client_number % n_replicas) + 1;
+            Console.WriteLine("try_replica = (client_number % n_replicas) + 1; " + try_replica);
 
             for(int i = 0; i < n_replicas; i++)
             {
                 server_url = "tcp://localhost:" + (try_replica + 3000) + "/Server" + try_replica;
-
+                Console.WriteLine(server_url);
                 try
                 {
                     this.clientLibrary.ServerURL = server_url;
@@ -48,6 +49,7 @@ namespace MSDAD
                 catch (System.Net.Sockets.SocketException se)
                 {
                     try_replica = ((try_replica + 1) % n_replicas) + 1;
+                    Console.WriteLine(try_replica);
                 }                
             }
 
