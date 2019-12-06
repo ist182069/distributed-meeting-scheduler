@@ -178,6 +178,7 @@ namespace MSDAD.Client.Commands
                         {
                             Console.WriteLine("We cannot find anymore servers to connect to! Aborting...");
                             CrashClientProcess();
+
                         }
                     }
                 }
