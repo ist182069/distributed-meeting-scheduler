@@ -3,9 +3,11 @@ using MSDAD.Client.Exceptions;
 using MSDAD.Library;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MSDAD.Client.Commands
@@ -84,28 +86,49 @@ namespace MSDAD.Client.Commands
 
             if(num_invitees==0)
             {
-                try
+                while (true)
                 {
-                    this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier, null, 0, null, Int32.MinValue);
-                } catch(ServerCoreException sce)
-                {
-                    Console.WriteLine(sce.Message);
-                }
-                catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
-                {
-                    this.remote_server = new ServerChange(ref base.client_library).Execute();
-                    
-                    if (this.remote_server!=null)
+                    try
                     {
-                        int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
-                        base.client_library.NReplicas = n_replicas;
                         this.remote_server.Create(meeting_topic, min_attendees, slots, null, this.client_identifier, null, 0, null, Int32.MinValue);
+                        break;
                     }
-                    else
+                    catch (ServerCoreException sce)
                     {
-                        throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
+                        Console.WriteLine(sce.Message);
                     }
-                    Console.WriteLine("lidou bem com a excepcao");
+                    catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
+                    {
+                        this.remote_server = new ServerChange(ref base.client_library).Execute(); //returns remote_server or null;
+
+                        if (this.remote_server != null)
+                        {
+                            try
+                            {
+                                int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
+                                base.client_library.NReplicas = n_replicas;
+                            }
+                            catch (System.Net.Sockets.SocketException)
+                            {
+                                Console.WriteLine("We cannot find anymore servers to connect to! Aborting...\r\n");
+                                Console.Write("Crashing Client in...");
+                                Thread.Sleep(1000);
+                                Console.Write("3 ");
+                                Thread.Sleep(1000);
+                                Console.Write("2 ");
+                                Thread.Sleep(1000);
+                                Console.Write("1 ");
+                                Thread.Sleep(1000);
+                                Process.GetCurrentProcess().Kill();
+                            }
+                            
+                            continue;
+                        }
+                        else
+                        {
+                            throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
+                        }                        
+                    }
                 }
             }
             else
@@ -123,27 +146,41 @@ namespace MSDAD.Client.Commands
                     invitees.Add(invitee_address);
                 }
 
-                try
+                while (true)
                 {
-                    this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier, null, 0, null, Int32.MinValue);
-                } catch(ServerCoreException sce)
-                {
-                    Console.WriteLine(sce.Message);
-                } catch(Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
-                {
-                    this.remote_server = new ServerChange(ref base.client_library).Execute();
-                    if (this.remote_server != null)
+                    try
                     {
-                        int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
-                        base.client_library.NReplicas = n_replicas;
                         this.remote_server.Create(meeting_topic, min_attendees, slots, invitees, this.client_identifier, null, 0, null, Int32.MinValue);
+                        break;
                     }
-                    else
+                    catch (ServerCoreException sce)
                     {
-                        throw new ClientLocalException("We cannot find anymore servers to connect to! Aborting...");
+                        Console.WriteLine(sce.Message);
+                    }
+                    catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
+                    {
+                        this.remote_server = new ServerChange(ref base.client_library).Execute();
+                        if (this.remote_server != null)
+                        {
+                            try
+                            {
+                                int n_replicas = this.remote_server.Hello(this.client_identifier, this.client_remoting, this.client_ip, this.client_port);
+                                base.client_library.NReplicas = n_replicas;
+                            }
+                            catch (System.Net.Sockets.SocketException)
+                            {
+                                Console.WriteLine("We cannot find anymore servers to connect to! Aborting...");
+                                CrashClientProcess();
+                            }
+                            continue;
+                        }
+                        else
+                        {
+                            Console.WriteLine("We cannot find anymore servers to connect to! Aborting...");
+                            CrashClientProcess();
+                        }
                     }
                 }
-                
             }
                 
             return null;
