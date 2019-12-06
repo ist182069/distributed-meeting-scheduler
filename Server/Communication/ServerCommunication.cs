@@ -647,13 +647,19 @@ namespace MSDAD.Server.Communication
             }
         }
 
+        // TODO: Unique ID para este gajo porque e partilho por varios TOPIC-VERSION-WRITER
         public void SendMeeting(string meeting_topic, int version, List<string> logs_list, string replica_identifier)
         {
+            Console.WriteLine("Entrou SM");
+            Console.WriteLine("Entrou SM");
             List<string> received_messages = this.atomic_read_received[meeting_topic];
             List<Tuple<int, List<string>>> received_tuples = this.atomic_read_tuples[meeting_topic];
 
+            Console.WriteLine("Entrou SM");
+            
             if (!received_messages.Contains(replica_identifier))
             {
+                Console.WriteLine("If para por informacao");
                 received_messages.Add(replica_identifier);
                 this.atomic_read_received[meeting_topic] = received_messages;
 
@@ -672,7 +678,8 @@ namespace MSDAD.Server.Communication
             List<string> logs_list = new List<string>();
             received_messages.Add(this.server_identifier);            
             int version = this.server_library.GetVersion(meeting_topic);
-            List<Tuple<int, List<string>>> received_versions = new List<Tuple<int, List<string>>>();            
+            List<Tuple<int, List<string>>> received_versions = new List<Tuple<int, List<string>>>(); 
+            
             if (this.logs_dictionary.ContainsKey(meeting_topic))
             {
                 logs_list = this.logs_dictionary[meeting_topic];
@@ -748,7 +755,6 @@ namespace MSDAD.Server.Communication
                 if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                 {
                     Tuple<int, List<string>> highest_version_tuple = this.ReadHighestVersion(meeting_topic);
-                    // TODO rebenta aqui porque o gajo pode ser null : tens de adicionar o gajo a ele proprio
                     highest_value_list = highest_version_tuple.Item2;                    
                     Console.WriteLine("!!!Fez Atomic Read!!!");
                     result = true;
@@ -762,6 +768,10 @@ namespace MSDAD.Server.Communication
                 // TODO: throw new ServerCoreException("Could not receive quorum: Abort");
                 Console.WriteLine("Could not receive quorum: Abort");
             }
+
+            // TODO continuar isto
+            /*this.atomic_read_received.TryRemove(meeting_topic, out _);
+            this.atomic_read_tuples.TryRemove(meeting_topic, out _);*/
 
             return new Tuple<bool, List<string>>(result, highest_value_list);
         }
@@ -851,7 +861,6 @@ namespace MSDAD.Server.Communication
                     server_iter++;
                 }
 
-                // TODO:  Por timer
                 int timer_counter = 0;
                 while (timer_counter < 40)
                 {
@@ -961,7 +970,6 @@ namespace MSDAD.Server.Communication
                     server_iter++;
                 }
 
-                // TODO:  Por timer
                 int timer_counter = 0;
                 while (timer_counter < 40)
                 {
@@ -1048,7 +1056,6 @@ namespace MSDAD.Server.Communication
                     server_iter++;
                 }
 
-                // TODO:  Por timer
                 int timer_counter = 0;
                 while (timer_counter < 40)
                 {
