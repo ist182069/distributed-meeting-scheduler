@@ -2,8 +2,10 @@
 using MSDAD.Library;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MSDAD.Client.Commands
@@ -35,5 +37,18 @@ namespace MSDAD.Client.Commands
             this.remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
         }
         public abstract object Execute();
+
+        public void CrashClientProcess()
+        {
+            Console.Write("Crashing Client in...");
+            Thread.Sleep(1000);
+            Console.Write("3 ");
+            Thread.Sleep(1000);
+            Console.Write("2 ");
+            Thread.Sleep(1000);
+            Console.Write("1 ");
+            Thread.Sleep(1000);
+            Process.GetCurrentProcess().Kill();
+        }
     }
 }
