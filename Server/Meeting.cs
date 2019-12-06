@@ -36,7 +36,8 @@ namespace MSDAD.Server
             if (invitees != null)
             {
                 this.invitees = invitees;
-                this.invitees.Add(client_identifier);                   
+                // CHANGE: Comentando isto ele nao adiciona o coordenador
+                //this.invitees.Add(client_identifier);                   
             }
             else
             {
