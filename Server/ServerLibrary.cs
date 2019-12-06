@@ -352,6 +352,7 @@ namespace MSDAD.Server
 
         public int WriteMeeting(string meeting_topic, List<string> logs_list)
         {
+            // TODO2: adicionar aqui tambem ao added e aos logs
             Console.WriteLine("Entrou no WriteMeeting");
             Console.WriteLine("Entrou no WriteMeeting:" + logs_list.Count);
             int min_attendees, version = -69;
@@ -363,6 +364,7 @@ namespace MSDAD.Server
             foreach (string json_entry in logs_list)
             {
                 Console.WriteLine("json entry:" + json_entry);
+                Console.WriteLine(this.GetVersion(meeting_topic) + "     :     " + version);
                 result_tuple = logsParser.ParseEntry(json_entry);
                 operation = result_tuple.Item1;
                 Console.WriteLine(operation);
@@ -371,33 +373,36 @@ namespace MSDAD.Server
                 {
 
                     // ou entao aquio gajo mudar tudo desde inicio
-                    case "Create":
+                    case "Create":                        
                         version = result_tuple.Item2;
                         if (this.GetVersion(meeting_topic) < version)
-                        {
+                        {                            
                             min_attendees = result_tuple.Item4;
                             slots = result_tuple.Item5;
                             invitees = result_tuple.Item6;
                             client_identifier = result_tuple.Item7;
                             this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                            Console.WriteLine("ESCREVEU:" + json_entry);
                         }                            
                         break;
-                    case "Join":
+                    case "Join":                        
                         version = result_tuple.Item2;
                         if (this.GetVersion(meeting_topic) < version)
                         {
                             slots = result_tuple.Item5;
                             client_identifier = result_tuple.Item7;
                             this.Join(meeting_topic, slots, client_identifier, version);
-                        }                            
+                        }
+                        Console.WriteLine("ESCREVEU:" + json_entry);
                         break;
-                    case "Close":
+                    case "Close":                        
                         version = result_tuple.Item2;
                         if (this.GetVersion(meeting_topic) < version)
                         {
                             client_identifier = result_tuple.Item7;
                             this.Close(meeting_topic, client_identifier, version);
-                        }                            
+                        }
+                        Console.WriteLine("ESCREVEU:" + json_entry);
                         break;
                 }
             }

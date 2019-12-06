@@ -784,6 +784,7 @@ namespace MSDAD.Server.Communication
         public int AtomicWrite(string meeting_topic, List<string> logs_list)
         {
             int written_version = this.server_library.WriteMeeting(meeting_topic, logs_list);
+            // TODO2: em vez disto e uma cena que faz o log apropriado
             //this.logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
             Console.WriteLine("!!!Fez Atomic Write!!!");
             return written_version;
