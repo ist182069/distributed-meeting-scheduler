@@ -351,7 +351,7 @@ namespace MSDAD.Server
             return version;
         }
 
-        public int WriteMeeting(string meeting_topic, List<string> logs_list, ref ConcurrentDictionary<string, List<string>> logs_dictionary, ref List<string> added_create, ref List<Tuple<string, string>> added_join, ref List<string> added_close)
+        public int WriteMeeting(string meeting_topic, List<string> logs_list, ref ConcurrentDictionary<string, List<string>> logs_dictionary, ref List<Tuple<string, string>> added_create, ref List<Tuple<string, string>> added_join, ref List<Tuple<string, string>> added_close)
         {
             // TODO2: adicionar aqui tambem ao added e aos logs
             Console.WriteLine("Entrou no WriteMeeting");
@@ -382,8 +382,10 @@ namespace MSDAD.Server
                             slots = result_tuple.Item5;
                             invitees = result_tuple.Item6;
                             client_identifier = result_tuple.Item7;
+
+                            Tuple<string, string> create_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
                             this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
-                            added_create.Add(meeting_topic);
+                            added_create.Add(create_tuple);
                             this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier, ref logs_dictionary);
                             Console.WriteLine("ESCREVEU:" + json_entry);
                         }                            
@@ -407,8 +409,10 @@ namespace MSDAD.Server
                         if (this.GetVersion(meeting_topic) < version)
                         {
                             client_identifier = result_tuple.Item7;
+
+                            Tuple<string, string> close_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
                             this.Close(meeting_topic, client_identifier, version);
-                            added_close.Add(meeting_topic);
+                            added_close.Add(close_tuple);
                             this.CloseLog(meeting_topic, client_identifier, ref logs_dictionary);
                             Console.WriteLine("ESCREVEU:" + json_entry);
                         }                        

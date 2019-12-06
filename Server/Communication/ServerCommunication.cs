@@ -40,8 +40,8 @@ namespace MSDAD.Server.Communication
         // recebe as mensagens para cada meeting_topic
         private ConcurrentDictionary<string, List<string>> receiving_create = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas        
         // topicos a criar que estao pendentes
-        private List<string> pending_create = new List<string>();
-        private List<string> added_create = new List<string>();
+        private List<Tuple<string, string>> pending_create = new List<Tuple<string, string>>();
+        private List<Tuple<string, string>> added_create = new List<Tuple<string, string>>();
 
         // Dicionario de acks para cada par reuniao-cliente
         private ConcurrentDictionary<Tuple<string, string>, List<string>> receiving_join = new ConcurrentDictionary<Tuple<string, string>, List<string>>();
@@ -50,8 +50,8 @@ namespace MSDAD.Server.Communication
         private List<Tuple<string, string>> added_join = new List<Tuple<string, string>>();        
 
         private ConcurrentDictionary<string, List<string>> receiving_close = new ConcurrentDictionary<string, List<string>>(); // key: topic ; value: mensagens das replicas
-        private List<string> pending_close = new List<string>();
-        private List<string> added_close = new List<string>();
+        private List<Tuple<string, string>> pending_close = new List<Tuple<string, string>>();
+        private List<Tuple<string, string>> added_close = new List<Tuple<string, string>>();
 
         private Dictionary<string, string> client_addresses = new Dictionary<string, string>(); //key = client_identifier; value = client_address
         private Dictionary<string, string> server_addresses = new Dictionary<string, string>(); //key = server_identifier; value = server_address        
@@ -171,9 +171,10 @@ namespace MSDAD.Server.Communication
         public void Create(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, string create_replica_identifier, int hops, List<string> logs_list, int sent_version)
         {
             object create;
-            Tuple<string, string> join_tuple;
+            Tuple<string, string> create_tuple;
 
-            join_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
+            create_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
+
 
             if (!dictionary_locks.ContainsKey(meeting_topic))
             {
@@ -185,7 +186,7 @@ namespace MSDAD.Server.Communication
                 create = dictionary_locks[meeting_topic];
             }            
 
-            if (!added_create.Contains(meeting_topic) && !this.added_join.Contains(join_tuple) && !added_close.Contains(meeting_topic))
+            if (!added_create.Contains(create_tuple) && !this.added_join.Contains(create_tuple) && !added_close.Contains(create_tuple))
             {
 
                 if (!this.receiving_create.ContainsKey(meeting_topic))
@@ -320,7 +321,7 @@ namespace MSDAD.Server.Communication
                 join = dictionary_locks[meeting_topic];
             }
 
-            if (!this.added_join.Contains(join_tuple) && !this.added_close.Contains(meeting_topic))
+            if (!this.added_join.Contains(join_tuple) && !this.added_close.Contains(join_tuple))
             {
 
                 if (!this.receiving_join.ContainsKey(join_tuple))
@@ -388,6 +389,9 @@ namespace MSDAD.Server.Communication
         public void Close(string meeting_topic, string client_identifier, string close_replica_identifier, int hops, List<string> logs_list, int sent_version)
         {
             object close;
+            Tuple<string, string> close_tuple;
+
+            close_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
 
             if (!dictionary_locks.ContainsKey(meeting_topic))
             {
@@ -399,7 +403,7 @@ namespace MSDAD.Server.Communication
                 close = dictionary_locks[meeting_topic];
             }
 
-            if(!added_close.Contains(meeting_topic))
+            if(!added_close.Contains(close_tuple))
             {
                 if (!this.receiving_close.ContainsKey(meeting_topic))
                 {
@@ -781,7 +785,7 @@ namespace MSDAD.Server.Communication
 
             return new Tuple<bool, List<string>>(result, highest_value_list);
         }
-        public int AtomicWrite(string meeting_topic, List<string> logs_list, ref List<string> added_create, ref List<Tuple<string, string>> added_join, ref List<string> added_close)
+        public int AtomicWrite(string meeting_topic, List<string> logs_list, ref List<Tuple<string, string>> added_create, ref List<Tuple<string, string>> added_join, ref List<Tuple<string, string>> added_close)
         {
             int written_version = this.server_library.WriteMeeting(meeting_topic, logs_list, ref this.logs_dictionary, ref added_create, ref added_join, ref added_close);
             Console.WriteLine("!!!Fez Atomic Write!!!");
@@ -815,11 +819,16 @@ namespace MSDAD.Server.Communication
 
         private void CreateBroadcast(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, int hops, List<string> logs_list, int sent_version)
         {
+
+            Tuple<string, string> create_tuple;
+
+            create_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
+
             Console.WriteLine("estado:" + this.server_library.GetVersion(meeting_topic) + " " + sent_version);
-            if (!pending_create.Contains(meeting_topic) && this.server_library.GetVersion(meeting_topic) < sent_version)
+            if (!pending_create.Contains(create_tuple) && this.server_library.GetVersion(meeting_topic) < sent_version)
             {
                 Console.WriteLine("if do create broadcast");
-                pending_create.Add(meeting_topic);
+                pending_create.Add(create_tuple);
 
                 int server_iter = 1;
                 TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
@@ -883,7 +892,7 @@ namespace MSDAD.Server.Communication
                         Console.WriteLine("quorum create");
                         Console.WriteLine("quorum create");
                         this.server_library.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
-                        this.added_create.Add(meeting_topic);
+                        this.added_create.Add(create_tuple);
                         this.server_library.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier, ref this.logs_dictionary);
                         if (invitees == null)
                         {
@@ -922,7 +931,7 @@ namespace MSDAD.Server.Communication
                 }
             }
             // TODO: verificar se atomic read tambem tem de ter isto
-            this.pending_create.Remove(meeting_topic);
+            this.pending_create.Remove(create_tuple);
         }
         private void JoinBroadcast(string meeting_topic, List<string> slots, string client_identifier, int hops, Tuple<string, string> join_tuple, List<string> logs_list, int sent_version)
         {
@@ -1010,11 +1019,13 @@ namespace MSDAD.Server.Communication
 
         private void CloseBroadcast(string meeting_topic, string client_identifier, int hops, List<string> logs_list, int sent_version)
         {
+            Tuple<string, string> close_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
+
             Console.WriteLine("close broadcast: " + this.server_library.GetVersion(meeting_topic) + " : " + sent_version);
-            if (!this.pending_close.Contains(meeting_topic) && this.server_library.GetVersion(meeting_topic) < sent_version)
+            if (!this.pending_close.Contains(close_tuple) && this.server_library.GetVersion(meeting_topic) < sent_version)
             {
                 Console.WriteLine("if");
-                this.pending_close.Add(meeting_topic);
+                this.pending_close.Add(close_tuple);
 
                 int server_iter = 1;
                 TimeSpan timeout = new TimeSpan(0, 0, 0, 10, 0); //TODO: AJUSTAR!
@@ -1078,7 +1089,7 @@ namespace MSDAD.Server.Communication
                     if (current_messages > (float)(this.n_replicas - this.crashed_servers) / 2)
                     {
                         this.server_library.Close(meeting_topic, client_identifier, sent_version);
-                        this.added_close.Add(meeting_topic);
+                        this.added_close.Add(close_tuple);
                         this.server_library.CloseLog(meeting_topic, client_identifier, ref this.logs_dictionary);
                         Console.WriteLine("close: " + meeting_topic);
                         break;
@@ -1090,7 +1101,7 @@ namespace MSDAD.Server.Communication
                     Console.WriteLine("Could not receive quorum: Abort");
                 }
             }
-            this.pending_close.Remove(meeting_topic);
+            this.pending_close.Remove(close_tuple);
         }
 
         public void setNReplica(int n_replicas)
