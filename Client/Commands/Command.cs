@@ -2,13 +2,15 @@
 using MSDAD.Library;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MSDAD.Client.Commands
 {
-            
+
     abstract class Command
     {
         public int client_port;
@@ -31,9 +33,23 @@ namespace MSDAD.Client.Commands
             this.client_port = this.client_library.ClientPort;
             this.client_ip = this.client_library.ClientIP;
             this.client_address = ClientUtils.AssembleAddress(client_ip, client_port);
-            Console.WriteLine("The URL to whom we are connectig to is: \"" + this.server_url + "\".");
+            Console.WriteLine("URL");
+            Console.WriteLine(this.server_url);
             this.remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), server_url);
         }
         public abstract object Execute();
+
+        public void CrashClientProcess()
+        {
+            Console.Write("Crashing Client in...");
+            Thread.Sleep(1000);
+            Console.Write("3 ");
+            Thread.Sleep(1000);
+            Console.Write("2 ");
+            Thread.Sleep(1000);
+            Console.Write("1 ");
+            Thread.Sleep(1000);
+            Process.GetCurrentProcess().Kill();
+        }
     }
 }
