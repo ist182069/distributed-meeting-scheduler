@@ -48,7 +48,7 @@ namespace MSDAD.Client.Comunication
                 channel = new TcpChannel(this.client_port);
                 ChannelServices.RegisterChannel(channel, true);
             }
-            catch (SocketException e)
+            catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
             {
                 throw new ClientLocalException(ErrorCodes.ALREADY_USED_PORT);
             }

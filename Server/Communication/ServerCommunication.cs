@@ -157,7 +157,7 @@ namespace MSDAD.Server.Communication
                     ServerInterface remote_server = (ServerInterface)Activator.GetObject(typeof(ServerInterface), replica_url);
                     remote_server.NReplicasUpdate(n_replicas);
                 }
-                catch (System.Net.Sockets.SocketException se)
+                catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
                 {
                     Console.WriteLine("Deteta Crash no Start\n");
                     replicas_state[ServerUtils.GetPortFromUrl(replica_url) - 3000] = false;
@@ -639,9 +639,9 @@ namespace MSDAD.Server.Communication
 
                 Console.WriteLine("Enviou GM: " + replica_url);
             }
-            catch (System.Net.Sockets.SocketException se)
+            catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
             {
-                Console.WriteLine(se.Message);
+                Console.WriteLine(communicationException.Message);
                 this.replicas_state[replica_port-3000] = false;
                 this.crashed_servers++;
             }
@@ -727,9 +727,9 @@ namespace MSDAD.Server.Communication
 
                         Console.WriteLine("enviou para os gajos");
                     }
-                    catch (System.Net.Sockets.SocketException se)
+                    catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
                     {
-                        Console.WriteLine(se.Message);
+                        Console.WriteLine(communicationException.Message);
                         this.replicas_state[server_iter] = false;
                         this.crashed_servers++;
                     }
@@ -840,9 +840,9 @@ namespace MSDAD.Server.Communication
                             }
 
                         }
-                        catch (System.Net.Sockets.SocketException se)
+                        catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
                         {
-                            Console.WriteLine(se.Message);
+                            Console.WriteLine(communicationException.Message);
                             this.replicas_state[server_iter] = false;
                             this.crashed_servers++;
                         }
@@ -931,9 +931,9 @@ namespace MSDAD.Server.Communication
                                 thread.Abort();
                             }
                         }
-                        catch (System.Net.Sockets.SocketException se)
+                        catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
                         {
-                            Console.WriteLine(se.Message);
+                            Console.WriteLine(communicationException.Message);
                             this.replicas_state[server_iter] = false;
                             this.crashed_servers++;
                         }
@@ -1018,9 +1018,9 @@ namespace MSDAD.Server.Communication
                             }
 
                         }
-                        catch (System.Net.Sockets.SocketException se)
+                        catch (Exception communicationException) when (communicationException is System.Net.Sockets.SocketException || communicationException is System.IO.IOException)
                         {
-                            Console.WriteLine(se.Message);
+                            Console.WriteLine(communicationException.Message);
                             this.replicas_state[server_iter] = false;
                             this.crashed_servers++;
                         }

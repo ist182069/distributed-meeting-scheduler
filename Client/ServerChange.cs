@@ -46,7 +46,7 @@ namespace MSDAD
                     
                     // cena fodix que pensei em que passas o comando original aqui para dentro
                 }
-                catch (System.Net.Sockets.SocketException se)
+                catch (Exception exception) when (exception is System.Net.Sockets.SocketException || exception is System.IO.IOException)
                 {
                     try_replica = ((try_replica + 1) % n_replicas) + 1;
                     Console.WriteLine(try_replica);
