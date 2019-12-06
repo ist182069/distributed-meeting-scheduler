@@ -2,6 +2,7 @@
 using MSDAD.Server.Communication;
 using MSDAD.Server.Logs;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -350,7 +351,7 @@ namespace MSDAD.Server
             return version;
         }
 
-        public int WriteMeeting(string meeting_topic, List<string> logs_list)
+        public int WriteMeeting(string meeting_topic, List<string> logs_list, ref ConcurrentDictionary<string, List<string>> logs_dictionary)
         {
             // TODO2: adicionar aqui tambem ao added e aos logs
             Console.WriteLine("Entrou no WriteMeeting");
@@ -382,6 +383,7 @@ namespace MSDAD.Server
                             invitees = result_tuple.Item6;
                             client_identifier = result_tuple.Item7;
                             this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                            this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier, ref logs_dictionary);
                             Console.WriteLine("ESCREVEU:" + json_entry);
                         }                            
                         break;
@@ -392,6 +394,7 @@ namespace MSDAD.Server
                             slots = result_tuple.Item5;
                             client_identifier = result_tuple.Item7;
                             this.Join(meeting_topic, slots, client_identifier, version);
+                            this.JoinLog(meeting_topic, slots, client_identifier, ref logs_dictionary);
                         }
                         Console.WriteLine("ESCREVEU:" + json_entry);
                         break;
@@ -401,6 +404,7 @@ namespace MSDAD.Server
                         {
                             client_identifier = result_tuple.Item7;
                             this.Close(meeting_topic, client_identifier, version);
+                            this.CloseLog(meeting_topic, client_identifier, ref logs_dictionary);
                         }
                         Console.WriteLine("ESCREVEU:" + json_entry);
                         break;
@@ -408,6 +412,42 @@ namespace MSDAD.Server
             }
 
             return version;
-        }       
+        }
+
+        public void CreateLog(string meeting_topic, int min_attendees, List<string> slots, List<string> invitees, string client_identifier, ref ConcurrentDictionary<string, List<string>> logs_dictionary)
+        {
+            int write_version = this.GetVersion(meeting_topic);
+            Console.WriteLine("create log: " + write_version);
+            string json_log = new LogsParser().Create_ParseJSON(meeting_topic, write_version, min_attendees, slots, invitees, client_identifier);
+            Console.WriteLine("log criado: " + json_log);
+            List<string> logs_list = new List<string>();
+            logs_list.Add(json_log);
+            logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
+            Console.WriteLine("criou log");
+        }
+        public void JoinLog(string meeting_topic, List<string> slots, string client_identifier, ref ConcurrentDictionary<string, List<string>> logs_dictionary)
+        {
+            int write_version = this.GetVersion(meeting_topic);
+            Console.WriteLine("join log: " + write_version);
+            string json_log = new LogsParser().Join_ParseJSON(meeting_topic, write_version, slots, client_identifier);
+            Console.WriteLine("log criado: " + json_log);
+            List<string> logs_list = logs_dictionary[meeting_topic];
+            logs_list.Add(json_log);
+            logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
+            Console.WriteLine("fez log");
+        }
+
+        public void CloseLog(string meeting_topic, string client_identifier, ref ConcurrentDictionary<string, List<string>> logs_dictionary)
+        {
+            Console.WriteLine("close log");
+            int write_version = this.GetVersion(meeting_topic);
+            string json_log = new LogsParser().Close_ParseJSON(meeting_topic, write_version, client_identifier);
+            Console.WriteLine("dred");
+            Console.WriteLine(json_log);
+            List<string> logs_list = logs_dictionary[meeting_topic];
+            logs_list.Add(json_log);
+            logs_dictionary.AddOrUpdate(meeting_topic, logs_list, (key, oldValue) => logs_list);
+            Console.WriteLine("fez log");
+        }
     }
 }
