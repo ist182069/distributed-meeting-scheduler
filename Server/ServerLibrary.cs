@@ -351,7 +351,7 @@ namespace MSDAD.Server
             return version;
         }
 
-        public int WriteMeeting(string meeting_topic, List<string> logs_list, ref ConcurrentDictionary<string, List<string>> logs_dictionary)
+        public int WriteMeeting(string meeting_topic, List<string> logs_list, ref ConcurrentDictionary<string, List<string>> logs_dictionary, ref List<string> added_create, ref List<Tuple<string, string>> added_join, ref List<string> added_close)
         {
             // TODO2: adicionar aqui tambem ao added e aos logs
             Console.WriteLine("Entrou no WriteMeeting");
@@ -383,6 +383,7 @@ namespace MSDAD.Server
                             invitees = result_tuple.Item6;
                             client_identifier = result_tuple.Item7;
                             this.Create(meeting_topic, min_attendees, slots, invitees, client_identifier);
+                            added_create.Add(meeting_topic);
                             this.CreateLog(meeting_topic, min_attendees, slots, invitees, client_identifier, ref logs_dictionary);
                             Console.WriteLine("ESCREVEU:" + json_entry);
                         }                            
@@ -393,10 +394,13 @@ namespace MSDAD.Server
                         {
                             slots = result_tuple.Item5;
                             client_identifier = result_tuple.Item7;
+
+                            Tuple<string, string> join_tuple = new Tuple<string, string>(meeting_topic, client_identifier);
                             this.Join(meeting_topic, slots, client_identifier, version);
+                            added_join.Add(join_tuple);
                             this.JoinLog(meeting_topic, slots, client_identifier, ref logs_dictionary);
-                        }
-                        Console.WriteLine("ESCREVEU:" + json_entry);
+                            Console.WriteLine("ESCREVEU:" + json_entry);
+                        }                        
                         break;
                     case "Close":                        
                         version = result_tuple.Item2;
@@ -404,9 +408,10 @@ namespace MSDAD.Server
                         {
                             client_identifier = result_tuple.Item7;
                             this.Close(meeting_topic, client_identifier, version);
+                            added_close.Add(meeting_topic);
                             this.CloseLog(meeting_topic, client_identifier, ref logs_dictionary);
-                        }
-                        Console.WriteLine("ESCREVEU:" + json_entry);
+                            Console.WriteLine("ESCREVEU:" + json_entry);
+                        }                        
                         break;
                 }
             }

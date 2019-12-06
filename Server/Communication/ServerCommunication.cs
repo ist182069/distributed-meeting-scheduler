@@ -228,7 +228,7 @@ namespace MSDAD.Server.Communication
                         if (atomic_read_result)
                         {
                             Console.WriteLine("entrou if dos 0 hops");
-                            written_version = this.AtomicWrite(meeting_topic, highest_value_list);
+                            written_version = this.AtomicWrite(meeting_topic, highest_value_list, ref this.added_create, ref this.added_join, ref this.added_close);
                             hops++;
                             written_version++;
                             Console.WriteLine("written version: " + written_version);
@@ -244,7 +244,7 @@ namespace MSDAD.Server.Communication
                     {
 
                         Console.WriteLine("entrou no else");
-                        this.AtomicWrite(meeting_topic, logs_list);
+                        this.AtomicWrite(meeting_topic, logs_list, ref this.added_create, ref this.added_join, ref this.added_close);
                         this.CreateBroadcast(meeting_topic, min_attendees, slots, invitees, client_identifier, hops, logs_list, sent_version);
                         Console.WriteLine("fez create broadcast");
                     }
@@ -363,7 +363,7 @@ namespace MSDAD.Server.Communication
                         if (atomic_read_result)
                         {
                             Console.WriteLine("entrou if dos 0 hops");
-                            written_version = this.AtomicWrite(meeting_topic, highest_value_list);                            
+                            written_version = this.AtomicWrite(meeting_topic, highest_value_list, ref this.added_create, ref this.added_join, ref this.added_close);
                             hops++;
                             written_version++;
                             Console.WriteLine("");
@@ -376,7 +376,7 @@ namespace MSDAD.Server.Communication
                     else
                     {
                         Console.WriteLine("entrou no else");
-                        this.AtomicWrite(meeting_topic, logs_list);
+                        this.AtomicWrite(meeting_topic, logs_list, ref this.added_create, ref this.added_join, ref this.added_close);
                         this.JoinBroadcast(meeting_topic, slots, client_identifier, hops, join_tuple, logs_list, sent_version);
                         Console.WriteLine("entrou executou");
                     }
@@ -442,7 +442,7 @@ namespace MSDAD.Server.Communication
                         if (atomic_read_result)
                         {
                             Console.WriteLine("entrou if");
-                            written_version = this.AtomicWrite(meeting_topic, highest_value_list);
+                            written_version = this.AtomicWrite(meeting_topic, highest_value_list, ref this.added_create, ref this.added_join, ref this.added_close);
                             hops++;
                             written_version++;
                             Console.WriteLine("");
@@ -468,7 +468,7 @@ namespace MSDAD.Server.Communication
                     else
                     {
                         Console.WriteLine("entrou no else");
-                        this.AtomicWrite(meeting_topic, logs_list);
+                        this.AtomicWrite(meeting_topic, logs_list, ref this.added_create, ref this.added_join, ref this.added_close);
                         this.CloseBroadcast(meeting_topic, client_identifier, hops, logs_list, sent_version);
                         Console.WriteLine("close executou");
                     }
@@ -781,9 +781,9 @@ namespace MSDAD.Server.Communication
 
             return new Tuple<bool, List<string>>(result, highest_value_list);
         }
-        public int AtomicWrite(string meeting_topic, List<string> logs_list)
+        public int AtomicWrite(string meeting_topic, List<string> logs_list, ref List<string> added_create, ref List<Tuple<string, string>> added_join, ref List<string> added_close)
         {
-            int written_version = this.server_library.WriteMeeting(meeting_topic, logs_list, ref this.logs_dictionary);
+            int written_version = this.server_library.WriteMeeting(meeting_topic, logs_list, ref this.logs_dictionary, ref added_create, ref added_join, ref added_close);
             Console.WriteLine("!!!Fez Atomic Write!!!");
             return written_version;
         }
