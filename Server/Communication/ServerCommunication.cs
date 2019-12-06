@@ -866,9 +866,28 @@ namespace MSDAD.Server.Communication
                         if (invitees == null)
                         {
                             Console.WriteLine("enviou aos gajos");
-                            this.SendLogNMessages(meeting_topic, client_identifier);
+                            List<string> client_addresses_list = this.client_addresses.Values.ToList();
+                            this.SendLogNMessages(meeting_topic, client_addresses_list);
+                            Console.WriteLine("funcionou");
                         }
-
+                        else
+                        {
+                            Console.WriteLine("enviou aos invitees");
+                            List<string> invitees_addresses_list = new List<string>();
+                            foreach(string sent_invitee in invitees)
+                            {
+                                if (this.client_addresses.ContainsKey(sent_invitee))
+                                {
+                                    string invitee_address = this.client_addresses[sent_invitee];
+                                    Console.WriteLine("&%$%&/invitee_address: ");
+                                    Console.WriteLine(invitee_address);
+                                    Console.WriteLine("&%$% &/");                                    
+                                    invitees_addresses_list.Add(invitee_address);
+                                }
+                            }
+                            this.SendLogNMessages(meeting_topic, invitees_addresses_list);
+                            Console.WriteLine("funcionou");
+                        }
                         Console.WriteLine("\r\nNew event: " + meeting_topic);
                         Console.Write("Please run a command to be run on the server: ");
                         break;
@@ -1102,9 +1121,9 @@ namespace MSDAD.Server.Communication
             }
         }
 
-        private void SendLogNMessages(string meeting_topic, string client_identifer)
+        private void SendLogNMessages(string meeting_topic, List<string> client_addresses)
         {            
-            int number_clients = this.client_addresses.Keys.Count;
+            int number_clients = client_addresses.Count;
             
             if(number_clients!=0)
             {
@@ -1118,25 +1137,35 @@ namespace MSDAD.Server.Communication
                 if(clients_log != 0)
                 {
                     double log_round = Math.Ceiling(clients_log);
-                    string[] random_clients = this.PickNRandomClients((int) log_round);
+                    string[] random_clients = this.PickNRandomClients((int) log_round, client_addresses);
 
-                    for(int i = 0; i < random_clients.Length; i++)
+                    Console.WriteLine("#######");
+                    Console.WriteLine(random_clients.Length);
+                    Console.WriteLine("#######");
+                    for (int i = 0; i < random_clients.Length; i++)
                     {
+                        Console.WriteLine("$$$$");
                         Console.WriteLine("client:" + random_clients[i]);
-                        List<string> sent_clients = this.client_addresses.Values.ToList();
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + random_clients[i]);                        
-                        
-                        SendMeetingToClientGossipAsyncDelegate RemoteDel = new SendMeetingToClientGossipAsyncDelegate(client.SendMeetingGossip);
-                        AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToClientGossipAsyncCallBack);
-                        IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, 1, "OPEN", null, sent_clients, RemoteCallback, null);
+                        Console.WriteLine("$$$$");
+                        if (this.client_addresses.ContainsValue(random_clients[i]))
+                        {
+                            ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + random_clients[i]);
+
+                            SendMeetingToClientGossipAsyncDelegate RemoteDel = new SendMeetingToClientGossipAsyncDelegate(client.SendMeetingGossip);
+                            AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToClientGossipAsyncCallBack);
+                            IAsyncResult RemAr = RemoteDel.BeginInvoke(meeting_topic, 1, "OPEN", null, client_addresses, RemoteCallback, null);
+                        }                        
                     }                    
                 }    
                 else
                 {
-                    if (this.client_addresses.ContainsKey(client_identifer))
+                    string single_address = client_addresses[0];
+                    Console.WriteLine("?????");
+                    Console.WriteLine("?????");
+                    Console.WriteLine(single_address);
+                    if (this.client_addresses.ContainsValue(single_address))
                     {
-                        string client_address = this.client_addresses[client_identifer];
-                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + client_address);
+                        ClientInterface client = (ClientInterface)Activator.GetObject(typeof(ClientInterface), "tcp://" + single_address);
 
                         SendMeetingToClientAsyncDelegate RemoteDel = new SendMeetingToClientAsyncDelegate(client.SendMeeting);
                         AsyncCallback RemoteCallback = new AsyncCallback(ServerCommunication.SendMeetingToClientAsyncCallBack);
@@ -1147,13 +1176,12 @@ namespace MSDAD.Server.Communication
             
         }
 
-        private string[] PickNRandomClients(int n_clients)
+        private string[] PickNRandomClients(int n_clients, List<string> client_list)
         {
             int insertion_counter = 0, random_int;
             string random_address;
             string[] selected_clients;
             Random random;
-            KeyValuePair<string, string> client_pair;
             
             selected_clients = new string[n_clients];
             random = new Random();
@@ -1164,8 +1192,7 @@ namespace MSDAD.Server.Communication
             {
                 
                 random_int = random.Next(0, (n_clients+1));
-                client_pair = this.client_addresses.ElementAt(random_int);
-                random_address = client_pair.Value;
+                random_address = client_list[random_int];
 
                 if(!selected_clients.Contains(random_address))
                 {
