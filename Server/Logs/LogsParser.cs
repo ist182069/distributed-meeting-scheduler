@@ -81,7 +81,7 @@ namespace MSDAD.Server.Logs
 
         public string Join_ParseJSON(string meeting_topic, int version, List<string> slots, string client_identifier)
         {
-            Join join = new Join(version, meeting_topic, client_identifier, slots);
+            Join join = new Join(version, client_identifier, meeting_topic, slots);
             string json_create = JsonConvert.SerializeObject(join);
 
             return json_create;
