@@ -1,0 +1,2 @@
+wait 20000
+join myTopic1 1 Porto,2020-01-10 

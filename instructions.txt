@@ -1,4 +1,47 @@
-﻿- Para processar o PCS dar é necessário fazer rebuild aos outros módulos do programa como o Client e o Server.
+Instructions
 
-Assumpções:
-- Os Rooms são adicionados por ordem de tamanho
+ Open the project "MSDAD.sln"
+ Rebuild each one of the existing modules
+ Start the PCS module
+ Start the PuppetMaster module
+ You can insert any script you want in the PuppetMaster's text box and send it to either the client or the server
+ An example of a PuppetMaster script to run would be the following:
+
+  AddRoom Porto 2 room1
+  Server s1 tcp://localhost:3001/server1 1 0 0
+  Server s2 tcp://localhost:3002/server2 1 0 0
+  Server s3 tcp://localhost:3003/server3 1 0 0
+  Wait 3000
+  Client c1 tcp://localhost:4001/client1 tcp://localhost:3001/server1 create+join+close.txt
+
+ In this script the client creates a meeting for himself, joins it and closes it. It is a simple interaction to show our simple replication protocol working.
+ Another interaction would be the following
+
+  AddRoom Porto 2 room1
+  Server s1 tcp://localhost:3001/server1 1 0 0
+  Server s2 tcp://localhost:3002/server2 1 0 0
+  Server s3 tcp://localhost:3003/server3 1 0 0
+  Wait 3000
+  Client c1 tcp://localhost:4001/client1 tcp://localhost:3001/server1 create+join+wait+close.txt
+  Client c2 tcp://localhost:4002/client2 tcp://localhost:3003/server3 wait+join.txt
+
+ Here the client creates a meeting, joins it, waits for client2 to join it and closes it.
+ We also have some other scripts on Client/Scripts and PuppetMaster/Scripts folders with more complex functionalities. The latter shall have its text Copied and Pasted on the PuppetMaster User Interface and then send them by clicking the button with the same name.
+
+ We made the following assumptions:
+  - Every client uses identifiers from c1 to c99 and has the addresses from "tcp://localhost:4001/client1" to "tcp://localhost:4099/client99" respectively, available for use.
+  - Every server uses identifiers from s1 to s99 and has the addresses from "tcp://localhost:3001/server1" to "tcp://localhost:3099/server99" respectively, available for use.
+
+ We implemented all commands in the Puppetmaster these include:
+  - Server: "Server server_identifier server_address number_of_tolerated_faults min_delay max_delay".
+  - Client: "Client client_identifier client_address server_address script_to_be_run". In order not to run a script on the client "script_to_be_run" must be equal to 0
+  - Status: "Status"
+  - Freeze: "Freeze server_identifier"
+  - Unfreeze: "Unfreeze server_identifier"
+  - Crash: "Crash server_identifier"
+  - Wait: "Wait time_milliseconds"
+
+ Finally we conclude by stating that we accomplished the development of all the functionalities mentioned in the Project Statement
+ 
+
+ 

@@ -1,2 +1,0 @@
-wait 7000
-create myTopic2 2 1 0 Porto,2020-01-10

@@ -1,2 +1,0 @@
-wait 10000
-create myTopic2 2 1 2 Porto,2020-01-10 c2
