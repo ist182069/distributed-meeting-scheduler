@@ -31,6 +31,10 @@ Este projecto foi realizado na linguagem C#. Sendo este projecto uma aplicação
 
 - */Server* naturalmente é o directório onde se encontra o servidor. No directório */Communications* encontram-se as funções de Remoting necessárias às comunicações usadas pelo servidor.
 
+## Enunciado
+
+Eventualmente tambm colocarei o enúnciado do projecto.
+
 ## Scripts Puppet Master
 
 Eventualmente colocarei aqui uma pasta com scripts para serem corridos no PuppetMaster ou em qualquer uma das máquinas Cliente ou Servidor.
