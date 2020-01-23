@@ -1,17 +1,16 @@
 # Desenvolvimento de Aplicações Distribuídas
 
 ## Nota Introdutória
-Este projecto consistiu em fazer um serviço de agendamento de reuniões.
 
-A ideia era um cliente ligar-se a um servidor e emitir comandos como a criação de reuniões que seriam agendadas para qualquer futuro dia. Estas reuniões seriam agendadas para uma sala numa dada localização (i.e. Lisboa; Porto) numa hora escolhida pelo coordenador (processo criador da reunião). 
+O responsável pela cadeira foi o Professor Luís Rodrigues e este projecto foi avaliado pelo Professor João Garcia tendo-lhe sido atribuída a nota final de para o projecto de 17.5. Este projecto foi a segunda nota mais alta no Instituto Superior Técnico a esta unidade curricular no semestre de 2019/2020.
+
+A ideia do projecto consistia em fazer um serviço de agendamento de reuniões. A interacção seria um cliente ligar-se a um servidor e emitir comandos como a criação de reuniões que seriam agendadas para qualquer futuro dia. Estas reuniões seriam agendadas para uma sala numa dada localização (i.e. Lisboa; Porto) numa hora escolhida pelo coordenador (processo criador da reunião). 
 
 As opções realizadas pelos clientes incluíam poder criar, juntar-se e fechar reuniões. Se o fecho das reuniões fosse bem sucedido estas passariam ao estado "SCHEDULED", caso contrário estas seriam canceladas.
 
 O objectivo dos servidores, e segundo a nossa interpretação do enunciado do projecto, que se encontra no directório "/Statement", foi cada servidor usar "Uniform Reliable Broadcast" em combinação com "Atomic Registers" e "Distributed Mutal Exclusion" de forma a garantir a ordem total das mensagens difundidas pelos servidores.
 
 Trabalho futuro consistiria em implementar "Message Queues" em cada servidor de forma a garantir que se uma operação não for difundida com sucesso estas voltaria a sê-lo algures no tempo mais tarde.
-
-A nota final atribuída a este projecto foi 17.5. Este projecto foi a segunda nota mais alta no Instituto Superior Técnico a esta unidade curricular no semestre de 2019/2020.
 
 É com muito prazer que partilho com qualquer leitor deste repositório o código para ajudar na criação de qualquer aplicação distribuída em projectos futuros.
 
