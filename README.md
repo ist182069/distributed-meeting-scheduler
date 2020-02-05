@@ -35,6 +35,9 @@ Este projecto foi realizado na linguagem C#. Sendo este projecto uma aplicação
 Na raiz deste directório encontram-se uma interacção de exemplo que mostra como correr o projecto. Os scripts para serem corridos pelo cliente encontram-se no directório *./Client/Scripts*. A mesma coisa para os scripts a serem corridos pelo PuppetMaster, estes encontram-se no directório *./PuppetMaster/Scripts*.
 
 ## Grupo 16 
+
+<pre>
 - 82069 - José Brás         -  MEIC-T  
 - 87527 - Duarte Nascimento -  MEIC-T
 - 87557 - Pedro Agostinho   -  METI
+</pre>
