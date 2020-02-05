@@ -36,8 +36,6 @@ Na raiz deste directório encontram-se uma interacção de exemplo que mostra co
 
 ## Grupo 16 
 
-<pre>
-- 82069 - José Brás         -  MEIC-T  
-- 87527 - Duarte Nascimento -  MEIC-T
-- 87557 - Pedro Agostinho   -  METI
-</pre>
+- 82069 - José Brás - MEIC-T (Nota Final: 18)
+- 87527 - Duarte Nascimento - MEIC-T (Nota Final: 17)
+- 87557 - Pedro Agostinho - METI (Nota Final: 17)
