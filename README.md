@@ -2,7 +2,7 @@
 
 ## Nota Introdutória
 
-O responsável pela cadeira foi o Professor Luís Rodrigues e este projecto foi avaliado pelo Professor João Garcia tendo-lhe sido atribuída a nota final de para o projecto de 17.5. Este projecto foi a segunda nota mais alta no Instituto Superior Técnico a esta unidade curricular no semestre de 2019/2020.
+O responsável pela cadeira foi o Professor Luís Rodrigues e este projecto foi avaliado pelo Professor João Garcia tendo-lhe sido atribuída a nota final de para o projecto de 17.5/20. Este projecto foi a segunda nota mais alta no Instituto Superior Técnico a esta unidade curricular no semestre de 2019/2020.
 
 A ideia do projecto consistia em fazer um serviço de agendamento de reuniões. A interacção seria um cliente ligar-se a um servidor e emitir comandos como a criação de reuniões que seriam agendadas para qualquer futuro dia. Estas reuniões seriam agendadas para uma sala numa dada localização (i.e. Lisboa; Porto) numa hora escolhida pelo coordenador (processo criador da reunião). 
 
@@ -36,6 +36,6 @@ Na raiz deste directório encontram-se uma interacção de exemplo que mostra co
 
 ## Grupo 16 
 
-- 82069 - José Brás - MEIC-T (Nota Final: 18)
-- 87527 - Duarte Nascimento - MEIC-T (Nota Final: 17)
-- 87557 - Pedro Agostinho - METI (Nota Final: 17)
+- 82069 - José Brás - MEIC-T (Nota Final: 18/20)
+- 87527 - Duarte Nascimento - MEIC-T (Nota Final: 17/20)
+- 87557 - Pedro Agostinho - METI (Nota Final: 17/20)
