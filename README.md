@@ -1,41 +1,43 @@
-# Desenvolvimento de Aplicações Distribuídas
+### [Design and Implementation of Distributed Applications](https://fenix.tecnico.ulisboa.pt/disciplinas/PADI/2021-2022/1-semestre)
 
-## Nota Introdutória
+## Introductory Note
 
-O responsável pela cadeira foi o Professor Luís Rodrigues e este projecto foi avaliado pelo Professor João Garcia tendo-lhe sido atribuída a nota final de para o projecto de 17.5/20. Este projecto foi a segunda nota mais alta no Instituto Superior Técnico a esta unidade curricular no semestre de 2019/2020.
+This course is considered one of the hardest courses in the Department of Computer Science and Engineering by the students.
 
-A ideia do projecto consistia em fazer um serviço de agendamento de reuniões. A interacção seria um cliente ligar-se a um servidor e emitir comandos como a criação de reuniões que seriam agendadas para qualquer futuro dia. Estas reuniões seriam agendadas para uma sala numa dada localização (i.e. Lisboa; Porto) numa hora escolhida pelo coordenador (processo criador da reunião). 
+The course was taught by Professor Luís Rodrigues, and this project was evaluated by Professor João Garcia, who awarded it a final grade of 17.5/20. This project was the second highest grade at Instituto Superior Técnico for this course in the semester of 2019/2020.
 
-As opções realizadas pelos clientes incluíam poder criar, juntar-se e fechar reuniões. Se o fecho das reuniões fosse bem sucedido estas passariam ao estado "SCHEDULED", caso contrário estas seriam canceladas.
+The project idea was to create a meeting scheduling service. The interaction involved a client connecting to a server and issuing commands such as creating meetings scheduled for any future date. These meetings would be scheduled for a room in a given location (e.g., Lisbon; Porto) at a time chosen by the coordinator (the meeting creator process).
 
-O objectivo dos servidores, e segundo a nossa interpretação do enunciado do projecto, que se encontra no directório *./Statement*, foi cada servidor usar "Uniform Reliable Broadcast" em combinação com "Atomic Registers" e "Distributed Mutual Exclusion" de forma a garantir a ordem total das mensagens difundidas pelos servidores.
+Client options included creating, joining, and closing meetings. If the closing of the meetings was successful, they would transition to the "SCHEDULED" state; otherwise, they would be canceled.
 
-Trabalho futuro consistiria em implementar "Message Queues" em cada servidor de forma a garantir que se uma operação não for difundida com sucesso estas voltaria a sê-lo algures no tempo mais tarde.
+The objective of the servers, as per our interpretation of the project statement located in the *./Statement* directory, was for each server to use "Uniform Reliable Broadcast" in combination with "Atomic Registers" and "Distributed Mutual Exclusion" to ensure total order of messages broadcasted by the servers.
 
-É com muito prazer que partilho com qualquer leitor deste repositório o código para ajudar na criação de qualquer aplicação distribuída em projectos futuros.
+Future work would involve implementing "Message Queues" on each server to ensure that if an operation is not successfully broadcasted, it would be re-broadcasted at some later point in time.
 
-## Línguagem e Módulos Utilizados
+It is with great pleasure that I share with any reader of this repository the code to aid in the creation of any distributed application in future projects.
 
-Este projecto foi realizado na linguagem C#. Sendo este projecto uma aplicação distribuda o módulo mais utilizado e importado no Visual Studio foi o Remoting. Adicionalmente fizemos uso também do JSON.NET da Newtonsoft para parsar certas classes e enviá-las na rede.
+## Language and Modules Used
 
-## Directórios
+This project was implemented in the C# language. Being a distributed application, the most used and imported module in Visual Studio was Remoting. Additionally, we also used JSON.NET from Newtonsoft to parse certain classes and send them over the network.
 
-- No directório *./Client* encontramos naturalmente o código da aplicação cliente que fará os pedidos à aplicação servidor. Esta aplicação é uma consola C# na qual são emitidos comandos para os servidores. A estructura da "main" código segue um padrão de desenho "Command". No directório *./Communications* encontram-se as funções de Remoting necessárias às comunicações usadas por nós.
+## Directories
 
-- No directório *./Library* encontram-se as bibliotecas partilhadas pela aplicação Cliente e Servidor.
+- In the *./Client* directory, we naturally find the code for the client application that will make requests to the server application. This application is a C# console in which commands are issued to the servers. The structure of the main code follows a "Command" design pattern. In the *./Communications* directory, we find the Remoting functions necessary for the communications used by us.
 
-- *./PCS* é a máquina responsável por iniciar processos Cliente ou Servidor remotamente emitidos através da aplicação PuppetMaster.
+- In the *./Library* directory, there are the libraries shared by the Client and Server applications.
 
-- *./PuppetMaster* é uma aplicação de Windows Form que permite enviar comandos de inicialização de Clientes ou Servidores e permite correr scripts nos mesmos.
+- *./PCS* is the machine responsible for starting Client or Server processes remotely issued through the PuppetMaster application.
 
-- *./Server* naturalmente é o directório onde se encontra o servidor. No directório *./Communications* encontram-se as funções de Remoting necessárias às comunicações usadas pelo servidor.
+- *./PuppetMaster* is a Windows Form application that allows sending initialization commands to Clients or Servers and running scripts on them.
 
-## Scripts Puppet Master
+- *./Server* naturally is the directory where the server is located. In the *./Communications* directory, we find the Remoting functions necessary for the communications used by the server.
 
-Na raiz deste directório encontram-se uma interacção de exemplo que mostra como correr o projecto. Os scripts para serem corridos pelo cliente encontram-se no directório *./Client/Scripts*. A mesma coisa para os scripts a serem corridos pelo PuppetMaster, estes encontram-se no directório *./PuppetMaster/Scripts*.
+## Puppet Master Scripts
 
-## Grupo 16 
+At the root of this directory, there is an example interaction showing how to run the project. The scripts to be run by the client are located in the *./Client/Scripts* directory. The same goes for the scripts to be run by the PuppetMaster; these are located in the *./PuppetMaster/Scripts* directory.
 
-- 82069 - José Brás - MEIC-T (Nota Final: 18/20)
-- 87527 - Duarte Nascimento - MEIC-T (Nota Final: 17/20)
-- 87557 - Pedro Agostinho - METI (Nota Final: 17/20)
+## Group 16
+
+- 82069 - José Brás - MEIC-T (Final Grade: 18/20)
+- 87527 - Duarte Nascimento - MEIC-T (Final Grade: 17/20)
+- 87557 - Pedro Agostinho - METI (Final Grade: 17/20)
